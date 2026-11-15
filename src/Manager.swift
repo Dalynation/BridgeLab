@@ -3,7 +3,7 @@ import CryptoKit
 import Darwin
 
 final class BridgeManager {
-    static let version = "0.9.1"
+    static let version = "0.9.2"
     let fm = FileManager.default
     let root: URL
     let resources: URL
@@ -88,8 +88,34 @@ final class BridgeManager {
         return (executable,env)
     }
     func windows(_ url:URL)->String {"Z:"+url.path}
+    var pluginDirectory:URL {URL(fileURLWithPath:ProcessInfo.processInfo.environment["BRIDGELAB_PLUGIN_DIR"] ?? (NSHomeDirectory()+"/Library/Audio/Plug-Ins/VST3"))}
+    func pluginFolderFailure(_ folder:URL,_ error:Error)->NSError {
+        let attributes=(try? fm.attributesOfItem(atPath:folder.path)) ?? [:]
+        let owner=attributes[.ownerAccountName] as? String ?? "unknown"
+        let mode=(attributes[.posixPermissions] as? NSNumber).map{String(format:"%03o",$0.intValue)} ?? "unknown"
+        return failure("BridgeLab cannot install an instrument in:\n\(folder.path)\n\nIn Finder, press Command-Shift-G and enter that path. Select the VST3 folder, choose File > Get Info, and check Sharing & Permissions. Your account (\(NSUserName())) needs Read & Write access. Also check that the folder is not Locked. If another account owns this folder, ask the Mac administrator to repair this folder's access. BridgeLab will not change permissions on your other plugins.\n\nAfter access is repaired, import the DLL again. No FL Studio rescan is needed until import succeeds.\n\nDetails: owner=\(owner), mode=\(mode). \(error.localizedDescription)")
+    }
+    func preparePluginDirectory()throws->URL {
+        let folder=pluginDirectory
+        let probe=folder.appendingPathComponent(".BridgeLab-write-check-"+UUID().uuidString)
+        defer {try? fm.removeItem(at:probe)}
+        do {
+            try fm.createDirectory(at:folder,withIntermediateDirectories:true)
+            // Exercise actual creation, writing and renaming: a writable flag alone
+            // misses inherited ACL restrictions and read-only filesystems.
+            try fm.createDirectory(at:probe,withIntermediateDirectories:false)
+            let first=probe.appendingPathComponent("write"),second=probe.appendingPathComponent("rename")
+            try Data("BridgeLab permission check".utf8).write(to:first)
+            try fm.moveItem(at:first,to:second)
+            try fm.removeItem(at:second)
+            try fm.removeItem(at:probe)
+        } catch {throw pluginFolderFailure(folder,error)}
+        return folder
+    }
     func importPlugin(_ source:URL)throws->[String:Any] {
-        let info=try inspect(source);try installEngine();record("Importing "+source.path)
+        let info=try inspect(source)
+        let pluginsFolder=try preparePluginDirectory()
+        try installEngine();record("Importing "+source.path)
         let digest=info["sha256"] as! String,id=String(digest.prefix(16)),arch=info["architecture"] as! String
         var rows=plugins()
         if let existing=rows.first(where:{$0["id"] as? String == id}),let bundle=existing["wrapper"] as? String,fm.fileExists(atPath:bundle),existing["bridge_version"] as? String == Self.version,(existing["warnings"] as? [String] ?? []).isEmpty{return ["plugin":existing,"plugins":rows,"message":"Already imported. Each FL Studio instance retains its own plugin and state."]}
@@ -109,12 +135,18 @@ final class BridgeManager {
         let display="BridgeLab - "+String(stem.prefix(40))+" ("+arch+")"
         let uid=String(hash(Data(("BridgeLab.processor."+digest).utf8)).prefix(32)).uppercased()
         let controller=String(hash(Data(("BridgeLab.controller."+digest).utf8)).prefix(32)).uppercased()
-        let pluginsFolder=URL(fileURLWithPath:ProcessInfo.processInfo.environment["BRIDGELAB_PLUGIN_DIR"] ?? (NSHomeDirectory()+"/Library/Audio/Plug-Ins/VST3"))
-        try fm.createDirectory(at:pluginsFolder,withIntermediateDirectories:true)
         let safe=stem.map{("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_".contains($0)) ? String($0):"_"}.joined()
         let target=pluginsFolder.appendingPathComponent("BridgeLab-"+safe+"-"+id+".vst3")
         let stage=pluginsFolder.appendingPathComponent(".BridgeLab-staging-"+UUID().uuidString+".vst3")
-        _=try execute(URL(fileURLWithPath:"/usr/bin/ditto"),[root.appendingPathComponent("engine/BridgeLabInstrument.vst3").path,stage.path])
+        defer {try? fm.removeItem(at:stage)}
+        do {
+            _=try execute(URL(fileURLWithPath:"/usr/bin/ditto"),["--norsrc","--noextattr","--noacl",root.appendingPathComponent("engine/BridgeLabInstrument.vst3").path,stage.path])
+        } catch {
+            // Access can change after preflight. Recheck before reporting a raw
+            // copy error; preserve the original diagnostic if access still works.
+            _=try preparePluginDirectory()
+            throw failure("Could not create the BridgeLab instrument. Import again; if it still fails, send this message to support.\n"+error.localizedDescription)
+        }
         let res=stage.appendingPathComponent("Contents/Resources")
         try (uid+"\n"+controller+"\n"+display+"\n"+dll.path+"\n").write(to:res.appendingPathComponent("bridgelab.conf"),atomically:true,encoding:.utf8)
         let plistURL=stage.appendingPathComponent("Contents/Info.plist")
