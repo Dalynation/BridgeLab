@@ -21,7 +21,7 @@ On Apple Silicon, macOS 15.6.1, FL Studio 24.2.2.4259:
 - Installed native host tests passed on arm64 and x86_64 under Rosetta with the development tree temporarily absent. Both plugins produced audio; live and offline PCM matched exactly. Three simultaneous instances (two SQ8L plus TAL) kept independent state and recreated identical audio, including relocation of another user's saved DLL path.
 - Both wrappers passed Steinberg validation: 47 passed, zero failed each. Packaged WAV rendering, duplicate import, invalid DLL rejection, and both editor state-recreation checks passed.
 
-See `clean-start-report.json`, `release-test-results.json`, `installed-editor-results.json`, and `test-evidence/0.9.1/`. FL multi-instrument audio comparison was not completed; the simultaneous-instance evidence comes from the native host harness.
+See the reports in [`test-results/`](test-results/). FL multi-instrument audio comparison was not completed; the simultaneous-instance evidence comes from the native host harness.
 
 ## Compatibility limits
 
@@ -33,4 +33,4 @@ Supported scope is Windows x86/x64 **VST2 instruments**. Windows VST3, audio-inp
 
 Build with `tools/build-runners.sh`, `tools/build-plugin.sh`, then `tools/build.sh`. The latter includes importer tests and packaged editor-attachment regression tests. Native installed commands include `doctor`, `inspect`, `import`, and `render`. The release matrix and installed editor protocol tests live under `tests/`.
 
-The original installation and subsequent clean-start attempts are preserved under `clean-start-backup-1794487092`; manifests record original locations. Original DLLs, FL projects, and unrelated plugins were preserved.
+Local backups, Wine installations, original DLLs, and user projects are excluded from this source repository. Build scripts currently assume the original workspace layout; dependency setup is not yet automated. The downloadable application is provided separately as a release asset.
