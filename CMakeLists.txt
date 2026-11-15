@@ -1,0 +1,37 @@
+cmake_minimum_required(VERSION 3.25)
+project(BridgeLab VERSION 0.9.1 LANGUAGES C CXX)
+set(SMTG_ENABLE_VST3_PLUGIN_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(SMTG_ENABLE_VST3_HOSTING_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(SMTG_ENABLE_VSTGUI_SUPPORT OFF CACHE BOOL "" FORCE)
+set(SMTG_CREATE_PLUGIN_LINK OFF CACHE BOOL "" FORCE)
+set(SMTG_RUN_VST_VALIDATOR OFF CACHE BOOL "" FORCE)
+add_subdirectory("${VST3_SDK_ROOT}" vst3sdk)
+smtg_add_vst3plugin(BridgeLabInstrument src/plugin/bridge.cpp src/plugin/editor_loader.cpp "${VST3_SDK_ROOT}/public.sdk/source/main/macmain.cpp")
+target_compile_features(BridgeLabInstrument PRIVATE cxx_std_17)
+target_link_libraries(BridgeLabInstrument PRIVATE sdk)
+smtg_target_set_bundle(BridgeLabInstrument BUNDLE_IDENTIFIER "local.bridgelab.instrument" COMPANY_NAME "BridgeLab")
+add_executable(bridge-smoke tests/vst3_smoke.cpp "${VST3_SDK_ROOT}/public.sdk/source/common/memorystream.cpp" "${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/module_mac.mm")
+target_compile_features(bridge-smoke PRIVATE cxx_std_17)
+target_link_libraries(bridge-smoke PRIVATE sdk_hosting "-framework Cocoa")
+target_compile_options(bridge-smoke PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-fobjc-arc>")
+# The SDK bundle helper sets these fields only with the Xcode generator.
+# Supply a complete plugin plist for command-line-tools/Makefile builds too.
+set_target_properties(BridgeLabInstrument PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/src/plugin/Info.plist.in")
+
+target_link_libraries(BridgeLabInstrument PRIVATE "-framework Cocoa")
+set_source_files_properties(src/plugin/editor.mm PROPERTIES COMPILE_FLAGS "-fobjc-arc")
+
+add_executable(bridge-multi tests/multi_plugin.cpp "${VST3_SDK_ROOT}/public.sdk/source/common/memorystream.cpp" "${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/module_mac.mm")
+target_compile_features(bridge-multi PRIVATE cxx_std_17)
+target_link_libraries(bridge-multi PRIVATE sdk_hosting "-framework Cocoa")
+
+target_compile_options(bridge-multi PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-fobjc-arc>")
+
+add_library(BridgeLabUI SHARED src/plugin/editor.mm)
+target_compile_features(BridgeLabUI PRIVATE cxx_std_17)
+target_link_libraries(BridgeLabUI PRIVATE sdk "-framework Cocoa")
+
+add_executable(bridge-editor-attachment tests/editor_attachment.mm)
+set_source_files_properties(tests/editor_attachment.mm PROPERTIES COMPILE_FLAGS "-fobjc-arc")
+target_compile_features(bridge-editor-attachment PRIVATE cxx_std_17)
+target_link_libraries(bridge-editor-attachment PRIVATE sdk "-framework Cocoa")

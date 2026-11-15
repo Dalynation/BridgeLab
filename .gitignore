@@ -1,0 +1,13 @@
+build/
+runtime/
+*.app/
+*.vst/
+*.vst3/
+*.zip
+*.dll
+*.exe
+*.wav
+*.f32
+__pycache__/
+.DS_Store
+clean-start-backup*/

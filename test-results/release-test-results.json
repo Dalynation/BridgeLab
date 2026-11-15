@@ -1,0 +1,170 @@
+{
+  "version": "0.9.1",
+  "macos": "15.6.1",
+  "hardware_arch": "arm64",
+  "plugins": [
+    {
+      "name": "BridgeLab - SQ8L (x86)",
+      "architecture": "x86",
+      "processor_uid": "BAFFD1AE199148C9F1AC80FB3CDE5380",
+      "wrapper": "/Users/TEST_USER/Library/Audio/Plug-Ins/VST3/BridgeLab-SQ8L-ffbb70884a6cd2af.vst3",
+      "sha256": "ffbb70884a6cd2af9600d287deebb2ba8dc6ec2270150ceef04c23d0fc92ab0e"
+    },
+    {
+      "name": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "architecture": "x64",
+      "processor_uid": "65419A1ADBA2E3438E97BC5885CF9ADF",
+      "wrapper": "/Users/TEST_USER/Library/Audio/Plug-Ins/VST3/BridgeLab-TAL-NoiseMaker-64-a4def1870e48ca34.vst3",
+      "sha256": "a4def1870e48ca34b3275e77690a4bb9428febc4d0e34d41395395e3177657b6"
+    }
+  ],
+  "checks": [
+    {
+      "test": "installed app without development tree",
+      "returncode": 0,
+      "seconds": 0.02,
+      "stdout": "{\n  \"installation\" : \"\\/Users\\/dalynsmall\\/Library\\/Application Support\\/BridgeLab\",\n  \"message\" : \"Import Windows VST2 instrument DLLs. Each import gets its own FL Studio entry. Apple Silicon requires Rosetta for the Windows runtime. Minimum target: macOS 11; compatibility is verified per plugin and host.\",\n  \"plugins\" : [\n    {\n      \"architecture\" : \"x86\",\n      \"bridge_version\" : \"0.9.1\",\n      \"controller_uid\" : \"0624C85A0268AFCBEBDC9FC8E404990C\",\n      \"id\" : \"ffbb70884a6cd2af\",\n      \"name\" : \"BridgeLab - SQ8L (x86)\",\n      \"original\" : \"\\/Users\\/dalynsmall\\/Documents\\/Codex\\/2026-11-11\\/me-x20\\/outputs\\/SQ8L\\/SQ8L.dll\",\n      \"path\" : \"\\/Users\\/dalynsmall\\/Library\\/Application Support\\/BridgeLab\\/plugins\\/ffbb70884a6cd2af\\/SQ8L.dll\",\n      \"probe\" : \"wineserver: using server-side synchronization.\\nVST2 probe ok; id=1397831756 programs=512 inputs=0 outputs=2 flags=305 editor=1 name=SQ8L\",\n      \"processor_uid\" : \"BAFFD1AE199148C9F1AC80FB3CDE5380\",\n      \"sha256\" : \"ffbb70884a6cd2af9600d287deebb2ba8dc6ec2270150ceef04c23d0fc92ab0e\",\n      \"warnings\" : [\n\n      ],\n      \"wrapper\" : \"\\/Users\\/dalynsmall\\/Library\\/Audio\\/Plug-Ins\\/VST3\\/BridgeLab-SQ8L-ffbb70884a6cd2af.vst3\"\n    },\n    {\n      \"architecture\" : \"x64\",\n      \"bridge_version\" : \"0.9.1\",\n      \"controller_uid\" : \"8F8F2A7BE6C6388FFDC2DDC7037DD3C6\",\n      \"id\" : \"a4def1870e48ca34\",\n      \"name\" : \"BridgeLab - TAL-NoiseMaker-64 (x64)\",\n      \"original\" : \"\\/Users\\/dalynsmall\\/Documents\\/Codex\\/2026-11-11\\/me-x20\\/work\\/compatibility\\/tal\\/TAL-NoiseMaker-64.dll\",\n      \"path\" : \"\\/Users\\/dalynsmall\\/Library\\/Application Support\\/BridgeLab\\/plugins\\/a4def1870e48ca34\\/TAL-NoiseMaker-64.dll\",\n      \"probe\" : \"wineserver: using server-side synchronization.\\nVST2 probe ok; id=1852011892 programs=1 inputs=2 outputs=2 flags=305 editor=1 name=TAL-NoiseMaker\",\n      \"processor_uid\" : \"65419A1ADBA2E3438E97BC5885CF9ADF\",\n      \"sha256\" : \"a4def1870e48ca34b3275e77690a4bb9428febc4d0e34d41395395e3177657b6\",\n      \"warnings\" : [\n\n      ],\n      \"wrapper\" : \"\\/Users\\/dalynsmall\\/Library\\/Audio\\/Plug-Ins\\/VST3\\/BridgeLab-TAL-NoiseMaker-64-a4def1870e48ca34.vst3\"\n    }\n  ],\n  \"version\" : \"0.9.1\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - SQ8L (x86) arm64 offline",
+      "returncode": 0,
+      "seconds": 3.51,
+      "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048\n",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - SQ8L (x86) arm64 live",
+      "returncode": 0,
+      "seconds": 4.09,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048\n",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - SQ8L (x86) arm64 exact live/offline audio",
+      "passed": true,
+      "sha256_offline": "faedb62cce7ef4d7f2f3152bea4bd37e552d2cd12a50ba626cb1ad6690c31dd1",
+      "sha256_live": "faedb62cce7ef4d7f2f3152bea4bd37e552d2cd12a50ba626cb1ad6690c31dd1"
+    },
+    {
+      "test": "BridgeLab - SQ8L (x86) x86_64 offline",
+      "returncode": 0,
+      "seconds": 1.72,
+      "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048\n",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - SQ8L (x86) x86_64 live",
+      "returncode": 0,
+      "seconds": 4.07,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048\n",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - SQ8L (x86) x86_64 exact live/offline audio",
+      "passed": true,
+      "sha256_offline": "faedb62cce7ef4d7f2f3152bea4bd37e552d2cd12a50ba626cb1ad6690c31dd1",
+      "sha256_live": "faedb62cce7ef4d7f2f3152bea4bd37e552d2cd12a50ba626cb1ad6690c31dd1"
+    },
+    {
+      "test": "BridgeLab - TAL-NoiseMaker-64 (x64) arm64 offline",
+      "returncode": 0,
+      "seconds": 2.61,
+      "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=256 latency=2048\n",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - TAL-NoiseMaker-64 (x64) arm64 live",
+      "returncode": 0,
+      "seconds": 3.83,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=256 latency=2048\n",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - TAL-NoiseMaker-64 (x64) arm64 exact live/offline audio",
+      "passed": true,
+      "sha256_offline": "e0faabb176b1212c7445a1678ca13b946b9cbaee6132ae349afb4db28299e02a",
+      "sha256_live": "e0faabb176b1212c7445a1678ca13b946b9cbaee6132ae349afb4db28299e02a"
+    },
+    {
+      "test": "BridgeLab - TAL-NoiseMaker-64 (x64) x86_64 offline",
+      "returncode": 0,
+      "seconds": 0.73,
+      "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=256 latency=2048\n",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - TAL-NoiseMaker-64 (x64) x86_64 live",
+      "returncode": 0,
+      "seconds": 5.8,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=256 latency=2048\n",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - TAL-NoiseMaker-64 (x64) x86_64 exact live/offline audio",
+      "passed": true,
+      "sha256_offline": "e0faabb176b1212c7445a1678ca13b946b9cbaee6132ae349afb4db28299e02a",
+      "sha256_live": "e0faabb176b1212c7445a1678ca13b946b9cbaee6132ae349afb4db28299e02a"
+    },
+    {
+      "test": "three instances and state recall arm64",
+      "returncode": 0,
+      "seconds": 10.17,
+      "stdout": "Distinct identities: BridgeLab - SQ8L (x86) / BridgeLab - TAL-NoiseMaker-64 (x64)\nShared editors created, three active instances, independent sounds: PASS\nThree-instance save/recreate/audio recall, including foreign user path: PASS\n",
+      "stderr": ""
+    },
+    {
+      "test": "three instances and state recall x86_64",
+      "returncode": 0,
+      "seconds": 6.69,
+      "stdout": "Distinct identities: BridgeLab - SQ8L (x86) / BridgeLab - TAL-NoiseMaker-64 (x64)\nShared editors created, three active instances, independent sounds: PASS\nThree-instance save/recreate/audio recall, including foreign user path: PASS\n",
+      "stderr": ""
+    },
+    {
+      "test": "VST3 validation BridgeLab - SQ8L (x86)",
+      "returncode": 0,
+      "seconds": 27.01,
+      "stdout": "==========================\nInfo:  This plugin does not have a bypass parameter!!!\n[Succeeded]\n\n[In: Stereo: 2 Channels, Out: Stereo: 2 Channels]\nInfo:  ===In: Stereo: 2 Channels, Out: Stereo: 2 Channels ====================================\n[Succeeded]\n\n[In: Mono: 1 Channels, Out: Mono: 1 Channels]\nInfo:  ===In: Mono: 1 Channels, Out: Mono: 1 Channels ====================================\nInfo:      Mono Output-SpeakerArrangement is not supported. Plug-in suggests: Stereo.\n[Succeeded]\n\n[Accuracy: Block, 1 Parameters, Change every100 Samples]\nInfo:  ===Accuracy: Block, 1 Parameters, Change every100 Samples ====================================\n[Succeeded]\n\n[Accuracy: Sample, 1 Parameters, Change every100 Samples]\nInfo:  ===Accuracy: Sample, 1 Parameters, Change every100 Samples ====================================\nInfo:     Not all points have been read via IParameterChanges\nInfo:     Not all points have been read via IParameterChanges\n[Succeeded]\n\n-------------------------------------------------------------\nTestSuite : Double Precision (64 bit) Tests\n-------------------------------------------------------------\n\n[Process Test]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Process function running in another thread]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Silence Flags]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Silence Processing]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Parameters Flush (no Buffer)]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Parameters Flush 2 (only numChannel==0)]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Parameters Flush 2 (no Buffer, no parameter change)]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Variable Block Size]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Process Format]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Parameter Bypass persistence]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[In: Stereo: 2 Channels, Out: Stereo: 2 Channels]\nInfo:  ===In: Stereo: 2 Channels, Out: Stereo: 2 Channels ====================================\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[In: Mono: 1 Channels, Out: Mono: 1 Channels]\nInfo:  ===In: Mono: 1 Channels, Out: Mono: 1 Channels ====================================\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Accuracy: Block, 1 Parameters, Change every100 Samples]\nInfo:  ===Accuracy: Block, 1 Parameters, Change every100 Samples ====================================\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Accuracy: Sample, 1 Parameters, Change every100 Samples]\nInfo:  ===Accuracy: Sample, 1 Parameters, Change every100 Samples ====================================\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n-------------------------------------------------------------\nResult: 47 tests passed, 0 tests failed\n-------------------------------------------------------------\n",
+      "stderr": ""
+    },
+    {
+      "test": "packaged app render BridgeLab - SQ8L (x86)",
+      "returncode": 0,
+      "seconds": 1.42,
+      "stdout": "{\n  \"output\" : \"\\/Users\\/dalynsmall\\/Documents\\/Codex\\/2026-11-11\\/me-x20\\/work\\/clean-start\\/ffbb70884a6cd2af-app-1794547640422388000.wav\",\n  \"result\" : \"Rendered 3 seconds; peak=0.239721; audio detected\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "test": "VST3 validation BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "returncode": 0,
+      "seconds": 73.53,
+      "stdout": "==========================\nInfo:  This plugin does not have a bypass parameter!!!\n[Succeeded]\n\n[In: Stereo: 2 Channels, Out: Stereo: 2 Channels]\nInfo:  ===In: Stereo: 2 Channels, Out: Stereo: 2 Channels ====================================\n[Succeeded]\n\n[In: Mono: 1 Channels, Out: Mono: 1 Channels]\nInfo:  ===In: Mono: 1 Channels, Out: Mono: 1 Channels ====================================\nInfo:      Mono Output-SpeakerArrangement is not supported. Plug-in suggests: Stereo.\n[Succeeded]\n\n[Accuracy: Block, 1 Parameters, Change every100 Samples]\nInfo:  ===Accuracy: Block, 1 Parameters, Change every100 Samples ====================================\n[Succeeded]\n\n[Accuracy: Sample, 1 Parameters, Change every100 Samples]\nInfo:  ===Accuracy: Sample, 1 Parameters, Change every100 Samples ====================================\nInfo:     Not all points have been read via IParameterChanges\nInfo:     Not all points have been read via IParameterChanges\n[Succeeded]\n\n-------------------------------------------------------------\nTestSuite : Double Precision (64 bit) Tests\n-------------------------------------------------------------\n\n[Process Test]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Process function running in another thread]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Silence Flags]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Silence Processing]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Parameters Flush (no Buffer)]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Parameters Flush 2 (only numChannel==0)]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Parameters Flush 2 (no Buffer, no parameter change)]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Variable Block Size]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Process Format]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Parameter Bypass persistence]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[In: Stereo: 2 Channels, Out: Stereo: 2 Channels]\nInfo:  ===In: Stereo: 2 Channels, Out: Stereo: 2 Channels ====================================\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[In: Mono: 1 Channels, Out: Mono: 1 Channels]\nInfo:  ===In: Mono: 1 Channels, Out: Mono: 1 Channels ====================================\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Accuracy: Block, 1 Parameters, Change every100 Samples]\nInfo:  ===Accuracy: Block, 1 Parameters, Change every100 Samples ====================================\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Accuracy: Sample, 1 Parameters, Change every100 Samples]\nInfo:  ===Accuracy: Sample, 1 Parameters, Change every100 Samples ====================================\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n-------------------------------------------------------------\nResult: 47 tests passed, 0 tests failed\n-------------------------------------------------------------\n",
+      "stderr": ""
+    },
+    {
+      "test": "packaged app render BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "returncode": 0,
+      "seconds": 0.76,
+      "stdout": "{\n  \"output\" : \"\\/Users\\/dalynsmall\\/Documents\\/Codex\\/2026-11-11\\/me-x20\\/work\\/clean-start\\/a4def1870e48ca34-app-1794547715375197000.wav\",\n  \"result\" : \"Rendered 3 seconds; peak=0.275374; audio detected\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "test": "idempotent reimport",
+      "returncode": 0,
+      "seconds": 0.02,
+      "stdout": "{\n  \"message\" : \"Already imported. Each FL Studio instance retains its own plugin and state.\",\n  \"plugin\" : {\n    \"architecture\" : \"x86\",\n    \"bridge_version\" : \"0.9.1\",\n    \"controller_uid\" : \"0624C85A0268AFCBEBDC9FC8E404990C\",\n    \"id\" : \"ffbb70884a6cd2af\",\n    \"name\" : \"BridgeLab - SQ8L (x86)\",\n    \"original\" : \"\\/Users\\/dalynsmall\\/Documents\\/Codex\\/2026-11-11\\/me-x20\\/outputs\\/SQ8L\\/SQ8L.dll\",\n    \"path\" : \"\\/Users\\/dalynsmall\\/Library\\/Application Support\\/BridgeLab\\/plugins\\/ffbb70884a6cd2af\\/SQ8L.dll\",\n    \"probe\" : \"wineserver: using server-side synchronization.\\nVST2 probe ok; id=1397831756 programs=512 inputs=0 outputs=2 flags=305 editor=1 name=SQ8L\",\n    \"processor_uid\" : \"BAFFD1AE199148C9F1AC80FB3CDE5380\",\n    \"sha256\" : \"ffbb70884a6cd2af9600d287deebb2ba8dc6ec2270150ceef04c23d0fc92ab0e\",\n    \"warnings\" : [\n\n    ],\n    \"wrapper\" : \"\\/Users\\/dalynsmall\\/Library\\/Audio\\/Plug-Ins\\/VST3\\/BridgeLab-SQ8L-ffbb70884a6cd2af.vst3\"\n  },\n  \"plugins\" : [\n    {\n      \"architecture\" : \"x86\",\n      \"bridge_version\" : \"0.9.1\",\n      \"controller_uid\" : \"0624C85A0268AFCBEBDC9FC8E404990C\",\n      \"id\" : \"ffbb70884a6cd2af\",\n      \"name\" : \"BridgeLab - SQ8L (x86)\",\n      \"original\" : \"\\/Users\\/dalynsmall\\/Documents\\/Codex\\/2026-11-11\\/me-x20\\/outputs\\/SQ8L\\/SQ8L.dll\",\n      \"path\" : \"\\/Users\\/dalynsmall\\/Library\\/Application Support\\/BridgeLab\\/plugins\\/ffbb70884a6cd2af\\/SQ8L.dll\",\n      \"probe\" : \"wineserver: using server-side synchronization.\\nVST2 probe ok; id=1397831756 programs=512 inputs=0 outputs=2 flags=305 editor=1 name=SQ8L\",\n      \"processor_uid\" : \"BAFFD1AE199148C9F1AC80FB3CDE5380\",\n      \"sha256\" : \"ffbb70884a6cd2af9600d287deebb2ba8dc6ec2270150ceef04c23d0fc92ab0e\",\n      \"warnings\" : [\n\n      ],\n      \"wrapper\" : \"\\/Users\\/dalynsmall\\/Library\\/Audio\\/Plug-Ins\\/VST3\\/BridgeLab-SQ8L-ffbb70884a6cd2af.vst3\"\n    },\n    {\n      \"architecture\" : \"x64\",\n      \"bridge_version\" : \"0.9.1\",\n      \"controller_uid\" : \"8F8F2A7BE6C6388FFDC2DDC7037DD3C6\",\n      \"id\" : \"a4def1870e48ca34\",\n      \"name\" : \"BridgeLab - TAL-NoiseMaker-64 (x64)\",\n      \"original\" : \"\\/Users\\/dalynsmall\\/Documents\\/Codex\\/2026-11-11\\/me-x20\\/work\\/compatibility\\/tal\\/TAL-NoiseMaker-64.dll\",\n      \"path\" : \"\\/Users\\/dalynsmall\\/Library\\/Application Support\\/BridgeLab\\/plugins\\/a4def1870e48ca34\\/TAL-NoiseMaker-64.dll\",\n      \"probe\" : \"wineserver: using server-side synchronization.\\nVST2 probe ok; id=1852011892 programs=1 inputs=2 outputs=2 flags=305 editor=1 name=TAL-NoiseMaker\",\n      \"processor_uid\" : \"65419A1ADBA2E3438E97BC5885CF9ADF\",\n      \"sha256\" : \"a4def1870e48ca34b3275e77690a4bb9428febc4d0e34d41395395e3177657b6\",\n      \"warnings\" : [\n\n      ],\n      \"wrapper\" : \"\\/Users\\/dalynsmall\\/Library\\/Audio\\/Plug-Ins\\/VST3\\/BridgeLab-TAL-NoiseMaker-64-a4def1870e48ca34.vst3\"\n    }\n  ]\n}\n",
+      "stderr": ""
+    },
+    {
+      "test": "invalid DLL rejected",
+      "returncode": 1,
+      "seconds": 0.01,
+      "stdout": "",
+      "stderr": "This is not a Windows DLL.\n"
+    }
+  ],
+  "development_tree_absent_during_tests": true,
+  "idempotent_import_count_unchanged": true,
+  "invalid_rejected_without_registry_change": true,
+  "development_tree_restored": true
+}

@@ -1,0 +1,40 @@
+{
+  "version": "0.9.1",
+  "status": "experimental friend-test preview",
+  "host": {
+    "macOS": "15.6.1",
+    "hardware": "Apple Silicon",
+    "FL_Studio": "24.2.2.4259"
+  },
+  "original_installation_backed_up": true,
+  "original_DLLs_projects_and_unrelated_plugins_preserved": true,
+  "clean_GUI_import": {
+    "SQ8L": "native file picker; folder picker for adjacent resources",
+    "TAL_NoiseMaker_64": "Finder copy and Paste DLLs",
+    "installed_plugins": 2,
+    "warnings": 0
+  },
+  "FL_Studio_24": {
+    "verified_scan_both_wrappers_OK": true,
+    "SQ8L_original_editor_embedded_and_interactive": true,
+    "TAL_original_editor_embedded_and_interactive": true,
+    "SQ8L_project_reopen_after_clean_reinstall_PCM_exact_match": true,
+    "recall_evidence": "test-evidence/0.9.1/fl-recall-comparison.json"
+  },
+  "native_tests": {
+    "matrix": "release-test-results.json",
+    "editors": "installed-editor-results.json",
+    "multiple_instances": "two SQ8L and one TAL concurrently; independent state and exact recreated audio on arm64 and x86_64 under Rosetta",
+    "editor_attachment_regression": "400 attachments per architecture passed"
+  },
+  "not_verified": [
+    "Physical Intel hardware",
+    "Other macOS versions",
+    "FL Studio 20 end-to-end playback and recall",
+    "Other FL Studio versions",
+    "Clean second-computer installation",
+    "Every Windows plugin",
+    "Two-instrument FL project audio comparison"
+  ],
+  "distribution": "Ad-hoc signed; not Developer ID notarized"
+}
