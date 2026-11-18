@@ -1,6 +1,6 @@
 {
   "version": "0.9.5",
-  "status": "unreleased candidate; manual FL acceptance pending",
+  "status": "unreleased candidate; legacy repaint fix tested and installed, actual FL repaint and per-instrument playback acceptance pending",
   "tested_host": {
     "cpu": "Apple Silicon M1 Pro",
     "macos": "15.6.1",
@@ -14,88 +14,108 @@
       "name": "Core Audio exact comparisons",
       "passed": 44,
       "total": 44,
-      "stage": "final",
-      "local_report_sha256": "6453d8b92098cf972df21dd964c162207341310888281b1819fbe87dee5963c6"
+      "stage": "post legacy-DXGI repaint correction",
+      "local_report_sha256": "ab64be480fe82f5657da241d361cd6987caa8e933b15d3e4500365893c075892"
     },
     {
       "name": "Concurrent editors and clients",
       "passed": 9,
       "total": 9,
-      "stage": "final",
-      "local_report_sha256": "946b62ac13a0ed89cc437cc9619f7d772fd641b87c41351e7766145126845d26"
+      "stage": "post legacy-DXGI repaint correction",
+      "local_report_sha256": "17fc23899385b333cd03243a39d2b38b811441c9d4bda338f4898aa47a1f750b"
     },
     {
       "name": "Timer MIDI recovery",
       "passed": 16,
       "total": 16,
-      "stage": "final",
+      "stage": "Before legacy-DXGI repaint correction; DSP/MIDI implementation unchanged",
       "local_report_sha256": "a48ecf82eb415362c26cd36e42ad2eaacab1a5db3f3271b267ab5f0ebc5fe419"
     },
     {
       "name": "Pipe Core Audio MIDI recovery",
       "passed": 12,
       "total": 12,
-      "stage": "final",
+      "stage": "Before legacy-DXGI repaint correction; DSP/MIDI implementation unchanged",
       "local_report_sha256": "d0b38d9b2a23ec8e9c7210341952fe3120fa0c87a7c72cd29e68bb40affda78d"
     },
     {
       "name": "Deterministic dropped MIDI",
       "passed": 8,
       "total": 8,
-      "stage": "final",
+      "stage": "Before legacy-DXGI repaint correction; DSP/MIDI implementation unchanged",
       "local_report_sha256": "6660c1c22af0df70100f14a0939bb747ec887231de7b7ce06c5b24ec96455d66"
     },
     {
       "name": "Shared held-note repetitions",
       "passed": 30,
       "total": 30,
-      "stage": "final shared path; later pipe-only scheduling change",
+      "stage": "Before legacy-DXGI repaint correction; DSP/MIDI implementation unchanged",
       "local_report_sha256": "1258d46b028836a2aaeb3a8f98e4c28b4c09c03eab1e336dfeb5a73df01be3b2"
     },
     {
       "name": "Multi-instance recall and VST3 validation",
       "passed": 4,
       "total": 4,
-      "stage": "final",
+      "stage": "Before legacy-DXGI repaint correction; DSP/MIDI implementation unchanged",
       "local_report_sha256": "b0478b2d3571ffcae11937bb01d1e5b7717763ab0dc974d069285e3aa88ed11e"
     },
     {
       "name": "Packaged clean import and render",
       "passed": 9,
       "total": 9,
-      "stage": "final standalone app",
-      "local_report_sha256": "834ee5e8bc3bfc66776b641873a2dc56817596fd8db5cca5a4a39f020dcc3dc8"
+      "stage": "post legacy-DXGI repaint correction",
+      "local_report_sha256": "dec3b9103d5711f854c1a5a6e79341063090914a3ce727fca4bf071b90f44976"
     },
     {
       "name": "Original knob artwork and audio",
       "passed": 3,
       "total": 3,
-      "stage": "graphics unchanged since this run",
-      "local_report_sha256": "f4a7260188d5dd35cfd6adc1b3a860493c76730fbdc0d7625815261bcbd6744e"
+      "stage": "post legacy-DXGI repaint correction",
+      "local_report_sha256": "b6dd1699333afb8dff31ebc5da2e66671a45e52b2b438621e7f91367e3bc1b29"
     },
     {
       "name": "Original GPU editor Core Audio",
       "passed": 6,
       "total": 6,
-      "stage": "graphics unchanged since this run",
+      "stage": "Before legacy-DXGI repaint correction; DSP/MIDI implementation unchanged",
       "local_report_sha256": "e6826af0f57791320cdd600416c66b89b9c09192b27663f1c21b4fc4df882112"
+    },
+    {
+      "name": "Same-window legacy knob pixels and unchanged artwork",
+      "passed": 2,
+      "total": 2,
+      "stage": "post legacy-DXGI repaint correction",
+      "local_report_sha256": "bdc41413eaca3b3e5a1221b53f29a32587514f46e58f74247d27ccf7c265822a"
+    },
+    {
+      "name": "Legacy factories and graphics synchronization contracts",
+      "passed": 2,
+      "total": 2,
+      "stage": "post legacy-DXGI repaint correction",
+      "local_report_sha256": "36a5c5aa4b3daa1ca84c03e05d5f73c5d62f1f2a2dc4588c46075fccdca72bc9"
+    },
+    {
+      "name": "Native Mac view repaint without host updateWindows",
+      "passed": 2,
+      "total": 2,
+      "stage": "same test passed with existing native view; no Mac view production change"
     }
   ],
   "artifacts": [
     {
       "path": "Contents/MacOS/BridgeLab",
-      "sha256": "2f08aaa9dadc563205b04467433e17dce56da921cf5e15e83d3a736879b7a57d",
+      "sha256": "3fdf5bf21d7bdf2490e59bae937b5a8c1e64eee2d85b47ac3e891acfc1c58c7f",
       "bytes": 848240
     },
     {
       "path": "Contents/Resources/Engine/bin/runner-x86.exe",
-      "sha256": "ba71c2a214e83151f7057165e2d4b8309198d3a34e8124d5c2163087938dd71c",
-      "bytes": 1553408
+      "sha256": "5a88db42d090130b2eaf43d1f667823dc1936fc5e1d0d06f4f2ca0ab14029960",
+      "bytes": 1554432
     },
     {
       "path": "Contents/Resources/Engine/bin/runner-x64.exe",
-      "sha256": "b6de00bfa3c2b856c75c4fb11a88e7e78d1d49981ef8dc8ea4c01b64836b324f",
-      "bytes": 1545728
+      "sha256": "c9d9a5e88385fc957b0ab42baaf3cf96aa12499a02560c044e4ba2db392bb919",
+      "bytes": 1546752
     },
     {
       "path": "Contents/Resources/Engine/libBridgeLabUI.dylib",
@@ -115,7 +135,7 @@
   ],
   "pending": [
     "Final graphical picker selection (Finder-copy import and fresh scan passed)",
-    "In-FL original knob input, multiple plugin instances, export and edited project save/reopen",
+    "Per-instrument FL solo export and actual FL live playback; combined export and two-plugin edited project recall passed",
     "Physical Intel, other macOS and FL versions, including friend macOS 15.1 / FL 26.1"
   ],
   "retained_observations": [
@@ -139,10 +159,35 @@
     "graphical_fresh_setup_seconds": 134,
     "installed_render_non_silent": 3,
     "pending": [
-      "In-FL mouse control/audio response",
-      "Multiple bridged instruments in one FL project",
-      "Edited project save/reopen and export"
+      "Actual FL confirmation of immediate knob repaint after correction",
+      "Per-instrument solo export/live playback",
+      "Final graphical picker selection"
     ],
-    "automation_limit": "Mouse API noWindowsAvailable before editor; accessibility timeout after editor close; main event-loop stack sample does not establish a product deadlock"
+    "automation_limit": "Mouse API noWindowsAvailable before editor; accessibility timeout after editor close; main event-loop stack sample does not establish a product deadlock",
+    "user_confirmed_responsive": true,
+    "user_confirmed_volume_input_and_editor_reopen": true,
+    "actual_project_recall": {
+      "passed": true,
+      "instruments": 2,
+      "method": "Save edited FL project, load empty, reopen saved project, save again and compare freshly captured opaque state hashes",
+      "edited_noise_volume": 0.2600000202655792
+    },
+    "combined_export": {
+      "passed": true,
+      "rate": 44100,
+      "channels": 2,
+      "frames": 88200,
+      "peak": 0.186859130859375,
+      "rms": 0.05917397552364552,
+      "limitation": "Per-instrument solo output and live playback checks pending"
+    },
+    "live_repaint_issue": {
+      "reported": "Sound changes, knob visually frozen until reopen",
+      "reproduced": true,
+      "root_correction": "Pace refresh through legacy DXGI factory versions 0/1 as well as 2",
+      "isolated_fixed": true,
+      "corrected_build_installed": true,
+      "actual_fl_retest": "pending user confirmation"
+    }
   }
 }

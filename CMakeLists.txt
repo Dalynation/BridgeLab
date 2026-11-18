@@ -36,6 +36,11 @@ set_source_files_properties(tests/editor_attachment.mm PROPERTIES COMPILE_FLAGS 
 target_compile_features(bridge-editor-attachment PRIVATE cxx_std_17)
 target_link_libraries(bridge-editor-attachment PRIVATE sdk "-framework Cocoa")
 
+add_executable(bridge-editor-repaint tests/editor_repaint.mm)
+set_source_files_properties(tests/editor_repaint.mm PROPERTIES COMPILE_FLAGS "-fobjc-arc")
+target_compile_features(bridge-editor-repaint PRIVATE cxx_std_17)
+target_link_libraries(bridge-editor-repaint PRIVATE sdk sdk_hosting "-framework Cocoa")
+
 add_executable(bridge-lifecycle-qa tests/lifecycle_qa.cpp "${VST3_SDK_ROOT}/public.sdk/source/common/memorystream.cpp" "${VST3_SDK_ROOT}/public.sdk/source/vst/hosting/module_mac.mm")
 target_compile_features(bridge-lifecycle-qa PRIVATE cxx_std_17)
 target_link_libraries(bridge-lifecycle-qa PRIVATE sdk_hosting "-framework Cocoa")

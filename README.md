@@ -12,7 +12,9 @@ bridge. The original plugin draws its own interface and receives mouse input;
 BridgeLab does not replace its artwork or knobs. Slow editor opening is queued
 without blocking shared-memory audio. MIDI recovery explicitly releases keys
 without duplicating held voices, and both pipe workers use verified realtime
-scheduling. Automated audio, recovery and multi-instance checks pass; final
+scheduling. Live repaint compatibility also covers the older DXGI factory
+entry points used by software-rendered editors. Automated audio, recovery and
+multi-instance checks pass; final
 manual FL project acceptance remains pending. See [QA-0.9.5.md](QA-0.9.5.md) for the
 measured results, cold editor delays, retained stress failures and remaining
 release checks. This candidate is not a universal-compatibility certification;

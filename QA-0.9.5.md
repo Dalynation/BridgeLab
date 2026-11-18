@@ -44,6 +44,37 @@ The public download remains 0.9.4 while final acceptance is incomplete.
   request waiting beyond the old timeout, continuous Core Audio while loading,
   a real control/audio change, and zero bridge underruns.
 
+## Live legacy-editor repaint correction
+
+A subsequent manual FL check exposed a gap in the earlier editor tests:
+NoiseMaker's sound/parameter state changed, but its knob image updated only
+after reopening. This is a real failed acceptance case, not the automation
+focus problem described below. A direct same-window pixel test reproduced it:
+SQ8L changed 579 knob-region bytes; NoiseMaker changed **zero**, despite a
+changed plugin state. A separate native Mac-view repaint test passed before any
+production UI change, directing investigation toward Windows repaint scheduling.
+
+NoiseMaker imports the older `CreateDXGIFactory` entry point. The refresh pacing
+hook previously covered only `CreateDXGIFactory2`; software-rendered editors can
+also depend on DXGI vblank notifications. The generic adapter now instruments
+factory versions 0, 1 and 2, retaining the existing bounded pacing and preserving
+real device errors. An attempted WM_PRINT capture workaround did not solve the
+case and was removed; there is no production capture-forcing change.
+
+The corrected same-window tests pass for **both** legacy instruments: parameter
+state changes, knob pixels change without reopening, and unrelated artwork stays
+unchanged. NoiseMaker now changes 821 knob-region bytes. The test waits for real,
+stable initial artwork and checks the SQ8L logo rather than its changing numeric
+display. Earlier test-fixture rectangle/startup mistakes are retained in local
+logs and are not counted as product regressions. Both Windows graphics contracts,
+both native Mac repaint harness architectures and all three modern original
+artwork/edited-state cases passed. The corrected build also passed **44/44** exact Core Audio comparisons, **9/9**
+editor/concurrent-client checks and **9/9** fresh standalone import/render checks.
+Its signed app and engine were installed after backing up the previous versions,
+preserving the existing imports, wrappers, runtime profile and saved projects.
+The saved two-plugin FL checkpoint loaded with the correction. Actual FL live
+repaint confirmation and separate per-instrument playback/export remain pending.
+
 ## Original interface
 
 The generic single-surface DirectComposition adapter lets the plugin draw its
@@ -108,7 +139,8 @@ The final standalone packaged app, run from outside the source tree with a
 genuinely empty disposable home, passed **9/9** checks: fresh SQ8L/NoiseMaker/
 U-NO-LX imports and real WAV audio, duplicate import, invalid-DLL rejection,
 distinct identities, one shared runtime and an intact registry. First setup
-and import took 34.44 s; later imports took approximately 1.5 s. The initial
+and import in the latest corrected package took 39.71 s; later imports took
+approximately 1.5 s. The preceding package measured 34.44 s. The initial
 command-sandbox run denied copying the runtime's .DS_Store; the complete isolated
 run outside that sandbox passed and its Wine profile shut down successfully.
 [Sanitized results and packaged binary hashes](test-results/qa-0.9.5.json) record
@@ -130,13 +162,28 @@ A user-triggered fresh FL Studio **24.2.2.4259** scan found all three as separat
 Apple + Intel VST3 synths with status **ok**. SQ8L's original interface visibly
 opened inside FL with the final candidate.
 
-Native mouse automation returned **noWindowsAvailable**, including in Plugin
-Manager before a plugin editor was open. After Escape/F6 from the SQ8L editor,
-accessibility automation timed out again. A fresh two-second process sample
-showed FL's main event loop waiting for and processing events; it did not prove
-a BridgeLab deadlock or a passed close/reopen test. User confirmation of normal
-FL interaction is pending. No forced quit or project discard was used. In-FL
-knob input, multi-plugin project export and save/reopen recall remain pending.
+The user confirmed FL responds normally after automation timeouts, and that the
+original NoiseMaker Volume knob responds and retains its change across closing
+and reopening the editor. An edited FL project was saved, an empty project loaded
+to destroy the plugin instances, then the saved project reopened. Capturing both
+plugin states into a second FL project produced **exactly matching opaque state
+hashes** for SQ8L and NoiseMaker. The edited NoiseMaker Volume value remained
+0.2600000202655792. This establishes actual FL project state recall, beyond
+editor-window reopening. The final QA pattern has four notes per bridged channel.
+
+FL exported the two-plugin pattern as **44.1 kHz, 16-bit stereo, 88,200 frames**
+(two seconds), peak 0.186859 and RMS 0.059174. This establishes a non-silent
+combined export; individual plugin solo exports and an explicit live playback
+check remain pending so one audible instrument cannot conceal a silent second
+instrument. The user was asked to restore main-window focus for those checks.
+
+Native mouse automation intermittently returns **noWindowsAvailable**, including
+in Plugin Manager before a plugin editor opens. Accessibility may time out after
+closing an editor, save panel or render dialog. Stack samples showed FL's main
+event loop waiting for and processing events; the user confirmed normal manual
+interaction. These automation failures are not evidence of an established plugin
+deadlock, nor do they certify uncompleted checks. No forced quit or project
+discard was used.
 
 The macOS picker could be highlighted via accessibility, but automated selection
 did not enable Open; direct coordinate input reported no available window.

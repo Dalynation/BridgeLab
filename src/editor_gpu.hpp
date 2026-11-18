@@ -168,23 +168,35 @@ inline HRESULT STDMETHODCALLTYPE enumOutputs(IDXGIAdapter* adapter,UINT n,IDXGIO
 inline HRESULT STDMETHODCALLTYPE enumAdapters(IDXGIFactory* factory,UINT n,IDXGIAdapter** adapter){auto fn=(EnumAdaptersFn)pacingOriginal(factory,7);if(!fn)return E_UNEXPECTED;HRESULT hr=fn(factory,n,adapter);if(SUCCEEDED(hr)&&adapter&&*adapter)installPacingHook(*(void***)*adapter,7,(void*)&enumOutputs);return hr;}
 inline HRESULT STDMETHODCALLTYPE enumAdapters1(IDXGIFactory1* factory,UINT n,IDXGIAdapter1** adapter){auto fn=(EnumAdapters1Fn)pacingOriginal(factory,12);if(!fn)return E_UNEXPECTED;HRESULT hr=fn(factory,n,adapter);if(SUCCEEDED(hr)&&adapter&&*adapter)installPacingHook(*(void***)*adapter,7,(void*)&enumOutputs);return hr;}
 using FactoryFn=HRESULT(WINAPI*)(UINT,REFIID,void**);
+using LegacyFactoryFn=HRESULT(WINAPI*)(REFIID,void**);
 using CompositionFn=HRESULT(WINAPI*)(IDXGIDevice*,REFIID,void**);
 using ChainFn=HRESULT(STDMETHODCALLTYPE*)(IDXGIFactory2*,IUnknown*,const DXGI_SWAP_CHAIN_DESC1*,IDXGIOutput*,IDXGISwapChain1**);
 inline FactoryFn factoryFn=nullptr;inline CompositionFn compositionFn=nullptr;
+inline LegacyFactoryFn factory0Fn=nullptr,factory1Fn=nullptr;
 inline std::mutex hooksMutex;inline std::map<void**,ChainFn> chainFns;
 inline HRESULT STDMETHODCALLTYPE createChain(IDXGIFactory2* factory,IUnknown* d,const DXGI_SWAP_CHAIN_DESC1* desc,IDXGIOutput* output,IDXGISwapChain1** result){
  if(!enabled){ChainFn fn;{std::lock_guard<std::mutex> lock(hooksMutex);fn=chainFns[*(void***)factory];}return fn(factory,d,desc,output,result);}
  if(!result||!d||!desc)return E_INVALIDARG;*result=nullptr;ID3D11Device* device=nullptr;HRESULT hr=d->QueryInterface(__uuidof(ID3D11Device),(void**)&device);if(FAILED(hr))return hr;
  try{auto releaseDevice=[](ID3D11Device* p){if(p)p->Release();};std::unique_ptr<ID3D11Device,decltype(releaseDevice)> held(device,releaseDevice);auto releaseChain=[](SwapChain* p){if(p)p->Release();};std::unique_ptr<SwapChain,decltype(releaseChain)> chain(new SwapChain(factory,device,*desc),releaseChain);hr=chain->create();if(FAILED(hr))return hr;*result=chain.release();return S_OK;}catch(...){return E_OUTOFMEMORY;}
 }
-inline HRESULT WINAPI createFactory(UINT flags,REFIID iid,void** result){HRESULT hr=factoryFn(flags,iid,result);if(FAILED(hr)||!result||!*result)return hr;IDXGIFactory2* f=nullptr;
- if(SUCCEEDED(((IUnknown*)*result)->QueryInterface(__uuidof(IDXGIFactory2),(void**)&f))){auto** vt=*(void***)f;installPacingHook(vt,7,(void*)&enumAdapters);installPacingHook(vt,12,(void*)&enumAdapters1);std::lock_guard<std::mutex> lock(hooksMutex);if(vt[24]!=(void*)&createChain){DWORD old;if(VirtualProtect(vt+24,sizeof(void*),PAGE_READWRITE,&old)){chainFns[vt]=(ChainFn)vt[24];vt[24]=(void*)&createChain;DWORD unused;VirtualProtect(vt+24,sizeof(void*),old,&unused);}}f->Release();}return hr;
+inline void instrumentFactory(IUnknown* object){
+ IDXGIFactory* base=nullptr;if(SUCCEEDED(object->QueryInterface(__uuidof(IDXGIFactory),(void**)&base))){installPacingHook(*(void***)base,7,(void*)&enumAdapters);base->Release();}
+ IDXGIFactory1* newer=nullptr;if(SUCCEEDED(object->QueryInterface(__uuidof(IDXGIFactory1),(void**)&newer))){installPacingHook(*(void***)newer,12,(void*)&enumAdapters1);newer->Release();}
+ IDXGIFactory2* f=nullptr;
+ if(SUCCEEDED(object->QueryInterface(__uuidof(IDXGIFactory2),(void**)&f))){auto** vt=*(void***)f;installPacingHook(vt,7,(void*)&enumAdapters);installPacingHook(vt,12,(void*)&enumAdapters1);std::lock_guard<std::mutex> lock(hooksMutex);if(vt[24]!=(void*)&createChain){DWORD old;if(VirtualProtect(vt+24,sizeof(void*),PAGE_READWRITE,&old)){chainFns[vt]=(ChainFn)vt[24];vt[24]=(void*)&createChain;DWORD unused;VirtualProtect(vt+24,sizeof(void*),old,&unused);}}f->Release();}
 }
+inline HRESULT WINAPI createFactory(UINT flags,REFIID iid,void** result){HRESULT hr=factoryFn(flags,iid,result);if(SUCCEEDED(hr)&&result&&*result)instrumentFactory((IUnknown*)*result);return hr;}
+// Older software-rendered editors also schedule paints from DXGI vblank.
+// Hook all factory generations, not only the DirectComposition entry point.
+inline HRESULT WINAPI createFactory0(REFIID iid,void** result){HRESULT hr=factory0Fn(iid,result);if(SUCCEEDED(hr)&&result&&*result)instrumentFactory((IUnknown*)*result);return hr;}
+inline HRESULT WINAPI createFactory1(REFIID iid,void** result){HRESULT hr=factory1Fn(iid,result);if(SUCCEEDED(hr)&&result&&*result)instrumentFactory((IUnknown*)*result);return hr;}
 inline HRESULT WINAPI createComposition(IDXGIDevice* d,REFIID iid,void** result){if(!enabled)return compositionFn(d,iid,result);if(!result)return E_POINTER;*result=nullptr;auto* dev=new(std::nothrow) Device;if(!dev)return E_OUTOFMEMORY;HRESULT hr=dev->QueryInterface(iid,result);dev->Release();return hr;}
 inline int patch(HMODULE module){int count=0;auto* base=(uint8_t*)module;auto* dos=(IMAGE_DOS_HEADER*)base;auto* nt=(IMAGE_NT_HEADERS*)(base+dos->e_lfanew);auto dir=nt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];if(!dir.VirtualAddress)return 0;
  for(auto* imp=(IMAGE_IMPORT_DESCRIPTOR*)(base+dir.VirtualAddress);imp->Name;++imp){if(!imp->OriginalFirstThunk)continue;auto* names=(IMAGE_THUNK_DATA*)(base+imp->OriginalFirstThunk);auto* addresses=(IMAGE_THUNK_DATA*)(base+imp->FirstThunk);
   for(size_t i=0;addresses[i].u1.Function;++i){if(IMAGE_SNAP_BY_ORDINAL(names[i].u1.Ordinal))continue;auto* name=(const char*)((IMAGE_IMPORT_BY_NAME*)(base+names[i].u1.AddressOfData))->Name;uintptr_t replacement=0;
    if(!std::strcmp(name,"CreateDXGIFactory2")){factoryFn=(FactoryFn)addresses[i].u1.Function;replacement=(uintptr_t)&createFactory;}
+   if(!std::strcmp(name,"CreateDXGIFactory")){factory0Fn=(LegacyFactoryFn)addresses[i].u1.Function;replacement=(uintptr_t)&createFactory0;}
+   if(!std::strcmp(name,"CreateDXGIFactory1")){factory1Fn=(LegacyFactoryFn)addresses[i].u1.Function;replacement=(uintptr_t)&createFactory1;}
    if(!std::strcmp(name,"DCompositionCreateDevice")){compositionFn=(CompositionFn)addresses[i].u1.Function;replacement=(uintptr_t)&createComposition;}
    if(replacement){DWORD old;if(VirtualProtect(&addresses[i].u1.Function,sizeof(uintptr_t),PAGE_READWRITE,&old)){addresses[i].u1.Function=replacement;DWORD unused;VirtualProtect(&addresses[i].u1.Function,sizeof(uintptr_t),old,&unused);++count;}}
   }

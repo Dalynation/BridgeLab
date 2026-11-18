@@ -28,6 +28,23 @@ int main(){
  }
  waiter.join();CloseHandle(alias);
  if(waited!=WAIT_OBJECT_0||EditorGPU::liveTickers.load()!=0)return 9;
+ HMODULE dxgi=LoadLibraryA("dxgi.dll");if(!dxgi)return 10;
+ EditorGPU::factory0Fn=(EditorGPU::LegacyFactoryFn)GetProcAddress(dxgi,"CreateDXGIFactory");
+ EditorGPU::factory1Fn=(EditorGPU::LegacyFactoryFn)GetProcAddress(dxgi,"CreateDXGIFactory1");
+ if(!EditorGPU::factory0Fn||!EditorGPU::factory1Fn)return 11;
+ for(auto create:{&EditorGPU::createFactory0,&EditorGPU::createFactory1}){
+  IDXGIFactory* factory=nullptr;
+  if(FAILED(create(__uuidof(IDXGIFactory),(void**)&factory))||!factory)return 12;
+  if((*(void***)factory)[7]!=(void*)&EditorGPU::enumAdapters)return 13;
+  IDXGIAdapter* adapter=nullptr;
+  if(FAILED(factory->EnumAdapters(0,&adapter))||!adapter)return 14;
+  if((*(void***)adapter)[7]!=(void*)&EditorGPU::enumOutputs)return 15;
+  IDXGIOutput* output=nullptr;
+  if(FAILED(adapter->EnumOutputs(0,&output))||!output)return 16;
+  if((*(void***)output)[10]!=(void*)&EditorGPU::pacedVblank)return 17;
+  output->Release();adapter->Release();factory->Release();
+ }
  std::cout<<"Unsupported refresh is paced and emulated; device errors preserved; frame-ready aliases and shutdown wakeup: PASS\n";
+ std::cout<<"Legacy DXGI factory versions 0/1 reach adapter/output refresh hooks: PASS\n";
  return 0;
 }
