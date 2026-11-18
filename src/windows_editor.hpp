@@ -12,7 +12,7 @@
 #include "editor_input_hooks.hpp"
 struct EditorHost {
  Effect* effect;std::recursive_mutex mutex;HWND window=nullptr;bool opened=false,standalone=false,embedded=false;
- HANDLE frameFile=INVALID_HANDLE_VALUE,frameMapping=nullptr;uint8_t* frameMemory=nullptr;DWORD lastFrame=0;HWND dragTarget=nullptr;std::atomic<bool> quit{false};std::atomic<int> note{0};std::string statePath;
+ HANDLE frameFile=INVALID_HANDLE_VALUE,frameMapping=nullptr;uint8_t* frameMemory=nullptr;DWORD lastFrame=0;uint32_t idleCalls=0;HWND dragTarget=nullptr;std::atomic<bool> quit{false};std::atomic<int> note{0};std::string statePath;
  explicit EditorHost(Effect* e):effect(e){}
  std::mutex jobMutex;std::condition_variable jobDone;
  struct Control {uint32_t command;std::vector<uint8_t> input,output;bool ok=false,done=false;uint32_t program=0;bool syncProgram=false;};
@@ -35,7 +35,8 @@ struct EditorHost {
  auto* s=(EditorHost*)GetWindowLongPtrW(hwnd,GWLP_USERDATA);
  if(msg==WM_NCCREATE){s=(EditorHost*)((CREATESTRUCTW*)lp)->lpCreateParams;SetWindowLongPtrW(hwnd,GWLP_USERDATA,(LONG_PTR)s);}
  if(!s)return DefWindowProcA(hwnd,msg,wp,lp);
- std::lock_guard<std::recursive_mutex> guard(s->mutex);
+ std::unique_lock<std::recursive_mutex> guard(s->mutex,std::defer_lock);
+ if(s->opened||msg==WM_CLOSE||msg==WM_COMMAND)guard.lock();
  if(s->embedded && msg==WM_WINDOWPOSCHANGING){auto* pos=(WINDOWPOS*)lp;pos->x=-12000;pos->y=-12000;pos->flags=(pos->flags&~SWP_NOMOVE)|SWP_NOACTIVATE;}
  if(msg==WM_CLOSE){s->save();ShowWindow(hwnd,SW_HIDE);if(s->standalone)s->quit=true;return 0;}
  if(msg==WM_COMMAND&&LOWORD(wp)==100){s->note=1;return 0;}
@@ -82,8 +83,15 @@ switch(c->command){
  case OpenEditor:EditorInputHooks::enabled=false;s->embedded=false;s->open();c->ok=s->opened;break;
  case OpenEmbeddedEditor:c->ok=s->embed(c->input);break;
  case EditorInput:c->ok=s->input(c->input);break;
- case CloseEditor:s->embedded=false;s->unmapFrame();ShowWindow(window,SW_HIDE);c->ok=true;break;
+ case CloseEditor:
+  // effEditClose releases the plugin GUI and stops its idle work. Hiding only
+  // the host window kept every closed editor's UI resources alive.
+  if(s->opened)s->effect->dispatch(s->effect,15,0,0,nullptr,0);
+  s->opened=false;s->embedded=false;s->unmapFrame();ShowWindow(window,SW_HIDE);
+  EditorInputHooks::enabled=false;EditorInputHooks::captured=nullptr;EditorInputHooks::focused=nullptr;
+  c->ok=true;break;
  case EditorStatus:{RECT r{};GetWindowRect(window,&r);int32_t status[4]={r.left,r.top,int32_t(IsWindowVisible(window)),int32_t(GetForegroundWindow()==window)};c->output.resize(sizeof(status));std::memcpy(c->output.data(),status,sizeof(status));c->ok=true;break;}
+ case EditorLifecycle:{uint32_t status[4]={uint32_t(opened),uint32_t(frameMemory!=nullptr),idleCalls,uint32_t(GetWindow(window,GW_CHILD)!=nullptr)};c->output.resize(sizeof(status));std::memcpy(c->output.data(),status,sizeof(status));c->ok=true;break;}
  case SelectProgram:if(c->program<uint32_t(s->effect->programs)){s->effect->dispatch(s->effect,2,0,c->program,nullptr,0);c->ok=true;}break;
  case GetState:case GetStateWithProgram:if(c->syncProgram)s->effect->dispatch(s->effect,2,0,c->program,nullptr,0);c->output=captureState(s->effect);c->ok=!c->output.empty();break;
  case SetState:c->ok=restoreState(s->effect,c->input);break;
@@ -95,7 +103,7 @@ switch(c->command){
  void pump(){
  Control* job=nullptr;{std::lock_guard<std::mutex> lock(jobMutex);job=pending;}
  if(job){execute(job);{std::lock_guard<std::mutex> lock(jobMutex);job->done=true;pending=nullptr;}jobDone.notify_all();}
- MSG msg;while(PeekMessageA(&msg,nullptr,0,0,PM_REMOVE)){std::lock_guard<std::recursive_mutex> guard(mutex);TranslateMessage(&msg);DispatchMessageA(&msg);}if(opened){std::lock_guard<std::recursive_mutex> guard(mutex);effect->dispatch(effect,19,0,0,nullptr,0);frame();}}
+ MSG msg;while(PeekMessageA(&msg,nullptr,0,0,PM_REMOVE)){std::unique_lock<std::recursive_mutex> guard(mutex,std::defer_lock);if(opened)guard.lock();TranslateMessage(&msg);DispatchMessageA(&msg);}if(opened){std::lock_guard<std::recursive_mutex> guard(mutex);effect->dispatch(effect,19,0,0,nullptr,0);++idleCalls;frame();}}
  void close(){std::lock_guard<std::recursive_mutex> guard(mutex);save();unmapFrame();if(opened)effect->dispatch(effect,15,0,0,nullptr,0);opened=false;if(window)DestroyWindow(window);window=nullptr;}
 };
 #endif

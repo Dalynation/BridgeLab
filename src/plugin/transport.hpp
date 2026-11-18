@@ -16,6 +16,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <memory>
+#include <pthread.h>
 extern char** environ;
 struct Packet {uint64_t seq=0;WireRequest request;WireResponse response;};
 template<class T,int N> struct Queue {
@@ -28,7 +29,7 @@ class Transport {
  int input=-1,output=-1;pid_t pid=-1;std::thread worker;std::atomic<bool> stopFlag{false};
  struct ControlJob {uint32_t command,program=0;std::vector<uint8_t> input,output;bool done=false,ok=false;};
  std::mutex controls,offlineIo;std::condition_variable completed;std::shared_ptr<ControlJob> pendingControl;
- bool offlineMode=false;std::atomic<bool> running{false};
+ bool offlineMode=false;std::atomic<bool> running{false};std::atomic<uint64_t> lastCompleted{0};
  bool performControl(ControlJob& job){
  WireRequest request;request.frames=0;request.command=job.command;request.program=job.program;request.payloadBytes=uint32_t(job.input.size());WireResponse response;
  if(!io(input,&request,sizeof(request),true)||(!job.input.empty()&&!io(input,job.input.data(),job.input.size(),true))||!io(output,&response,sizeof(response),false)||response.magic!=wireMagic||response.frames!=0||response.payloadBytes>maxStateBytes){failed=true;return false;}
@@ -42,10 +43,10 @@ class Transport {
  return bytes==0;
  }
 public:
- Queue<Packet,64> requests,responses;std::atomic<bool> failed{false};uint32_t programs=1;
+ Queue<Packet,128> requests,responses;std::atomic<bool> failed{false};uint32_t programs=1;
  ~Transport(){stop();}
  bool start(const std::string& path,int bits,double rate,bool offline){
- stop();offlineMode=offline;stopFlag=false;failed=false;requests.clear();responses.clear();
+ stop();offlineMode=offline;stopFlag=false;failed=false;lastCompleted=0;requests.clear();responses.clear();
  int toChild[2],fromChild[2];if(pipe(toChild))return false;if(pipe(fromChild)){close(toChild[0]);close(toChild[1]);return false;}
  // Avoid inherited descriptors holding another instance's pipes open.
  for(int* fd:{&toChild[0],&toChild[1],&fromChild[0],&fromChild[1]}){int duplicate=fcntl(*fd,F_DUPFD_CLOEXEC,3);if(duplicate<0)return false;close(*fd);*fd=duplicate;}
@@ -66,13 +67,32 @@ public:
  if(err){pid=-1;stop();return false;}
  uint32_t hello[3]{};if(!io(output,hello,sizeof(hello),false,90000)||hello[0]!=wireMagic){stop();return false;}programs=hello[1];
  running=true;
- if(!offline)worker=std::thread([this]{Packet packet;while(!stopFlag){
+ if(!offline)worker=std::thread([this]{
+ pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE,0);
+ Packet packet;while(!stopFlag){
  std::shared_ptr<ControlJob> job;{std::lock_guard<std::mutex> lock(controls);job=pendingControl;}
  if(job){bool ok=performControl(*job);{std::lock_guard<std::mutex> lock(controls);job->ok=ok;job->done=true;if(pendingControl==job)pendingControl.reset();}completed.notify_all();if(failed)break;}
- if(!requests.pop(packet)){std::this_thread::sleep_for(std::chrono::microseconds(100));continue;}
- if(!exchange(packet)||!responses.push(packet)){failed=true;break;}}
+ // A UI/state request can take several audio quanta in the Windows message
+ // loop. Drain a bounded batch afterwards; one packet per control job lets
+ // sustained mouse/state traffic starve audio and eventually fill the queue.
+ bool processed=false;
+ for(int batch=0;batch<8&&!stopFlag&&requests.pop(packet);++batch){
+ processed=true;if(!exchange(packet)||!responses.push(packet)){failed=true;break;}
+ {std::lock_guard<std::mutex> lock(controls);lastCompleted=packet.seq+1;}completed.notify_all();
+ }
+ if(failed)break;
+ if(!processed)std::this_thread::sleep_for(std::chrono::microseconds(100));}
  running=false;completed.notify_all();});
  return true;
+ }
+ bool submit(const Packet& packet,bool prefetch){
+ if(failed||!running||!requests.push(packet))return false;
+ if(!prefetch)return true;
+ // VST3 permits prefetch callbacks to run faster than wall clock and switch
+ // from realtime without setupProcessing. Keep one worker/ordered pipe, but
+ // wait here (only for prefetch) so a fast host cannot overflow the queue.
+ std::unique_lock<std::mutex> lock(controls);
+ return completed.wait_for(lock,std::chrono::seconds(6),[&]{return lastCompleted>packet.seq||failed||!running;})&&lastCompleted>packet.seq&&!failed;
  }
  bool control(uint32_t command,const std::vector<uint8_t>& bytes,std::vector<uint8_t>& result,uint32_t hostProgram=0){
  if(!running||failed||bytes.size()>maxStateBytes)return false;

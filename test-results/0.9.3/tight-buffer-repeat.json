@@ -1,0 +1,20 @@
+[
+  {
+    "trial": 1,
+    "exit": 0,
+    "exact_PCM": false,
+    "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=150269 tail=0.0479358 rate=48000 block=64 latency=2048"
+  },
+  {
+    "trial": 2,
+    "exit": 0,
+    "exact_PCM": true,
+    "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=64 latency=2048"
+  },
+  {
+    "trial": 3,
+    "exit": 0,
+    "exact_PCM": false,
+    "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=148989 tail=0.0479358 rate=48000 block=64 latency=2048"
+  }
+]

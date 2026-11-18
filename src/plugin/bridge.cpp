@@ -20,7 +20,7 @@ class Bridge final:public AudioEffect {
  std::vector<uint8_t> savedState,editorMapping;bool editorWanted=false;
  std::string path;std::atomic<uint32_t> program{0};bool active=false,offline=false;int bits=32;
  uint64_t underruns=0;uint64_t seq=0;int position=0;Packet pending,playing,waiting;bool hasWaiting=false;
- static constexpr int delay=8;
+ int delay=8;
  int architecture(){std::ifstream file(path,std::ios::binary);uint32_t off=0;uint16_t machine=0;file.seekg(60);file.read((char*)&off,4);if(!file||off>16*1024*1024)return 0;file.seekg(off+4);file.read((char*)&machine,2);return machine==0x14c?32:machine==0x8664?64:0;}
 public:
  Bridge(){setControllerClass(controllerUid);trace("processor constructed");}
@@ -40,10 +40,17 @@ public:
  uint32 PLUGIN_API getTailSamples() override{return kInfiniteTail;}
  tresult PLUGIN_API setupProcessing(ProcessSetup& setup) override {
  if(active)return kResultFalse;
- if(setup.sampleRate<44100||setup.sampleRate>192000||setup.symbolicSampleSize!=kSample32)return kResultFalse;
+ if(setup.sampleRate<44100||setup.sampleRate>192000||setup.symbolicSampleSize!=kSample32||setup.maxSamplesPerBlock<1||setup.maxSamplesPerBlock>8192)return kResultFalse;
+ // Cover an entire host callback plus worker scheduling headroom. Small
+ // buffers retain scheduling safety; larger callbacks need more headroom.
+ delay=std::max(8,2*((setup.maxSamplesPerBlock+quantum-1)/quantum)+2);
+ trace(("setup rate="+std::to_string(setup.sampleRate)+" maxBlock="+std::to_string(setup.maxSamplesPerBlock)+" mode="+std::to_string(setup.processMode)+" latency="+std::to_string(delay*quantum)).c_str());
  offline=setup.processMode==kOffline;return AudioEffect::setupProcessing(setup);
  }
  tresult PLUGIN_API setActive(TBool state) override {
+ // Some hosts repeat activation without a matching deactivation. Preserve
+ // the live runner, voices and editor instead of starting another Wine process.
+ if(bool(state)==active&&!transport.failed)return kResultOk;
  if(active){std::vector<uint8_t> captured;if(transport.control(GetStateWithProgram,{},captured,program))savedState=std::move(captured);}
  transport.stop();active=false;seq=0;position=0;pending={};playing={};hasWaiting=false;
  if(!state)return kResultOk;
@@ -82,7 +89,12 @@ public:
  }
  tresult PLUGIN_API process(ProcessData& data) override {
  if(data.inputParameterChanges)for(int i=0;i<data.inputParameterChanges->getParameterCount();i++){auto* q=data.inputParameterChanges->getParameterData(i);int32 offset;ParamValue value;if(q&&q->getParameterId()==0&&q->getPointCount()&&q->getPoint(q->getPointCount()-1,offset,value)==kResultOk)program=uint32_t(std::clamp(value,0.0,1.0)*511+0.5);}
- if(data.numSamples==0||data.numOutputs==0||!data.outputs||data.outputs[0].numChannels==0)return kResultOk;
+ // Preserve note flushes while a host has no audio buffer to process.
+ // They belong at the next quantum position, not at an absent audio sample.
+ if(data.numSamples==0||data.numOutputs==0||!data.outputs||data.outputs[0].numChannels==0){
+ if(active&&data.inputEvents)for(int i=0;i<data.inputEvents->getEventCount();++i){Event e{};if(data.inputEvents->getEvent(i,e)==kResultOk&&(e.type==Event::kNoteOnEvent||e.type==Event::kNoteOffEvent)&&pending.request.count<maxMidi){auto& m=pending.request.midi[pending.request.count++];bool on=e.type==Event::kNoteOnEvent;m.offset=position;m.status=(on?0x90:0x80)|(on?e.noteOn.channel:e.noteOff.channel);m.note=on?e.noteOn.pitch:e.noteOff.pitch;m.velocity=uint8_t(std::clamp(on?e.noteOn.velocity:e.noteOff.velocity,0.f,1.f)*127);}}
+ return kResultOk;
+ }
  if(data.outputs[0].numChannels<2||data.symbolicSampleSize!=kSample32)return kResultFalse;
  float* left=data.outputs[0].channelBuffers32[0];float* right=data.outputs[0].channelBuffers32[1];
  if(!active||transport.failed){std::fill_n(left,data.numSamples,0);std::fill_n(right,data.numSamples,0);data.outputs[0].silenceFlags=3;return kResultOk;}
@@ -100,7 +112,7 @@ public:
  while(next<count&&events[next].sampleOffset<=i){auto& e=events[next++];if(pending.request.count<maxMidi){auto& m=pending.request.midi[pending.request.count++];m.offset=position;bool on=e.type==Event::kNoteOnEvent;m.status=(on?0x90:0x80)|(on?e.noteOn.channel:e.noteOff.channel);m.note=on?e.noteOn.pitch:e.noteOff.pitch;m.velocity=uint8_t(std::clamp(on?e.noteOn.velocity:e.noteOff.velocity,0.f,1.f)*127);}}
  left[i]=playing.response.left[position];right[i]=playing.response.right[position];
  if(++position==quantum){pending.seq=seq++;pending.request.program=program;
- if(offline){if(transport.exchange(pending))transport.responses.push(pending);}else if(!transport.requests.push(pending))transport.failed=true;
+ if(offline){if(transport.exchange(pending))transport.responses.push(pending);}else if(!transport.submit(pending,data.processMode==kPrefetch))transport.failed=true;
  pending={};position=0;}
  }
  return kResultOk;
@@ -124,6 +136,6 @@ public:
 };
 bool InitModule(){trace("bundle entry");return true;}bool DeinitModule(){trace("bundle exit");return true;}
 BEGIN_FACTORY_DEF("BridgeLab","https://example.invalid","")
-DEF_CLASS2(INLINE_UID_FROM_FUID(uid),PClassInfo::kManyInstances,kVstAudioEffectClass,bridgeDisplayName(),0,"Instrument|Synth","0.9.1",kVstVersionString,Bridge::create)
-DEF_CLASS2(INLINE_UID_FROM_FUID(controllerUid),PClassInfo::kManyInstances,kVstComponentControllerClass,"BridgeLab Controller",0,"","0.9.1",kVstVersionString,Controller::create)
+DEF_CLASS2(INLINE_UID_FROM_FUID(uid),PClassInfo::kManyInstances,kVstAudioEffectClass,bridgeDisplayName(),0,"Instrument|Synth","0.9.3",kVstVersionString,Bridge::create)
+DEF_CLASS2(INLINE_UID_FROM_FUID(controllerUid),PClassInfo::kManyInstances,kVstComponentControllerClass,"BridgeLab Controller",0,"","0.9.3",kVstVersionString,Controller::create)
 END_FACTORY

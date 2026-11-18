@@ -1,0 +1,55 @@
+[
+  {
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "test_overrides": {
+      "BRIDGELAB_TEST_OUTPUT": "/Users/TEST_USER/Documents/Codex/2026-11-11/me-x20/work/brandon-qa/editors",
+      "BRIDGELAB_TEST_REPORT": "/Users/TEST_USER/Documents/Codex/2026-11-11/me-x20/work/brandon-qa/editor-results.json"
+    },
+    "initial_window_status": [
+      -12000,
+      -12000,
+      1,
+      0
+    ],
+    "frame_size": [
+      630,
+      428
+    ],
+    "pixel_colors": 2751,
+    "after_input_window_status": [
+      -12000,
+      -12000,
+      1,
+      0
+    ],
+    "preset_click": true,
+    "enabled_knob_drag": true,
+    "backing_window_offscreen": true,
+    "wine_local_foreground": false,
+    "mac_foreground_not_determined_by_win32": true,
+    "gui_edited_state_recreated_exactly": true,
+    "passed": true
+  },
+  {
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "test_overrides": {
+      "BRIDGELAB_TEST_OUTPUT": "/Users/TEST_USER/Documents/Codex/2026-11-11/me-x20/work/brandon-qa/editors",
+      "BRIDGELAB_TEST_REPORT": "/Users/TEST_USER/Documents/Codex/2026-11-11/me-x20/work/brandon-qa/editor-results.json"
+    },
+    "initial_window_status": [
+      -12000,
+      -12000,
+      1,
+      1
+    ],
+    "frame_size": [
+      1270,
+      695
+    ],
+    "pixel_colors": 2559,
+    "enabled_knob_drag": true,
+    "backing_window_offscreen": true,
+    "gui_edited_state_recreated_exactly": true,
+    "passed": true
+  }
+]

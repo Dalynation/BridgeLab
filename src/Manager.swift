@@ -3,7 +3,7 @@ import CryptoKit
 import Darwin
 
 final class BridgeManager {
-    static let version = "0.9.2"
+    static let version = "0.9.3"
     let fm = FileManager.default
     let root: URL
     let resources: URL

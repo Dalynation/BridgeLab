@@ -79,6 +79,9 @@ int main(int argc,char** argv){
  fwrite(hello,sizeof(hello),1,stdout);fflush(stdout);
  std::atomic<bool> done{false};
  auto serveLoop=[&]{
+#ifdef _WIN32
+ if(processLevel==2)SetThreadPriority(GetCurrentThread(),THREAD_PRIORITY_ABOVE_NORMAL);
+#endif
  try {
  WireRequest request;
  while(fread(&request,sizeof(request),1,stdin)==1){
