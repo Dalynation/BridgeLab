@@ -95,5 +95,9 @@ architectures at 44.1, 48 and 192 kHz. See
 Use: keep the original editor open, play a sustained note or keep an FL pattern
 running, then open BridgeLab and choose Check runtime. The message reports
 observed signal behavior; it does not choose a new sound or prove all controls
-correct. The installed update still needs a live FL message check. Keyboard
-focus/note release remains a separate pending acceptance item.
+correct. The installed update passed its live FL 24.2.2 message check: the user started
+the QA pattern, live NoiseMaker observations reported held notes and quiet output,
+and the installed app returned the expected quiet-patch guidance. Display frames
+continued updating, with zero rejected inputs and invalid audio samples in the
+observation. Mac typing-keyboard focus/note release remains a separate pending
+acceptance item.

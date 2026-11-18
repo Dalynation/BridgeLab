@@ -247,5 +247,6 @@
     "native_and_Windows_contracts": "passed",
     "installed": "after backup; live FL message check pending",
     "keyboard_focus_release": "still pending"
-  }
+  },
+  "live_audio_diagnostics": "PASS: installed app reported quiet-held-note guidance from live NoiseMaker in FL Studio 24.2.2; keyboard focus/release acceptance remains pending"
 }

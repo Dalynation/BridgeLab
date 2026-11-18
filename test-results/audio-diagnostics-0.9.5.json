@@ -1,6 +1,6 @@
 {
   "candidate": "0.9.5 unreleased",
-  "status": "Built, tested and installed; actual FL status-message check pending",
+  "status": "Built, tested, installed and live quiet-audio guidance verified in FL Studio 24.2.2 on macOS 15.6.1",
   "implementation": "Vendor-independent, observational fixed-memory MIDI/audio monitor. Atomic 32-bit snapshots; no locks, allocations, file I/O or plugin calls in the audio observer. GUI side writes local health; Check runtime shows per-instrument guidance.",
   "quiet_rule": "Below -55 dBFS for 0.75 seconds of held-note audio. Informational; not a plugin failure. Cleared by audible audio or released keys. Check with a sustained note or a pattern kept playing.",
   "diagnoses": [
@@ -413,5 +413,41 @@
     "Live diagnostic observations currently require an open original editor",
     "Mac typing-keyboard focus/note-release acceptance remains unverified",
     "Public release remains 0.9.4"
-  ]
+  ],
+  "live_fl_check": {
+    "host": "FL Studio 24.2.2 build 4259",
+    "os": "macOS 15.6.1",
+    "architecture": "Apple Silicon",
+    "passed": true,
+    "method": "User started test pattern in FL; installed BridgeLab doctor command read live shared editor/audio observations and returned Check runtime guidance",
+    "observation": {
+      "above_full_scale_recent": 0,
+      "audio_blocks_observed": 99415,
+      "audio_observation_stale": 0,
+      "audio_peak": 0.00371673,
+      "audio_rms": 0.000264358,
+      "capture_failure": 0,
+      "format_version": 1,
+      "frame_stalled": 0,
+      "frames_published": 7962,
+      "held_note_keys": 1,
+      "input_coalesced": 0,
+      "input_delivered": 380,
+      "input_queued": 380,
+      "input_rejected": 0,
+      "instrument_name": "TAL-NoiseMaker",
+      "nonfinite_audio_samples": 0,
+      "note_ons_observed": 124,
+      "original_popup_pixels_forwarded": 1,
+      "popup_backing_offscreen": 1,
+      "popup_input_forwarded": 1,
+      "popup_windows_detected": 6,
+      "quiet_while_notes": 1,
+      "status_stale": false,
+      "unsupported_popup_modes": 0,
+      "visible_popup_windows": 0
+    },
+    "message": "TAL-NoiseMaker: output is very quiet while notes are held. This can be intentional. Check volume, filter cutoff/type, envelope and oscillator mix, then channel routing. BridgeLab preserves these settings.",
+    "limits": "This validates quiet-held-note advice and live monitoring, not Mac typing-keyboard focus/release or every control."
+  }
 }
