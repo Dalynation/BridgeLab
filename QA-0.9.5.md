@@ -114,18 +114,29 @@ run outside that sandbox passed and its Wine profile shut down successfully.
 [Sanitized results and packaged binary hashes](test-results/qa-0.9.5.json) record
 the tested candidate. This is CLI acceptance, not graphical import acceptance.
 
-BridgeLab's old app, runtime/settings and its own FL database entries were moved
-into restorable backups. Original DLLs, FL projects and unrelated plugins were
-preserved. The fresh normal installation imported all three instruments. FL
-Studio 24.2.2.4259 scanned all three as separate Apple + Intel VST3 synths with
-status **ok**, and SQ8L's original editor opened inside FL.
+The final tested standalone app was subsequently installed normally on the
+Desktop. The prior BridgeLab app, settings/runtime, three wrappers and its own
+FL database entries were moved into restorable backups (17 items). FL was saved
+to a separate project backup and quit before replacement. Original DLLs, projects
+and unrelated plugins were preserved. Installed app/engine hashes match the
+standalone test; all three wrapper executable payloads match after excluding
+their expected bundle-specific ad-hoc signatures.
 
-Native mouse automation was unavailable for FL's custom editor window. After
-closing it, accessibility automation timed out. A process stack sample showed
-FL's main event loop running; it did not establish a BridgeLab deadlock or a
-passed close/reopen test. User focus recovery is pending; the Mac subsequently locked and blocked UI access. No forced quit or
-project discard was used. In-FL knob input, multi-plugin project export and
-save/reopen recall are therefore not certified for this candidate.
+SQ8L was imported through Finder Copy → Paste DLLs in the graphical app. This
+fresh graphical runtime setup took **134 seconds**, considerably longer than
+the isolated CLI run. NoiseMaker and U-NO-LX were then imported through the
+installed app CLI. All three produced non-silent installed-app WAV renders.
+A user-triggered fresh FL Studio **24.2.2.4259** scan found all three as separate
+Apple + Intel VST3 synths with status **ok**. SQ8L's original interface visibly
+opened inside FL with the final candidate.
+
+Native mouse automation returned **noWindowsAvailable**, including in Plugin
+Manager before a plugin editor was open. After Escape/F6 from the SQ8L editor,
+accessibility automation timed out again. A fresh two-second process sample
+showed FL's main event loop waiting for and processing events; it did not prove
+a BridgeLab deadlock or a passed close/reopen test. User confirmation of normal
+FL interaction is pending. No forced quit or project discard was used. In-FL
+knob input, multi-plugin project export and save/reopen recall remain pending.
 
 The macOS picker could be highlighted via accessibility, but automated selection
 did not enable Open; direct coordinate input reported no available window.

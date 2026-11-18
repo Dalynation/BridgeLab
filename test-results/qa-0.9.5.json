@@ -114,7 +114,7 @@
     }
   ],
   "pending": [
-    "Final candidate clean graphical import and FL rescan",
+    "Final graphical picker selection (Finder-copy import and fresh scan passed)",
     "In-FL original knob input, multiple plugin instances, export and edited project save/reopen",
     "Physical Intel, other macOS and FL versions, including friend macOS 15.1 / FL 26.1"
   ],
@@ -129,5 +129,20 @@
     "Single-surface Direct2D adapter, not complete DirectComposition",
     "Cold modern editor startup approximately 9\u201316 seconds",
     "No claim of zero defects or universal compatibility"
-  ]
+  ],
+  "manual_fl": {
+    "host": "FL Studio 24.2.2.4259",
+    "final_installed_payload_verified": true,
+    "fresh_scan_ok": 3,
+    "SQ8L_original_editor_opened": true,
+    "graphical_SQ8L_import": "Finder Copy \u2192 Paste DLLs",
+    "graphical_fresh_setup_seconds": 134,
+    "installed_render_non_silent": 3,
+    "pending": [
+      "In-FL mouse control/audio response",
+      "Multiple bridged instruments in one FL project",
+      "Edited project save/reopen and export"
+    ],
+    "automation_limit": "Mouse API noWindowsAvailable before editor; accessibility timeout after editor close; main event-loop stack sample does not establish a product deadlock"
+  }
 }
