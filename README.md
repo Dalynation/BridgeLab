@@ -1,10 +1,10 @@
-# BridgeLab 0.9.4 — friend-test preview
+# BridgeLab 0.9.5 — friend-test preview
 
 BridgeLab imports Windows VST2 instrument DLLs and creates a separate Mac VST3 instrument for each DLL. It runs the original Windows code through bundled Wine; it does not convert DLLs into native Mac code.
 
-[Download the 0.9.4 preview and follow its setup steps](https://github.com/Dalynation/BridgeLab/releases/tag/v0.9.4-preview).
+[Download the 0.9.5 preview and follow its setup steps](https://github.com/Dalynation/BridgeLab/releases/tag/v0.9.5-preview).
 
-## 0.9.5 development candidate
+## 0.9.5 changes
 
 The source includes queue-overload MIDI recovery, first-note DSP initialization,
 a shared Wine profile for new imports, and a single-surface Direct2D editor
@@ -25,12 +25,13 @@ entry points used by software-rendered editors. Automated audio, recovery and
 multi-instance checks pass; final
 manual FL project acceptance remains pending. See [QA-0.9.5.md](QA-0.9.5.md) for the
 measured results, cold editor delays, retained stress failures and remaining
-release checks. This candidate is not a universal-compatibility certification;
-the public download above remains 0.9.4.
+release checks. This preview is not a universal-compatibility certification.
+Mac typing-keyboard note release after clicking the editor remains unverified;
+see the release page for known issues and upgrade instructions.
 
 ## Try it
 
-1. Extract `BridgeLab-0.9.4-mac-preview.zip` and move the complete BridgeLab.app to Applications or your Desktop. This preview is ad-hoc signed and not notarized; a second Mac may require macOS approval before opening. Apple Silicon needs Rosetta for the Windows runtime.
+1. Extract `BridgeLab-0.9.5-mac-preview.zip` and move the complete BridgeLab.app to Applications or your Desktop. This preview is ad-hoc signed and not notarized; a second Mac may require macOS approval before opening. Apple Silicon needs Rosetta for the Windows runtime.
 2. Open BridgeLab and import an extracted Windows DLL or its extracted folder. Folder selection also permits copying adjacent presets and resources. Multiple DLLs remain in the library. Finder Copy → Paste DLLs is also supported. Drag/drop is implemented; the final clean-start run used the native picker and clipboard paths.
 3. In FL Studio, open Options → Manage plugins → Find installed plugins. Each import gets a separate entry, such as **BridgeLab - SQ8L (x86)**. Add it from the Channel Rack as a generator/instrument. It is not a mixer effect.
 4. Open that channel to use the original plugin editor through the Mac bridge view. Save, reopen, and export a small test project before relying on a new plugin.
