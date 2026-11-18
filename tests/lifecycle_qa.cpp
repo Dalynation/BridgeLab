@@ -31,7 +31,7 @@ int main(int argc,char** argv){try{
   note();auto start=std::chrono::steady_clock::now();std::atomic<bool> done{false};std::atomic<int> captures{0};
   std::thread controls([&]{while(!done){MemoryStream state;if(component->getState(&state)!=kResultOk)break;++captures;}});
   int audible=0;for(int b=0;b<512;++b){float value=render(1);if(b>32&&value>.0001)++audible;std::this_thread::sleep_until(start+std::chrono::microseconds((b+1)*256*1000000LL/48000));}
-  done=true;controls.join();std::cout<<"captures="<<captures<<" audible_blocks="<<audible<<"/479 ";peak=audible>450?.1f:0.f;
+  done=true;controls.join();std::cout<<"captures="<<captures<<" audible_blocks="<<audible<<"/479 ";peak=audible==479&&captures>0?.1f:0.f;
  }
  else return 2;
  processor->setProcessing(false);component->setActive(false);component->terminate();

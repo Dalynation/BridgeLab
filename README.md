@@ -1,23 +1,30 @@
-# BridgeLab 0.9.3 — friend-test preview
+# BridgeLab 0.9.4 — friend-test preview
 
 BridgeLab imports Windows VST2 instrument DLLs and creates a separate Mac VST3 instrument for each DLL. It runs the original Windows code through bundled Wine; it does not convert DLLs into native Mac code.
 
-[Download the 0.9.3 preview and follow its setup steps](https://github.com/Dalynation/BridgeLab/releases/tag/v0.9.3-preview).
+[Download the 0.9.4 preview and follow its setup steps](https://github.com/Dalynation/BridgeLab/releases/tag/v0.9.4-preview).
 
 ## Try it
 
-1. Extract `BridgeLab-0.9.3-mac-preview.zip` and move the complete BridgeLab.app to Applications or your Desktop. This preview is ad-hoc signed and not notarized; a second Mac may require macOS approval before opening. Apple Silicon needs Rosetta for the Windows runtime.
+1. Extract `BridgeLab-0.9.4-mac-preview.zip` and move the complete BridgeLab.app to Applications or your Desktop. This preview is ad-hoc signed and not notarized; a second Mac may require macOS approval before opening. Apple Silicon needs Rosetta for the Windows runtime.
 2. Open BridgeLab and import an extracted Windows DLL or its extracted folder. Folder selection also permits copying adjacent presets and resources. Multiple DLLs remain in the library. Finder Copy → Paste DLLs is also supported. Drag/drop is implemented; the final clean-start run used the native picker and clipboard paths.
 3. In FL Studio, open Options → Manage plugins → Find installed plugins. Each import gets a separate entry, such as **BridgeLab - SQ8L (x86)**. Add it from the Channel Rack as a generator/instrument. It is not a mixer effect.
 4. Open that channel to use the original plugin editor through the Mac bridge view. Save, reopen, and export a small test project before relying on a new plugin.
 
 No development checkout or Python is required. Original plugin DLLs are not included in the archive. Installed wrappers live in `~/Library/Audio/Plug-Ins/VST3/BridgeLab-*.vst3`; managed copies, runtimes, settings, and logs live in `~/Library/Application Support/BridgeLab`.
 
-## 0.9.3 changes
+## 0.9.4 changes
 
-Repeated activation preserves the current runner and held voices. MIDI notes received without an audio buffer are retained for the next audio callback. Prefetch processing waits for ordered worker completion rather than overflowing the realtime queue. Closing the editor now closes the Windows plugin UI, releases its frame mapping and stops idle callbacks. Active instances still use one isolated Windows runner each; the bundled runtime and per-architecture Wine profiles are shared. Lower-RAM machines and Brandon’s exact TAL variant remain unverified.
+Realtime audio now uses a bounded shared-memory queue between the Mac VST3 wrapper and the Windows DSP worker, avoiding pipe scheduling on the audio path. A bundled native helper gives only that worker a macOS realtime scheduling policy; UI and control threads retain their normal scheduling. If shared transport cannot initialize, the bridge retries the legacy pipe path. Offline rendering continues through pipes; the pipe worker can pipeline up to eight requests and handles partial I/O.
 
-To upgrade, close FL Studio, replace BridgeLab.app, then reimport each original DLL/folder so its VST3 wrapper is rebuilt. Rescan updated wrappers in FL Studio with **Rescan previously verified plugins** enabled. Existing per-DLL IDs remain stable.
+Windows runners receive EOF and can finish normal plugin/editor cleanup before bounded forced termination. The approximately 43 ms minimum scheduling allowance scales with sample rate: 2,048 samples at 48 kHz, 4,096 at 96 kHz and 8,192 at 192 kHz, including under Rosetta. Larger callbacks can require more. Device latency is additional.
+The current Core Audio suite passed 44/44 exact audio comparisons. Both original editors accepted knob edits during playback, and four simultaneous native/Rosetta clients produced exact audio without bridge underruns. The broader timer-host suite passed 53/54 checks; one silent-block mismatch remains unconfirmed despite 12 passing follow-ups. See the QA report before relying on this preview.
+
+Some earlier stress results ran with stale Wine helpers left across short tool-driven test sessions. A controlled old/new comparison kept helper counts stable in both versions. We do **not** claim a reproduced production Wine-memory leak was fixed. The test harness now explicitly closes its disposable Wine profiles at the end of each session. See [QA-0.9.4.md](QA-0.9.4.md) for evidence and limits.
+
+To upgrade, save and quit FL Studio and BridgeLab, replace the complete BridgeLab.app, then reimport each original DLL/folder so its VST3 wrapper is rebuilt. Restarting the Mac once is recommended if old preview/test runtimes are still running. Rescan with **Rescan previously verified plugins** enabled. Existing per-DLL IDs remain stable.
+
+The 0.9.3 MIDI, prefetch, editor-close and folder-permission fixes remain included. Active instruments still use one isolated Windows runner each; runtime files and per-architecture Wine profiles are shared.
 
 ## Earlier FL baseline (0.9.1)
 
@@ -29,13 +36,22 @@ On Apple Silicon, macOS 15.6.1, FL Studio 24.2.2.4259:
 - Installed native host tests passed on arm64 and x86_64 under Rosetta with the development tree temporarily absent. Both plugins produced audio; live and offline PCM matched exactly. Three simultaneous instances (two SQ8L plus TAL) kept independent state and recreated identical audio, including relocation of another user's saved DLL path.
 - Both wrappers passed Steinberg validation: 47 passed, zero failed each. Packaged WAV rendering, duplicate import, invalid DLL rejection, and both editor state-recreation checks passed.
 
-See the baseline reports in `test-results/` and the current findings in [QA-0.9.3.md](QA-0.9.3.md). FL multi-instrument audio comparison was not completed; the simultaneous-instance evidence comes from the native host harness.
+See the baseline reports in `test-results/` and the current findings in [QA-0.9.4.md](QA-0.9.4.md). FL multi-instrument audio comparison was not completed; the simultaneous-instance evidence comes from the native host harness.
 
 ## Compatibility limits
 
-This is ready for a controlled friend test, not a guarantee for all Macs, FL versions, or plugins. Physical Intel Macs, other macOS releases, FL Studio 20 end-to-end behavior, other FL versions, and installation on a clean second computer remain unverified. Universal arm64/x86_64 builds target macOS 11; that target is not a tested support promise.
+The compatibility target is macOS 11 and later, on Apple Silicon and Intel, through the standard VST3 interface used by FL Studio. The target is broader than the tested coverage:
 
-Supported scope is Windows x86/x64 **VST2 instruments**. Windows VST3, audio-input effects, arbitrary installers, copy protection, external sample dependencies, GPU editors, popup menus, and file dialogs are not generally supported or verified. Dialogs may block synchronous controls. Notes and velocity work; MIDI CC, pitch bend, aftertouch, SysEx, transport/tempo, and general parameter automation are not implemented. Bridge latency has a 2048-sample minimum and increases for larger host callback sizes; device latency is additional.
+| Combination | Evidence |
+| --- | --- |
+| Apple Silicon, macOS 15.6.1 | Current audio, state and editor regression host tests |
+| Intel host process under Rosetta on that Mac | Current host tests; not physical Intel hardware |
+| FL Studio 24.2.2.4259 on that Mac | Earlier 0.9.1 end-to-end baseline below |
+| Physical Intel, macOS 11–14 / other macOS releases, FL Studio 20 / 21 / 2025 / 2026 | Not yet certified by end-to-end tests |
+| Brandon’s macOS 15.1 / FL Studio 26.1 | Requires confirmation on his computer |
+
+Universal arm64/x86_64 builds and a macOS 11 deployment target help reach this range; they do not prove every combination works. This remains a controlled friend-test preview.
+Supported scope is Windows x86/x64 **VST2 instruments**. Windows VST3, audio-input effects, arbitrary installers, copy protection, external sample dependencies, GPU editors, popup menus, and file dialogs are not generally supported or verified. Dialogs may block synchronous controls. Notes and velocity work; MIDI CC, pitch bend, aftertouch, SysEx, transport/tempo, and general parameter automation are not implemented. Bridge latency has a 2048-sample minimum; higher sample rates and larger callbacks receive more scheduling headroom. Device latency is additional.
 
 ## Development and backups
 

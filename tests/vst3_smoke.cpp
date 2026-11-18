@@ -12,6 +12,8 @@
 #include <cmath>
 #include <thread>
 #include <chrono>
+#include <vector>
+#include <pthread.h>
 using namespace Steinberg;using namespace Steinberg::Vst;
 int main(int argc,char**argv){
  if(argc<3)return 2;bool live=argc>3;std::string error;
@@ -35,16 +37,23 @@ int main(int argc,char**argv){
  component->activateBus(kAudio,kOutput,0,true);component->activateBus(kEvent,kInput,0,true);processor->setProcessing(true);
  float left[4096]{},right[4096]{};float* channels[2]{left,right};AudioBusBuffers bus{};bus.numChannels=2;bus.channelBuffers32=channels;
  EventList events;ProcessData data{};data.processMode=setup.processMode;data.symbolicSampleSize=kSample32;data.numOutputs=1;data.outputs=&bus;data.inputEvents=&events;data.numSamples=256;
- std::ofstream output(argv[2],std::ios::binary);double peak=0,tail=0;int nonzero=0;auto start=std::chrono::steady_clock::now();
- const int total=153600,noteOff=76800;
+ const int total=std::getenv("BRIDGELAB_TEST_FRAMES")?std::atoi(std::getenv("BRIDGELAB_TEST_FRAMES")):153600;
+ if(total<4096||total>48000*120)return 2;const int noteOff=total/2;
+ // Preallocate and touch the complete recording before timed processing.
+ // Disk I/O in this loop can stall the fake host and manufacture dropouts.
+ std::vector<float> recording(total*2);double peak=0,tail=0;int nonzero=0;
+ int qosStatus=0;if(live&&!std::getenv("BRIDGELAB_TEST_NORMAL_PRIORITY"))qosStatus=pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE,0);
+ auto start=std::chrono::steady_clock::now();long long maxLateUs=0;
  for(int pos=0;pos<total;pos+=block){
+ if(live)maxLateUs=std::max(maxLateUs,(long long)std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now()-start).count()-pos*1000000LL/rate);
  data.numSamples=std::min(block,total-pos);events.clear();
  if(pos==0||(pos<=noteOff&&pos+data.numSamples>noteOff)){Event e{};bool on=pos==0;e.type=on?Event::kNoteOnEvent:Event::kNoteOffEvent;e.busIndex=0;e.sampleOffset=on?0:noteOff-pos;if(on){e.noteOn.pitch=60;e.noteOn.velocity=.8;e.noteOn.noteId=1;}else {e.noteOff.pitch=60;e.noteOff.noteId=1;}events.addEvent(e);}
  if(processor->process(data)!=kResultOk)return 1;
- for(int i=0;i<data.numSamples;i++){if(!std::isfinite(left[i])||!std::isfinite(right[i]))return 1;peak=std::max(peak,double(std::abs(left[i])));if(pos>140000)tail=std::max(tail,double(std::abs(left[i])));if(left[i]!=0)nonzero++;output.write((char*)&left[i],4);output.write((char*)&right[i],4);}
+ for(int i=0;i<data.numSamples;i++){if(!std::isfinite(left[i])||!std::isfinite(right[i]))return 1;peak=std::max(peak,double(std::abs(left[i])));if(pos>140000)tail=std::max(tail,double(std::abs(left[i])));if(left[i]!=0)nonzero++;recording[(pos+i)*2]=left[i];recording[(pos+i)*2+1]=right[i];}
  if(live)std::this_thread::sleep_until(start+std::chrono::microseconds((pos+data.numSamples)*1000000LL/rate));
  }
  processor->setProcessing(false);component->setActive(false);component->terminate();
- std::cout<<(live?"Realtime":"Offline")<<" VST3 → Windows plugin: peak="<<peak<<" nonzero="<<nonzero<<" tail="<<tail<<" rate="<<rate<<" block="<<block<<" latency="<<processor->getLatencySamples()<<"\n";
+ std::ofstream output(argv[2],std::ios::binary);output.write(reinterpret_cast<const char*>(recording.data()),recording.size()*sizeof(float));if(!output)return 1;
+ std::cout<<(live?"Realtime":"Offline")<<" VST3 → Windows plugin: peak="<<peak<<" nonzero="<<nonzero<<" tail="<<tail<<" rate="<<rate<<" block="<<block<<" latency="<<processor->getLatencySamples()<<" qos_status="<<qosStatus<<" max_timer_lateness_us="<<maxLateUs<<"\n";
  return peak>.001&&nonzero>1000?0:1;
 }

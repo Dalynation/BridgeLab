@@ -1,0 +1,1146 @@
+[
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "rate": 44100,
+    "block": 64,
+    "frames": 176400,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.192091 nonzero=174349 tail=0.119582 rate=44100 block=64 latency=2048 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=176400 max_slice=512 VST_block=64 rate=44100 realtime_policy=1 latency=2048 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "rate": 44100,
+    "block": 256,
+    "frames": 176400,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.192091 nonzero=174349 tail=0.119582 rate=44100 block=256 latency=2048 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=176400 max_slice=512 VST_block=256 rate=44100 realtime_policy=1 latency=2048 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "rate": 44100,
+    "block": 4096,
+    "frames": 176400,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.192091 nonzero=167693 tail=0.119582 rate=44100 block=4096 latency=8704 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=176400 max_slice=512 VST_block=4096 rate=44100 realtime_policy=1 latency=8704 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "rate": 48000,
+    "block": 64,
+    "frames": 153600,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=64 latency=2048 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=64 rate=48000 realtime_policy=1 latency=2048 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "rate": 48000,
+    "block": 256,
+    "frames": 153600,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=256 rate=48000 realtime_policy=1 latency=2048 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "rate": 48000,
+    "block": 1024,
+    "frames": 153600,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151037 tail=0.0474078 rate=48000 block=1024 latency=2560 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=1024 rate=48000 realtime_policy=1 latency=2560 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "rate": 48000,
+    "block": 4096,
+    "frames": 153600,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.136913 nonzero=144893 tail=0.0455589 rate=48000 block=4096 latency=8704 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=4096 rate=48000 realtime_policy=1 latency=8704 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "rate": 96000,
+    "block": 64,
+    "frames": 384000,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.189979 nonzero=379899 tail=0.189979 rate=96000 block=64 latency=4096 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=384000 max_slice=1115 VST_block=64 rate=96000 realtime_policy=1 latency=4096 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "rate": 192000,
+    "block": 64,
+    "frames": 768000,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.189321 nonzero=759798 tail=0.189321 rate=192000 block=64 latency=8192 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=768000 max_slice=2230 VST_block=64 rate=192000 realtime_policy=1 latency=8192 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "rate": 48000,
+    "block": 64,
+    "frames": 960000,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.390902 nonzero=957949 tail=0.390902 rate=48000 block=64 latency=2048 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=960000 max_slice=558 VST_block=64 rate=48000 realtime_policy=1 latency=2048 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "rate": 192000,
+    "block": 64,
+    "frames": 3840000,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.388565 nonzero=3831798 tail=0.388565 rate=192000 block=64 latency=8192 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=3840000 max_slice=2230 VST_block=64 rate=192000 realtime_policy=1 latency=8192 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "rate": 44100,
+    "block": 64,
+    "frames": 176400,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.277227 nonzero=174352 tail=1.28981e-07 rate=44100 block=64 latency=2048 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=176400 max_slice=512 VST_block=64 rate=44100 realtime_policy=1 latency=2048 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "rate": 44100,
+    "block": 256,
+    "frames": 176400,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.277227 nonzero=174352 tail=1.28981e-07 rate=44100 block=256 latency=2048 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=176400 max_slice=512 VST_block=256 rate=44100 realtime_policy=1 latency=2048 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "rate": 44100,
+    "block": 4096,
+    "frames": 176400,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.277227 nonzero=167696 tail=1.28981e-07 rate=44100 block=4096 latency=8704 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=176400 max_slice=512 VST_block=4096 rate=44100 realtime_policy=1 latency=8704 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "rate": 48000,
+    "block": 64,
+    "frames": 153600,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=64 latency=2048 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=64 rate=48000 realtime_policy=1 latency=2048 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "rate": 48000,
+    "block": 256,
+    "frames": 153600,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=256 latency=2048 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=256 rate=48000 realtime_policy=1 latency=2048 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "rate": 48000,
+    "block": 1024,
+    "frames": 153600,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151040 tail=1.28974e-07 rate=48000 block=1024 latency=2560 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=1024 rate=48000 realtime_policy=1 latency=2560 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "rate": 48000,
+    "block": 4096,
+    "frames": 153600,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.275374 nonzero=144896 tail=1.28974e-07 rate=48000 block=4096 latency=8704 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=4096 rate=48000 realtime_policy=1 latency=8704 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "rate": 96000,
+    "block": 64,
+    "frames": 384000,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.26514 nonzero=379904 tail=0.264785 rate=96000 block=64 latency=4096 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=384000 max_slice=1115 VST_block=64 rate=96000 realtime_policy=1 latency=4096 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "rate": 192000,
+    "block": 64,
+    "frames": 768000,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.259156 nonzero=759808 tail=0.259156 rate=192000 block=64 latency=8192 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=768000 max_slice=2230 VST_block=64 rate=192000 realtime_policy=1 latency=8192 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "rate": 48000,
+    "block": 64,
+    "frames": 960000,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.275531 nonzero=957952 tail=0.275531 rate=48000 block=64 latency=2048 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=960000 max_slice=558 VST_block=64 rate=48000 realtime_policy=1 latency=2048 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "rate": 192000,
+    "block": 64,
+    "frames": 3840000,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.264991 nonzero=3831808 tail=0.264991 rate=192000 block=64 latency=8192 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=3840000 max_slice=2230 VST_block=64 rate=192000 realtime_policy=1 latency=8192 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "rate": 44100,
+    "block": 64,
+    "frames": 176400,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.192091 nonzero=174349 tail=0.119582 rate=44100 block=64 latency=2048 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=176400 max_slice=512 VST_block=64 rate=44100 realtime_policy=1 latency=2048 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "rate": 44100,
+    "block": 256,
+    "frames": 176400,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.192091 nonzero=174349 tail=0.119582 rate=44100 block=256 latency=2048 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=176400 max_slice=512 VST_block=256 rate=44100 realtime_policy=1 latency=2048 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "rate": 44100,
+    "block": 4096,
+    "frames": 176400,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.192091 nonzero=167693 tail=0.119582 rate=44100 block=4096 latency=8704 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=176400 max_slice=512 VST_block=4096 rate=44100 realtime_policy=1 latency=8704 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "rate": 48000,
+    "block": 64,
+    "frames": 153600,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=64 latency=2048 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=64 rate=48000 realtime_policy=1 latency=2048 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "rate": 48000,
+    "block": 256,
+    "frames": 153600,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=256 rate=48000 realtime_policy=1 latency=2048 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "rate": 48000,
+    "block": 1024,
+    "frames": 153600,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151037 tail=0.0474078 rate=48000 block=1024 latency=2560 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=1024 rate=48000 realtime_policy=1 latency=2560 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "rate": 48000,
+    "block": 4096,
+    "frames": 153600,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.136913 nonzero=144893 tail=0.0455589 rate=48000 block=4096 latency=8704 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=4096 rate=48000 realtime_policy=1 latency=8704 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "rate": 96000,
+    "block": 64,
+    "frames": 384000,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.189979 nonzero=379899 tail=0.189979 rate=96000 block=64 latency=4096 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=384000 max_slice=1115 VST_block=64 rate=96000 realtime_policy=1 latency=4096 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "rate": 192000,
+    "block": 64,
+    "frames": 768000,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.189321 nonzero=759798 tail=0.189321 rate=192000 block=64 latency=8192 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=768000 max_slice=2230 VST_block=64 rate=192000 realtime_policy=1 latency=8192 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "rate": 48000,
+    "block": 64,
+    "frames": 960000,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.390902 nonzero=957949 tail=0.390902 rate=48000 block=64 latency=2048 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=960000 max_slice=558 VST_block=64 rate=48000 realtime_policy=1 latency=2048 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "rate": 192000,
+    "block": 64,
+    "frames": 3840000,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.388565 nonzero=3831798 tail=0.388565 rate=192000 block=64 latency=8192 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=3840000 max_slice=2230 VST_block=64 rate=192000 realtime_policy=1 latency=8192 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "rate": 44100,
+    "block": 64,
+    "frames": 176400,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.277227 nonzero=174352 tail=1.28981e-07 rate=44100 block=64 latency=2048 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=176400 max_slice=512 VST_block=64 rate=44100 realtime_policy=1 latency=2048 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "rate": 44100,
+    "block": 256,
+    "frames": 176400,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.277227 nonzero=174352 tail=1.28981e-07 rate=44100 block=256 latency=2048 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=176400 max_slice=512 VST_block=256 rate=44100 realtime_policy=1 latency=2048 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "rate": 44100,
+    "block": 4096,
+    "frames": 176400,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.277227 nonzero=167696 tail=1.28981e-07 rate=44100 block=4096 latency=8704 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=176400 max_slice=512 VST_block=4096 rate=44100 realtime_policy=1 latency=8704 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "rate": 48000,
+    "block": 64,
+    "frames": 153600,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=64 latency=2048 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=64 rate=48000 realtime_policy=1 latency=2048 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "rate": 48000,
+    "block": 256,
+    "frames": 153600,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=256 latency=2048 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=256 rate=48000 realtime_policy=1 latency=2048 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "rate": 48000,
+    "block": 1024,
+    "frames": 153600,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151040 tail=1.28974e-07 rate=48000 block=1024 latency=2560 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=1024 rate=48000 realtime_policy=1 latency=2560 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "rate": 48000,
+    "block": 4096,
+    "frames": 153600,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.275374 nonzero=144896 tail=1.28974e-07 rate=48000 block=4096 latency=8704 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=4096 rate=48000 realtime_policy=1 latency=8704 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "rate": 96000,
+    "block": 64,
+    "frames": 384000,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.26514 nonzero=379904 tail=0.264785 rate=96000 block=64 latency=4096 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=384000 max_slice=1115 VST_block=64 rate=96000 realtime_policy=1 latency=4096 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "rate": 192000,
+    "block": 64,
+    "frames": 768000,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.259156 nonzero=759808 tail=0.259156 rate=192000 block=64 latency=8192 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=768000 max_slice=2230 VST_block=64 rate=192000 realtime_policy=1 latency=8192 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "rate": 48000,
+    "block": 64,
+    "frames": 960000,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.275531 nonzero=957952 tail=0.275531 rate=48000 block=64 latency=2048 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=960000 max_slice=558 VST_block=64 rate=48000 realtime_policy=1 latency=2048 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "rate": 192000,
+    "block": 64,
+    "frames": 3840000,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.264991 nonzero=3831808 tail=0.264991 rate=192000 block=64 latency=8192 qos_status=0",
+        "stderr": "",
+        "transport": "pipe",
+        "native_realtime": false,
+        "transport_matches": true
+      },
+      {
+        "exit": 0,
+        "stdout": "Core Audio callback: frames=3840000 max_slice=2230 VST_block=64 rate=192000 realtime_policy=1 latency=8192 device_output=silence",
+        "stderr": "",
+        "transport": "shared",
+        "native_realtime": true,
+        "transport_matches": true
+      }
+    ]
+  }
+]

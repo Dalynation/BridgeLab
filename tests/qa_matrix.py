@@ -32,6 +32,6 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
 for arch in ['arm64','x86_64']:
  results.append(run('three-instance state recall '+arch,['/usr/bin/arch','-'+arch,source/'build/vst3/bridge-multi',rows[0]['wrapper'],rows[-1]['wrapper']]))
 for row in rows:results.append(run('Steinberg validation '+row['name'],[source/'build/vst3/bin/Release/validator',row['wrapper']],timeout=240))
-report=dict(version='0.9.3',plugins=[r['name'] for r in rows],checks=results)
+report=dict(version='0.9.4',plugins=[r['name'] for r in rows],checks=results)
 (out/'results.json').write_text(json.dumps(report,indent=2)+'\n')
 raise SystemExit(0 if all(r['passed'] for r in results) else 1)

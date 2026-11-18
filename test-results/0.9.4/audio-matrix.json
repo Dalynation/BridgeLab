@@ -1,0 +1,401 @@
+{
+  "version": "0.9.4",
+  "plugins": [
+    "BridgeLab - SQ8L (x86)",
+    "BridgeLab - TAL-NoiseMaker-64 (x64)"
+  ],
+  "checks": [
+    {
+      "test": "BridgeLab - SQ8L (x86) arm64 zero-sample-note",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 4.05,
+      "stdout": "zero-sample-note peak=0.127078 latency=2048",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - SQ8L (x86) arm64 repeated-activation",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 0.921,
+      "stdout": "repeated-activation peak=0.0846561 latency=2048",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - SQ8L (x86) arm64 prefetch",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 2.034,
+      "stdout": "prefetch peak=0.149849 latency=2048",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - SQ8L (x86) arm64 control-pressure",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 3.748,
+      "stdout": "captures=273 audible_blocks=479/479 control-pressure peak=0.1 latency=2048",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - TAL-NoiseMaker-64 (x64) arm64 zero-sample-note",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 2.679,
+      "stdout": "zero-sample-note peak=0.275374 latency=2048",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - TAL-NoiseMaker-64 (x64) arm64 repeated-activation",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 0.829,
+      "stdout": "repeated-activation peak=0.274598 latency=2048",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - TAL-NoiseMaker-64 (x64) arm64 prefetch",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 1.287,
+      "stdout": "prefetch peak=0.275376 latency=2048",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - TAL-NoiseMaker-64 (x64) arm64 control-pressure",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 3.428,
+      "stdout": "captures=310 audible_blocks=479/479 control-pressure peak=0.1 latency=2048",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - SQ8L (x86) x86_64 zero-sample-note",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 3.215,
+      "stdout": "zero-sample-note peak=0.127078 latency=2048",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - SQ8L (x86) x86_64 repeated-activation",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 0.967,
+      "stdout": "repeated-activation peak=0.0846561 latency=2048",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - SQ8L (x86) x86_64 prefetch",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 2.354,
+      "stdout": "prefetch peak=0.149849 latency=2048",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - SQ8L (x86) x86_64 control-pressure",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 3.687,
+      "stdout": "captures=293 audible_blocks=479/479 control-pressure peak=0.1 latency=2048",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - TAL-NoiseMaker-64 (x64) x86_64 zero-sample-note",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 3.027,
+      "stdout": "zero-sample-note peak=0.275374 latency=2048",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - TAL-NoiseMaker-64 (x64) x86_64 repeated-activation",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 0.901,
+      "stdout": "repeated-activation peak=0.274598 latency=2048",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - TAL-NoiseMaker-64 (x64) x86_64 prefetch",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 1.38,
+      "stdout": "prefetch peak=0.275376 latency=2048",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - TAL-NoiseMaker-64 (x64) x86_64 control-pressure",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 3.464,
+      "stdout": "captures=326 audible_blocks=479/479 control-pressure peak=0.1 latency=2048",
+      "stderr": ""
+    },
+    {
+      "test": "ffbb70884a6cd2af-arm64-64-offline",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 3.501,
+      "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=64 latency=2048 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "ffbb70884a6cd2af-arm64-64-live",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 4.072,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=64 latency=2048 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - SQ8L (x86) arm64 64 live/offline exact PCM",
+      "passed": true
+    },
+    {
+      "test": "ffbb70884a6cd2af-arm64-256-offline",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 1.887,
+      "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "ffbb70884a6cd2af-arm64-256-live",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 4.211,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - SQ8L (x86) arm64 256 live/offline exact PCM",
+      "passed": true
+    },
+    {
+      "test": "ffbb70884a6cd2af-arm64-1024-offline",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 1.52,
+      "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151037 tail=0.0474078 rate=48000 block=1024 latency=2560 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "ffbb70884a6cd2af-arm64-1024-live",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 4.144,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151037 tail=0.0474078 rate=48000 block=1024 latency=2560 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - SQ8L (x86) arm64 1024 live/offline exact PCM",
+      "passed": true
+    },
+    {
+      "test": "ffbb70884a6cd2af-arm64-4096-offline",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 1.614,
+      "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.136913 nonzero=144893 tail=0.0455589 rate=48000 block=4096 latency=8704 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "ffbb70884a6cd2af-arm64-4096-live",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 4.12,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=144893 tail=0.0455589 rate=48000 block=4096 latency=8704 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - SQ8L (x86) arm64 4096 live/offline exact PCM",
+      "passed": true
+    },
+    {
+      "test": "a4def1870e48ca34-arm64-64-offline",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 2.741,
+      "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=64 latency=2048 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "a4def1870e48ca34-arm64-64-live",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 3.865,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=64 latency=2048 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - TAL-NoiseMaker-64 (x64) arm64 64 live/offline exact PCM",
+      "passed": true
+    },
+    {
+      "test": "a4def1870e48ca34-arm64-256-offline",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 0.649,
+      "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=256 latency=2048 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "a4def1870e48ca34-arm64-256-live",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 3.859,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=256 latency=2048 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - TAL-NoiseMaker-64 (x64) arm64 256 live/offline exact PCM",
+      "passed": true
+    },
+    {
+      "test": "a4def1870e48ca34-arm64-1024-offline",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 0.699,
+      "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151040 tail=1.28974e-07 rate=48000 block=1024 latency=2560 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "a4def1870e48ca34-arm64-1024-live",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 3.897,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151040 tail=1.28974e-07 rate=48000 block=1024 latency=2560 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - TAL-NoiseMaker-64 (x64) arm64 1024 live/offline exact PCM",
+      "passed": true
+    },
+    {
+      "test": "a4def1870e48ca34-arm64-4096-offline",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 0.68,
+      "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.275374 nonzero=144896 tail=1.28974e-07 rate=48000 block=4096 latency=8704 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "a4def1870e48ca34-arm64-4096-live",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 3.938,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.275374 nonzero=144896 tail=1.28974e-07 rate=48000 block=4096 latency=8704 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - TAL-NoiseMaker-64 (x64) arm64 4096 live/offline exact PCM",
+      "passed": true
+    },
+    {
+      "test": "ffbb70884a6cd2af-x86_64-256-offline",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 3.641,
+      "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "ffbb70884a6cd2af-x86_64-256-live",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 4.276,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151293 tail=0.0479358 rate=48000 block=256 latency=2048 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - SQ8L (x86) x86_64 256 live/offline exact PCM",
+      "passed": false
+    },
+    {
+      "test": "a4def1870e48ca34-x86_64-256-offline",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 2.901,
+      "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=256 latency=2048 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "a4def1870e48ca34-x86_64-256-live",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 3.903,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=256 latency=2048 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "BridgeLab - TAL-NoiseMaker-64 (x64) x86_64 256 live/offline exact PCM",
+      "passed": true
+    },
+    {
+      "test": "four simultaneous live clients 0",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 6.364,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "four simultaneous live clients 1",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 3.936,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=256 latency=2048 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "four simultaneous live clients 2",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 6.351,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "four simultaneous live clients 3",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 3.942,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=256 latency=2048 qos_status=0",
+      "stderr": ""
+    },
+    {
+      "test": "three-instance state recall arm64",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 6.869,
+      "stdout": "Distinct identities: BridgeLab - SQ8L (x86) / BridgeLab - TAL-NoiseMaker-64 (x64)\nShared editors created, three active instances, independent sounds: PASS\nThree-instance save/recreate/audio recall, including foreign user path: PASS",
+      "stderr": ""
+    },
+    {
+      "test": "three-instance state recall x86_64",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 6.462,
+      "stdout": "Distinct identities: BridgeLab - SQ8L (x86) / BridgeLab - TAL-NoiseMaker-64 (x64)\nShared editors created, three active instances, independent sounds: PASS\nThree-instance save/recreate/audio recall, including foreign user path: PASS",
+      "stderr": ""
+    },
+    {
+      "test": "Steinberg validation BridgeLab - SQ8L (x86)",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 28.458,
+      "stdout": "* Loading module...\n\n\t<workspace>/work/permission-fix/wrappers/BridgeLab-SQ8L-ffbb70884a6cd2af.vst3\n\n* Check valid bundle structure...\n\n* Scanning classes...\n\n  Factory Info:\n\tvendor = BridgeLab\n\turl = https://example.invalid\n\temail = \n\n  Class Info 0:\n\tname = BridgeLab - SQ8L (x86)\n\tcategory = Audio Module Class\n\tsubCategories = Instrument|Synth\n\tversion = 0.9.4\n\tsdkVersion = VST 3.8.1\n\tcid = BAFFD1AE199148C9F1AC80FB3CDE5380\n\n  Class Info 1:\n\tname = BridgeLab Controller\n\tcategory = Component Controller Class\n\tsubCategories = \n\tversion = 0.9.4\n\tsdkVersion = VST 3.8.1\n\tcid = 0624C85A0268AFCBEBDC9FC8E404990C\n\n* Checking snapshots...\n\nInfo: No snapshots in Bundle.\n\n* Creating tests...\n\n* Running tests...\n\n-------------------------------------------------------------\nTestSuite : BridgeLab - SQ8L (x86)\n-------------------------------------------------------------\n\n-------------------------------------------------------------\nTestSuite : General Tests\n-------------------------------------------------------------\n\n[Scan Editor Classes]\nInfo:  ===Scan Editor Classes ====================================\nInfo:  This component has an edit controller class\nInfo:     Controller CID: {0624C85A-0268-AFCB-EBDC-9FC8E404990C}\n[Succeeded]\n\n[Scan Buses]\nInfo:  ===Scan Buses ====================================\nInfo:  => Audio Buses: [0 In(s) => 1 Out(s)]\nInfo:       Out[0]: \"Stereo\" (Main-Default Active) \nInfo:  => Event Buses: [1 In(s) => 0 Out(s)]\nInfo:       In [0]: \"MIDI\" (Main-Default Active) \n[Succeeded]\n\n[Scan Parameters]\nInfo:  ===Scan Parameters ====================================\nInfo:  This component exports 1 parameter(s)\nInfo:     Parameter 000 (id=0): [title=\"Preset\"] [unit=\"\"] [type = Discrete, default = 0.000000, unit = 0]\nInfo:  No bypass parameter found. This is an instrument.\n[Succeeded]\n\n[MIDI Mapping]\nInfo:  ===MIDI Mapping ====================================\nInfo:  No MIDI Mapping interface supplied!\n[Succeeded]\n\n[MIDI Learn]\nInfo:  ===MIDI Learn ====================================\nInfo:  No MIDI Learn interface supplied!\n[Succeeded]\n\n[Scan Units]\nInfo:  ===Scan Units ====================================\nInfo:  No units found, while controller implements IUnitInfo !!!\n[Succeeded]\n\n[Scan Programs]\nInfo:  ===Scan Programs ====================================\nInfo:  This component does not export any programs.\n[Succeeded]\n\n[Terminate/Initialize]\nInfo:  ===Terminate/Initialize ====================================\n[Succeeded]\n\n[Check Unit Structure]\nInfo:  ===Check Unit Structure ====================================\nInfo:  No units found, while controller implements IUnitInfo !!!\nInfo:  All units have valid parent IDs.\n[Succeeded]\n\n[Valid State Transition 32bits]\nInfo:  ===Valid State Transition 32bits ====================================\n[Succeeded]\n\n[Valid State Transition 64bits]\nInfo:  ===Valid State Transition 64bits ====================================\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Bus Consistency]\nInfo:  ===Bus Consistency ====================================\n[Succeeded]\n\n[Bus Activation]\nInfo:  ===Bus Activation ====================================\nInfo:     Bus Activation: Output Audio Bus (0) (kMain)\nInfo:     Bus Activation: Input Event Bus (0) (kMain)\n[Succeeded]\n\n[Check Audio Bus Arrangement]\nInfo:  ===Check Audio Bus Arrangement ====================================\nInfo:     Check Output Audio Bus Arrangement (0)\n[Succeeded]\n\n[SideChain Arrangement]\nInfo:  ===SideChain Arrangement ====================================\n[Succeeded]\n\n[Suspend/Resume]\nInfo:  ===Suspend/Resume ====================================\n[Succeeded]\n\n[Note Expression]\nInfo:  ===Note Expression ====================================\nInfo:  No Note Expression interface supplied!\n[Succeeded]\n\n[Keyswitch]\nInfo:  ===Keyswitch ====================================\nInfo:  No Keyswitch interface supplied!\n[Succeeded]\n\n[ProcessContext Requirements]\nInfo:  ===ProcessContext Requirements ====================================\nInfo:  ProcessContextRequirements:\nInfo:   - None\n[Succeeded]\n\n-------------------------------------------------------------\nTestSuite : Single Precision (32 bit) Tests\n-------------------------------------------------------------\n\n[Process Test]\n[Succeeded]\n\n[Process function running in another thread]\nInfo:  ===Process function running in another thread ====================================\n[Succeeded]\n\n[Silence Flags]\nInfo:  ===Silence Flags ====================================\n[Succeeded]\n\n[Silence Processing]\nInfo:  ===Silence Processing ====================================\n[Succeeded]\n\n[Parameters Flush (no Buffer)]\nInfo:  ===Parameters Flush (no Buffer) ====================================\n[Succeeded]\n\n[Parameters Flush 2 (only numChannel==0)]\nInfo:  ===Parameters Flush 2 (only numChannel==0) ====================================\n[Succeeded]\n\n[Parameters Flush 2 (no Buffer, no parameter change)]\nInfo:  ===Parameters Flush 2 (no Buffer, no parameter change) ====================================\n[Succeeded]\n\n[Variable Block Size]\nInfo:  ===Variable Block Size ====================================\n[Succeeded]\n\n[Process Format]\nInfo:  ===Process Format ====================================\nInfo:  ***Tested Sample Rates***\nERROR: IAudioProcessor::setupProcessing (..) failed for samplerate 22050.000 Hz! \nERROR: IAudioProcessor::setupProcessing (..) failed for samplerate 32000.000 Hz! \nInfo:        44100 Hz - processed successfully!\nInfo:        48000 Hz - processed successfully!\nInfo:        88200 Hz - processed successfully!\nInfo:        96000 Hz - processed successfully!\nInfo:       192000 Hz - processed successfully!\nERROR: IAudioProcessor::setupProcessing (..) failed for samplerate 384000.000 Hz! \nERROR: IAudioProcessor::setupProcessing (..) failed for samplerate 1234.568 Hz! \nERROR: IAudioProcessor::setupProcessing (..) failed for samplerate 12345.678 Hz! \nInfo:    123456.78 Hz - processed successfully!\nERROR: IAudioProcessor::setupProcessing (..) failed for samplerate 1234567.800 Hz! \n[Succeeded]\n\n[Parameter Bypass persistence]\nInfo:  ===Parameter Bypass persistence ====================================\nInfo:  This plugin does not have a bypass parameter!!!\n[Succeeded]\n\n[In: Stereo: 2 Channels, Out: Stereo: 2 Channels]\nInfo:  ===In: Stereo: 2 Channels, Out: Stereo: 2 Channels ====================================\n[Succeeded]\n\n[In: Mono: 1 Channels, Out: Mono: 1 Channels]\nInfo:  ===In: Mono: 1 Channels, Out: Mono: 1 Channels ====================================\nInfo:      Mono Output-SpeakerArrangement is not supported. Plug-in suggests: Stereo.\n[Succeeded]\n\n[Accuracy: Block, 1 Parameters, Change every100 Samples]\nInfo:  ===Accuracy: Block, 1 Parameters, Change every100 Samples ====================================\n[Succeeded]\n\n[Accuracy: Sample, 1 Parameters, Change every100 Samples]\nInfo:  ===Accuracy: Sample, 1 Parameters, Change every100 Samples ====================================\nInfo:     Not all points have been read via IParameterChanges\nInfo:     Not all points have been read via IParameterChanges\n[Succeeded]\n\n-------------------------------------------------------------\nTestSuite : Double Precision (64 bit) Tests\n-------------------------------------------------------------\n\n[Process Test]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Process function running in another thread]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Silence Flags]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Silence Processing]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Parameters Flush (no Buffer)]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Parameters Flush 2 (only numChannel==0)]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Parameters Flush 2 (no Buffer, no parameter change)]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Variable Block Size]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Process Format]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Parameter Bypass persistence]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[In: Stereo: 2 Channels, Out: Stereo: 2 Channels]\nInfo:  ===In: Stereo: 2 Channels, Out: Stereo: 2 Channels ====================================\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[In: Mono: 1 Channels, Out: Mono: 1 Channels]\nInfo:  ===In: Mono: 1 Channels, Out: Mono: 1 Channels ====================================\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Accuracy: Block, 1 Parameters, Change every100 Samples]\nInfo:  ===Accuracy: Block, 1 Parameters, Change every100 Samples ====================================\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Accuracy: Sample, 1 Parameters, Change every100 Samples]\nInfo:  ===Accuracy: Sample, 1 Parameters, Change every100 Samples ====================================\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n-------------------------------------------------------------\nResult: 47 tests passed, 0 tests failed\n-------------------------------------------------------------",
+      "stderr": ""
+    },
+    {
+      "test": "Steinberg validation BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "passed": true,
+      "exit_code": 0,
+      "seconds": 23.183,
+      "stdout": "* Loading module...\n\n\t<workspace>/work/permission-fix/wrappers/BridgeLab-TAL-NoiseMaker-64-a4def1870e48ca34.vst3\n\n* Check valid bundle structure...\n\n* Scanning classes...\n\n  Factory Info:\n\tvendor = BridgeLab\n\turl = https://example.invalid\n\temail = \n\n  Class Info 0:\n\tname = BridgeLab - TAL-NoiseMaker-64 (x64)\n\tcategory = Audio Module Class\n\tsubCategories = Instrument|Synth\n\tversion = 0.9.4\n\tsdkVersion = VST 3.8.1\n\tcid = 65419A1ADBA2E3438E97BC5885CF9ADF\n\n  Class Info 1:\n\tname = BridgeLab Controller\n\tcategory = Component Controller Class\n\tsubCategories = \n\tversion = 0.9.4\n\tsdkVersion = VST 3.8.1\n\tcid = 8F8F2A7BE6C6388FFDC2DDC7037DD3C6\n\n* Checking snapshots...\n\nInfo: No snapshots in Bundle.\n\n* Creating tests...\n\n* Running tests...\n\n-------------------------------------------------------------\nTestSuite : BridgeLab - TAL-NoiseMaker-64 (x64)\n-------------------------------------------------------------\n\n-------------------------------------------------------------\nTestSuite : General Tests\n-------------------------------------------------------------\n\n[Scan Editor Classes]\nInfo:  ===Scan Editor Classes ====================================\nInfo:  This component has an edit controller class\nInfo:     Controller CID: {8F8F2A7B-E6C6-388F-FDC2-DDC7037DD3C6}\n[Succeeded]\n\n[Scan Buses]\nInfo:  ===Scan Buses ====================================\nInfo:  => Audio Buses: [0 In(s) => 1 Out(s)]\nInfo:       Out[0]: \"Stereo\" (Main-Default Active) \nInfo:  => Event Buses: [1 In(s) => 0 Out(s)]\nInfo:       In [0]: \"MIDI\" (Main-Default Active) \n[Succeeded]\n\n[Scan Parameters]\nInfo:  ===Scan Parameters ====================================\nInfo:  This component exports 1 parameter(s)\nInfo:     Parameter 000 (id=0): [title=\"Preset\"] [unit=\"\"] [type = Discrete, default = 0.000000, unit = 0]\nInfo:  No bypass parameter found. This is an instrument.\n[Succeeded]\n\n[MIDI Mapping]\nInfo:  ===MIDI Mapping ====================================\nInfo:  No MIDI Mapping interface supplied!\n[Succeeded]\n\n[MIDI Learn]\nInfo:  ===MIDI Learn ====================================\nInfo:  No MIDI Learn interface supplied!\n[Succeeded]\n\n[Scan Units]\nInfo:  ===Scan Units ====================================\nInfo:  No units found, while controller implements IUnitInfo !!!\n[Succeeded]\n\n[Scan Programs]\nInfo:  ===Scan Programs ====================================\nInfo:  This component does not export any programs.\n[Succeeded]\n\n[Terminate/Initialize]\nInfo:  ===Terminate/Initialize ====================================\n[Succeeded]\n\n[Check Unit Structure]\nInfo:  ===Check Unit Structure ====================================\nInfo:  No units found, while controller implements IUnitInfo !!!\nInfo:  All units have valid parent IDs.\n[Succeeded]\n\n[Valid State Transition 32bits]\nInfo:  ===Valid State Transition 32bits ====================================\n[Succeeded]\n\n[Valid State Transition 64bits]\nInfo:  ===Valid State Transition 64bits ====================================\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Bus Consistency]\nInfo:  ===Bus Consistency ====================================\n[Succeeded]\n\n[Bus Activation]\nInfo:  ===Bus Activation ====================================\nInfo:     Bus Activation: Output Audio Bus (0) (kMain)\nInfo:     Bus Activation: Input Event Bus (0) (kMain)\n[Succeeded]\n\n[Check Audio Bus Arrangement]\nInfo:  ===Check Audio Bus Arrangement ====================================\nInfo:     Check Output Audio Bus Arrangement (0)\n[Succeeded]\n\n[SideChain Arrangement]\nInfo:  ===SideChain Arrangement ====================================\n[Succeeded]\n\n[Suspend/Resume]\nInfo:  ===Suspend/Resume ====================================\n[Succeeded]\n\n[Note Expression]\nInfo:  ===Note Expression ====================================\nInfo:  No Note Expression interface supplied!\n[Succeeded]\n\n[Keyswitch]\nInfo:  ===Keyswitch ====================================\nInfo:  No Keyswitch interface supplied!\n[Succeeded]\n\n[ProcessContext Requirements]\nInfo:  ===ProcessContext Requirements ====================================\nInfo:  ProcessContextRequirements:\nInfo:   - None\n[Succeeded]\n\n-------------------------------------------------------------\nTestSuite : Single Precision (32 bit) Tests\n-------------------------------------------------------------\n\n[Process Test]\n[Succeeded]\n\n[Process function running in another thread]\nInfo:  ===Process function running in another thread ====================================\n[Succeeded]\n\n[Silence Flags]\nInfo:  ===Silence Flags ====================================\n[Succeeded]\n\n[Silence Processing]\nInfo:  ===Silence Processing ====================================\n[Succeeded]\n\n[Parameters Flush (no Buffer)]\nInfo:  ===Parameters Flush (no Buffer) ====================================\n[Succeeded]\n\n[Parameters Flush 2 (only numChannel==0)]\nInfo:  ===Parameters Flush 2 (only numChannel==0) ====================================\n[Succeeded]\n\n[Parameters Flush 2 (no Buffer, no parameter change)]\nInfo:  ===Parameters Flush 2 (no Buffer, no parameter change) ====================================\n[Succeeded]\n\n[Variable Block Size]\nInfo:  ===Variable Block Size ====================================\n[Succeeded]\n\n[Process Format]\nInfo:  ===Process Format ====================================\nInfo:  ***Tested Sample Rates***\nERROR: IAudioProcessor::setupProcessing (..) failed for samplerate 22050.000 Hz! \nERROR: IAudioProcessor::setupProcessing (..) failed for samplerate 32000.000 Hz! \nInfo:        44100 Hz - processed successfully!\nInfo:        48000 Hz - processed successfully!\nInfo:        88200 Hz - processed successfully!\nInfo:        96000 Hz - processed successfully!\nInfo:       192000 Hz - processed successfully!\nERROR: IAudioProcessor::setupProcessing (..) failed for samplerate 384000.000 Hz! \nERROR: IAudioProcessor::setupProcessing (..) failed for samplerate 1234.568 Hz! \nERROR: IAudioProcessor::setupProcessing (..) failed for samplerate 12345.678 Hz! \nInfo:    123456.78 Hz - processed successfully!\nERROR: IAudioProcessor::setupProcessing (..) failed for samplerate 1234567.800 Hz! \n[Succeeded]\n\n[Parameter Bypass persistence]\nInfo:  ===Parameter Bypass persistence ====================================\nInfo:  This plugin does not have a bypass parameter!!!\n[Succeeded]\n\n[In: Stereo: 2 Channels, Out: Stereo: 2 Channels]\nInfo:  ===In: Stereo: 2 Channels, Out: Stereo: 2 Channels ====================================\n[Succeeded]\n\n[In: Mono: 1 Channels, Out: Mono: 1 Channels]\nInfo:  ===In: Mono: 1 Channels, Out: Mono: 1 Channels ====================================\nInfo:      Mono Output-SpeakerArrangement is not supported. Plug-in suggests: Stereo.\n[Succeeded]\n\n[Accuracy: Block, 1 Parameters, Change every100 Samples]\nInfo:  ===Accuracy: Block, 1 Parameters, Change every100 Samples ====================================\n[Succeeded]\n\n[Accuracy: Sample, 1 Parameters, Change every100 Samples]\nInfo:  ===Accuracy: Sample, 1 Parameters, Change every100 Samples ====================================\nInfo:     Not all points have been read via IParameterChanges\nInfo:     Not all points have been read via IParameterChanges\n[Succeeded]\n\n-------------------------------------------------------------\nTestSuite : Double Precision (64 bit) Tests\n-------------------------------------------------------------\n\n[Process Test]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Process function running in another thread]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Silence Flags]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Silence Processing]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Parameters Flush (no Buffer)]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Parameters Flush 2 (only numChannel==0)]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Parameters Flush 2 (no Buffer, no parameter change)]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Variable Block Size]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Process Format]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Parameter Bypass persistence]\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[In: Stereo: 2 Channels, Out: Stereo: 2 Channels]\nInfo:  ===In: Stereo: 2 Channels, Out: Stereo: 2 Channels ====================================\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[In: Mono: 1 Channels, Out: Mono: 1 Channels]\nInfo:  ===In: Mono: 1 Channels, Out: Mono: 1 Channels ====================================\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Accuracy: Block, 1 Parameters, Change every100 Samples]\nInfo:  ===Accuracy: Block, 1 Parameters, Change every100 Samples ====================================\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n[Accuracy: Sample, 1 Parameters, Change every100 Samples]\nInfo:  ===Accuracy: Sample, 1 Parameters, Change every100 Samples ====================================\nInfo:  64bit Audio Processing not supported.\n[Succeeded]\n\n-------------------------------------------------------------\nResult: 47 tests passed, 0 tests failed\n-------------------------------------------------------------",
+      "stderr": ""
+    }
+  ]
+}

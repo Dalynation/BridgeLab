@@ -1,0 +1,53 @@
+{
+  "results": [
+    {
+      "test": "packaged upgrade and two DLL imports preserve identities and install current payload",
+      "passed": true
+    },
+    {
+      "test": "installed_editor.py",
+      "passed": true,
+      "exit": 0
+    },
+    {
+      "test": "editor_lifecycle_qa.py",
+      "passed": true,
+      "exit": 0
+    },
+    {
+      "test": "device_interaction.py",
+      "passed": true,
+      "exit": 0
+    },
+    {
+      "test": "12 Rosetta timer-host exact PCM follow-ups",
+      "passed": true
+    }
+  ],
+  "cleanup": [
+    {
+      "arch": "x86",
+      "option": "-k",
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "arch": "x86",
+      "option": "-w",
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "arch": "x64",
+      "option": "-k",
+      "exit": 1,
+      "stderr": ""
+    },
+    {
+      "arch": "x64",
+      "option": "-w",
+      "exit": 0,
+      "stderr": ""
+    }
+  ]
+}

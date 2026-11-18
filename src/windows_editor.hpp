@@ -14,7 +14,7 @@ struct EditorHost {
  Effect* effect;std::recursive_mutex mutex;HWND window=nullptr;bool opened=false,standalone=false,embedded=false;
  HANDLE frameFile=INVALID_HANDLE_VALUE,frameMapping=nullptr;uint8_t* frameMemory=nullptr;DWORD lastFrame=0;uint32_t idleCalls=0;HWND dragTarget=nullptr;std::atomic<bool> quit{false};std::atomic<int> note{0};std::string statePath;
  explicit EditorHost(Effect* e):effect(e){}
- std::mutex jobMutex;std::condition_variable jobDone;
+ std::mutex requestMutex;std::mutex jobMutex;std::condition_variable jobDone;
  struct Control {uint32_t command;std::vector<uint8_t> input,output;bool ok=false,done=false;uint32_t program=0;bool syncProgram=false;};
  Control* pending=nullptr;
  static constexpr UINT controlMessage=WM_APP+11;
@@ -98,7 +98,7 @@ switch(c->command){
  case SetParameter:if(c->input.size()==8&&s->effect->setParameter){uint32_t index;float value;std::memcpy(&index,c->input.data(),4);std::memcpy(&value,c->input.data()+4,4);if(index<uint32_t(s->effect->parameters)&&std::isfinite(value)){s->effect->setParameter(s->effect,index,value);c->ok=true;}}break;
  }
  }
- void request(Control& control){std::unique_lock<std::mutex> lock(jobMutex);pending=&control;jobDone.wait(lock,[&]{return control.done;});}
+ void request(Control& control){std::lock_guard<std::mutex> serialize(requestMutex);std::unique_lock<std::mutex> lock(jobMutex);pending=&control;jobDone.wait(lock,[&]{return control.done;});}
  bool create(const char* title){WNDCLASSA cls{};cls.lpfnWndProc=wndproc;cls.hInstance=GetModuleHandle(nullptr);cls.lpszClassName="BridgeLabEditorHost";cls.hCursor=LoadCursor(nullptr,IDC_ARROW);RegisterClassA(&cls);window=CreateWindowExA(0,cls.lpszClassName,"BridgeLab - Windows Plugin Editor",WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX,CW_USEDEFAULT,CW_USEDEFAULT,640,480,nullptr,nullptr,cls.hInstance,this);if(window)SetWindowTextA(window,title);return window;}
  void pump(){
  Control* job=nullptr;{std::lock_guard<std::mutex> lock(jobMutex);job=pending;}

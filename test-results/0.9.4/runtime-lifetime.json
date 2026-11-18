@@ -1,0 +1,151 @@
+{
+  "before": 7,
+  "after": 7,
+  "trials": [
+    {
+      "arch": "arm64",
+      "plugin": "BridgeLab - SQ8L (x86)",
+      "trial": 0,
+      "exact": true,
+      "helper_count": 6,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=64 latency=2048 qos_status=0\n",
+      "stderr": ""
+    },
+    {
+      "arch": "arm64",
+      "plugin": "BridgeLab - SQ8L (x86)",
+      "trial": 1,
+      "exact": true,
+      "helper_count": 6,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=64 latency=2048 qos_status=0\n",
+      "stderr": ""
+    },
+    {
+      "arch": "arm64",
+      "plugin": "BridgeLab - SQ8L (x86)",
+      "trial": 2,
+      "exact": true,
+      "helper_count": 6,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=64 latency=2048 qos_status=0\n",
+      "stderr": ""
+    },
+    {
+      "arch": "arm64",
+      "plugin": "BridgeLab - SQ8L (x86)",
+      "trial": 3,
+      "exact": true,
+      "helper_count": 6,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=64 latency=2048 qos_status=0\n",
+      "stderr": ""
+    },
+    {
+      "arch": "arm64",
+      "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "trial": 0,
+      "exact": true,
+      "helper_count": 7,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=64 latency=2048 qos_status=0\n",
+      "stderr": ""
+    },
+    {
+      "arch": "arm64",
+      "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "trial": 1,
+      "exact": true,
+      "helper_count": 7,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=64 latency=2048 qos_status=0\n",
+      "stderr": ""
+    },
+    {
+      "arch": "arm64",
+      "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "trial": 2,
+      "exact": true,
+      "helper_count": 7,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=64 latency=2048 qos_status=0\n",
+      "stderr": ""
+    },
+    {
+      "arch": "arm64",
+      "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "trial": 3,
+      "exact": true,
+      "helper_count": 7,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=64 latency=2048 qos_status=0\n",
+      "stderr": ""
+    },
+    {
+      "arch": "x86_64",
+      "plugin": "BridgeLab - SQ8L (x86)",
+      "trial": 0,
+      "exact": true,
+      "helper_count": 6,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=64 latency=2048 qos_status=0\n",
+      "stderr": ""
+    },
+    {
+      "arch": "x86_64",
+      "plugin": "BridgeLab - SQ8L (x86)",
+      "trial": 1,
+      "exact": true,
+      "helper_count": 6,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=64 latency=2048 qos_status=0\n",
+      "stderr": ""
+    },
+    {
+      "arch": "x86_64",
+      "plugin": "BridgeLab - SQ8L (x86)",
+      "trial": 2,
+      "exact": true,
+      "helper_count": 6,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=64 latency=2048 qos_status=0\n",
+      "stderr": ""
+    },
+    {
+      "arch": "x86_64",
+      "plugin": "BridgeLab - SQ8L (x86)",
+      "trial": 3,
+      "exact": true,
+      "helper_count": 6,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=64 latency=2048 qos_status=0\n",
+      "stderr": ""
+    },
+    {
+      "arch": "x86_64",
+      "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "trial": 0,
+      "exact": true,
+      "helper_count": 7,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=64 latency=2048 qos_status=0\n",
+      "stderr": ""
+    },
+    {
+      "arch": "x86_64",
+      "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "trial": 1,
+      "exact": true,
+      "helper_count": 7,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=64 latency=2048 qos_status=0\n",
+      "stderr": ""
+    },
+    {
+      "arch": "x86_64",
+      "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "trial": 2,
+      "exact": true,
+      "helper_count": 7,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=64 latency=2048 qos_status=0\n",
+      "stderr": ""
+    },
+    {
+      "arch": "x86_64",
+      "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "trial": 3,
+      "exact": true,
+      "helper_count": 7,
+      "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.275374 nonzero=151552 tail=1.28974e-07 rate=48000 block=64 latency=2048 qos_status=0\n",
+      "stderr": ""
+    }
+  ],
+  "passed": true
+}

@@ -1,5 +1,6 @@
 #include "vst2_abi.hpp"
 #include "wire.hpp"
+#include "shared_audio.hpp"
 #include <cstdio>
 #include <cstdlib>
 #include <algorithm>
@@ -12,6 +13,7 @@
 #include <thread>
 #include <atomic>
 #include <mutex>
+#include <chrono>
 #ifdef _WIN32
 #include <windows.h>
 #include <fcntl.h>
@@ -36,9 +38,9 @@ static intptr_t BCALL host(Effect*,int32_t op,int32_t,intptr_t,void* ptr,float) 
 static void u16(std::ostream& o,uint16_t v){o.put(v&255);o.put(v>>8);}
 static void u32(std::ostream& o,uint32_t v){u16(o,v&65535);u16(o,v>>16);}
 int main(int argc,char** argv){
- if(argc!=3 && argc!=5){std::cerr<<"Usage: runner plugin-path output.wav\n";return 2;}
- const bool serve=argc==5 && std::string(argv[2])=="--serve";
- if(argc==5 && !serve)return 2;
+ if(argc!=3 && argc!=5 && argc!=6){std::cerr<<"Usage: runner plugin-path output.wav\n";return 2;}
+ const bool serve=(argc==5||argc==6) && std::string(argv[2])=="--serve";
+ if((argc==5||argc==6) && !serve)return 2;
  if(serve){processLevel=std::string(argv[4])=="offline"?4:2;rate=std::atoi(argv[3]);if(rate<44100||rate>192000)return 2;}
  try{
 #ifdef _WIN32
@@ -71,16 +73,50 @@ int main(int argc,char** argv){
  _setmode(_fileno(stdin),_O_BINARY);_setmode(_fileno(stdout),_O_BINARY);
 #endif
  uint32_t hello[3]={wireMagic,uint32_t(e->programs),uint32_t(e->outputs)};
- uint32_t program=0;
+ std::atomic<uint32_t> program{0};
 #ifdef _WIN32
  EditorHost editor(e);
  if(!editor.create("BridgeLab - Original Windows Plugin Editor"))throw std::runtime_error("Cannot create editor host");
 #endif
- fwrite(hello,sizeof(hello),1,stdout);fflush(stdout);
+ SharedAudio* shared=nullptr;
+#ifdef _WIN32
+ HANDLE audioFile=INVALID_HANDLE_VALUE,audioMapping=nullptr;
+ if(argc==6){
+  audioFile=CreateFileA(argv[5],GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,nullptr,OPEN_EXISTING,0,nullptr);
+  LARGE_INTEGER size{};if(audioFile!=INVALID_HANDLE_VALUE&&GetFileSizeEx(audioFile,&size)&&size.QuadPart==sizeof(SharedAudio))audioMapping=CreateFileMappingA(audioFile,nullptr,PAGE_READWRITE,0,0,nullptr);
+  if(audioMapping)shared=(SharedAudio*)MapViewOfFile(audioMapping,FILE_MAP_ALL_ACCESS,0,0,sizeof(SharedAudio));
+  if(!shared||shared->magic!=sharedAudioMagic||shared->version!=1||shared->frames!=quantum||shared->slots!=sharedAudioSlots)throw std::runtime_error("Cannot map shared audio transport");
+ }
+#endif
+ if(!shared){fwrite(hello,sizeof(hello),1,stdout);fflush(stdout);}
  std::atomic<bool> done{false};
+ const bool measure=std::getenv("BRIDGELAB_TIMING")!=nullptr;
+ auto renderAudio=[&](const WireRequest& request){
+ if(request.magic!=wireMagic||request.count>maxMidi)throw std::runtime_error("Invalid audio request");
+ if(request.frames!=quantum||request.payloadBytes)throw std::runtime_error("Invalid audio packet");
+ auto renderStart=measure?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
+ WireResponse response;
+ {
+#ifdef _WIN32
+ if(request.program!=program&&request.program<uint32_t(e->programs)){EditorHost::Control select{SelectProgram,{}, {},false};select.program=request.program;editor.request(select);if(select.ok)program=request.program;}
+ std::lock_guard<std::recursive_mutex> pluginLock(editor.mutex);
+#else
+ if(request.program!=program && request.program<uint32_t(e->programs)){program=request.program;call(2,program);}
+#endif
+ struct ManyEvents {int32_t count;intptr_t reserved;Midi* items[maxMidi];} events{};
+ Midi messages[maxMidi];events.count=request.count;
+ for(uint32_t i=0;i<request.count;i++){messages[i].delta=std::min(request.midi[i].offset,uint32_t(quantum-1));messages[i].data[0]=request.midi[i].status;messages[i].data[1]=request.midi[i].note;messages[i].data[2]=request.midi[i].velocity;events.items[i]=&messages[i];}
+ if(events.count)call(25,0,&events);
+ for(auto& c:out)std::fill(c.begin(),c.end(),0);
+ e->replacing(e,ip.data(),op.data(),quantum);
+ if(measure){auto micros=std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now()-renderStart).count();response.status=1|(uint32_t(std::min<int64_t>(micros,0x7fffffff))<<1);}
+ for(int i=0;i<quantum;i++){response.left[i]=std::isfinite(out[0][i])?out[0][i]:0;response.right[i]=std::isfinite(out[std::min(1,e->outputs-1)][i])?out[std::min(1,e->outputs-1)][i]:0;}
+ } // Release the plugin mutex before pipe I/O can block.
+ return response;
+ };
  auto serveLoop=[&]{
 #ifdef _WIN32
- if(processLevel==2)SetThreadPriority(GetCurrentThread(),THREAD_PRIORITY_ABOVE_NORMAL);
+ if(processLevel==2&&!shared)SetThreadPriority(GetCurrentThread(),THREAD_PRIORITY_TIME_CRITICAL);
 #endif
  try {
  WireRequest request;
@@ -109,30 +145,41 @@ int main(int argc,char** argv){
 #endif
  fflush(stdout);continue;
  }
- if(request.frames!=quantum||request.payloadBytes)throw std::runtime_error("Invalid audio packet");
-#ifdef _WIN32
- if(request.program!=program&&request.program<uint32_t(e->programs)){EditorHost::Control select{SelectProgram,{}, {},false};select.program=request.program;editor.request(select);if(select.ok)program=request.program;}
- std::lock_guard<std::recursive_mutex> pluginLock(editor.mutex);
-#else
- if(request.program!=program && request.program<uint32_t(e->programs)){program=request.program;call(2,program);}
-#endif
- struct ManyEvents {int32_t count;intptr_t reserved;Midi* items[maxMidi];} events{};
- Midi messages[maxMidi];events.count=request.count;
- for(uint32_t i=0;i<request.count;i++){messages[i].delta=std::min(request.midi[i].offset,uint32_t(quantum-1));messages[i].data[0]=request.midi[i].status;messages[i].data[1]=request.midi[i].note;messages[i].data[2]=request.midi[i].velocity;events.items[i]=&messages[i];}
- if(events.count)call(25,0,&events);
- for(auto& c:out)std::fill(c.begin(),c.end(),0);
- e->replacing(e,ip.data(),op.data(),quantum);
- WireResponse response;
- for(int i=0;i<quantum;i++){response.left[i]=std::isfinite(out[0][i])?out[0][i]:0;response.right[i]=std::isfinite(out[std::min(1,e->outputs-1)][i])?out[std::min(1,e->outputs-1)][i]:0;}
+ if(shared)throw std::runtime_error("Shared audio must use its mapped queue");
+ WireResponse response=renderAudio(request);
  if(fwrite(&response,sizeof(response),1,stdout)!=1)break;fflush(stdout);
  }
  }catch(const std::exception& error){std::cerr<<error.what()<<"\n";}
  done=true;
  };
 #ifdef _WIN32
- std::thread audio(serveLoop);
+ std::thread audio(serveLoop);std::thread mapped;
+ if(shared){mapped=std::thread([&]{
+  SetThreadPriority(GetCurrentThread(),THREAD_PRIORITY_TIME_CRITICAL);timeBeginPeriod(1);
+  using SetDescription=HRESULT(WINAPI*)(HANDLE,PCWSTR);auto nameThread=(SetDescription)GetProcAddress(GetModuleHandleA("kernel32.dll"),"SetThreadDescription");if(nameThread)nameThread(GetCurrentThread(),L"BridgeLab DSP");
+  shared->ready.store(1,std::memory_order_release);
+  try{while(!done&&!shared->stop.load(std::memory_order_acquire)){
+   if(shared->pause.load(std::memory_order_acquire)){shared->paused.store(1,std::memory_order_release);Sleep(1);continue;}
+   shared->paused.store(0,std::memory_order_release);
+   auto r=shared->requestRead.load(std::memory_order_relaxed),w=shared->requestWrite.load(std::memory_order_acquire);
+   if(r==w){Sleep(1);continue;}
+   auto request=shared->requests[r%sharedAudioSlots];shared->requestRead.store(r+1,std::memory_order_release);
+   auto response=renderAudio(request.request);
+   auto write=shared->responseWrite.load(std::memory_order_relaxed);
+   while(write-shared->responseRead.load(std::memory_order_acquire)>=sharedAudioSlots&&!done&&!shared->stop.load(std::memory_order_acquire))Sleep(1);
+   if(done||shared->stop.load(std::memory_order_acquire))break;
+   auto& slot=shared->responses[write%sharedAudioSlots];slot.seq=request.seq;slot.response=response;
+   shared->responseWrite.store(write+1,std::memory_order_release);shared->completed.store(r+1,std::memory_order_release);
+  }}catch(const std::exception& error){std::cerr<<error.what()<<"\n";shared->error.store(1,std::memory_order_release);done=true;}
+  timeEndPeriod(1);
+ });
+ while(!shared->ready.load(std::memory_order_acquire))Sleep(1);
+ fwrite(hello,sizeof(hello),1,stdout);fflush(stdout);
+ }
  while(!done){editor.pump();MsgWaitForMultipleObjects(0,nullptr,FALSE,8,QS_ALLINPUT);}
- audio.join();editor.close();
+ if(shared)shared->stop.store(1,std::memory_order_release);
+ audio.join();if(mapped.joinable())mapped.join();editor.close();
+ if(shared)UnmapViewOfFile(shared);if(audioMapping)CloseHandle(audioMapping);if(audioFile!=INVALID_HANDLE_VALUE)CloseHandle(audioFile);
 #else
  serveLoop();
 #endif

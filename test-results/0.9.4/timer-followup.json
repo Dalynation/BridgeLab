@@ -1,0 +1,74 @@
+[
+  {
+    "trial": 0,
+    "passed": true,
+    "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048 qos_status=0 max_timer_lateness_us=9446",
+    "stderr": ""
+  },
+  {
+    "trial": 1,
+    "passed": true,
+    "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048 qos_status=0 max_timer_lateness_us=8296",
+    "stderr": ""
+  },
+  {
+    "trial": 2,
+    "passed": true,
+    "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048 qos_status=0 max_timer_lateness_us=9642",
+    "stderr": ""
+  },
+  {
+    "trial": 3,
+    "passed": true,
+    "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048 qos_status=0 max_timer_lateness_us=8892",
+    "stderr": ""
+  },
+  {
+    "trial": 4,
+    "passed": true,
+    "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048 qos_status=0 max_timer_lateness_us=5228",
+    "stderr": ""
+  },
+  {
+    "trial": 5,
+    "passed": true,
+    "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048 qos_status=0 max_timer_lateness_us=14619",
+    "stderr": ""
+  },
+  {
+    "trial": 6,
+    "passed": true,
+    "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048 qos_status=0 max_timer_lateness_us=7695",
+    "stderr": ""
+  },
+  {
+    "trial": 7,
+    "passed": true,
+    "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048 qos_status=0 max_timer_lateness_us=6949",
+    "stderr": ""
+  },
+  {
+    "trial": 8,
+    "passed": true,
+    "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048 qos_status=0 max_timer_lateness_us=37755",
+    "stderr": ""
+  },
+  {
+    "trial": 9,
+    "passed": true,
+    "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048 qos_status=0 max_timer_lateness_us=10857",
+    "stderr": ""
+  },
+  {
+    "trial": 10,
+    "passed": true,
+    "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048 qos_status=0 max_timer_lateness_us=6102",
+    "stderr": ""
+  },
+  {
+    "trial": 11,
+    "passed": true,
+    "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.136913 nonzero=151549 tail=0.0479358 rate=48000 block=256 latency=2048 qos_status=0 max_timer_lateness_us=10722",
+    "stderr": ""
+  }
+]

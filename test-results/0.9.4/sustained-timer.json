@@ -1,0 +1,78 @@
+[
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "seconds": 20,
+    "block": 64,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.390902 nonzero=957949 tail=0.390902 rate=48000 block=64 latency=2048 qos_status=0",
+        "stderr": ""
+      },
+      {
+        "exit": 0,
+        "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.390902 nonzero=957949 tail=0.390902 rate=48000 block=64 latency=2048 qos_status=0",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "arch": "arm64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "seconds": 20,
+    "block": 64,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.275531 nonzero=957952 tail=0.275531 rate=48000 block=64 latency=2048 qos_status=0",
+        "stderr": ""
+      },
+      {
+        "exit": 0,
+        "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.275531 nonzero=957952 tail=0.275531 rate=48000 block=64 latency=2048 qos_status=0",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "seconds": 20,
+    "block": 64,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.390902 nonzero=957949 tail=0.390902 rate=48000 block=64 latency=2048 qos_status=0",
+        "stderr": ""
+      },
+      {
+        "exit": 0,
+        "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.390902 nonzero=957949 tail=0.390902 rate=48000 block=64 latency=2048 qos_status=0",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "arch": "x86_64",
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "seconds": 20,
+    "block": 64,
+    "passed": true,
+    "runs": [
+      {
+        "exit": 0,
+        "stdout": "Offline VST3 \u2192 Windows plugin: peak=0.275531 nonzero=957952 tail=0.275531 rate=48000 block=64 latency=2048 qos_status=0",
+        "stderr": ""
+      },
+      {
+        "exit": 0,
+        "stdout": "Realtime VST3 \u2192 Windows plugin: peak=0.275531 nonzero=957952 tail=0.275531 rate=48000 block=64 latency=2048 qos_status=0",
+        "stderr": ""
+      }
+    ]
+  }
+]

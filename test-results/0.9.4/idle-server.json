@@ -1,0 +1,67 @@
+[
+  {
+    "seconds_after_client": 0,
+    "servers": [
+      84731
+    ],
+    "helpers": 7
+  },
+  {
+    "seconds_after_client": 1,
+    "servers": [
+      84731
+    ],
+    "helpers": 6
+  },
+  {
+    "seconds_after_client": 2,
+    "servers": [
+      84731
+    ],
+    "helpers": 6
+  },
+  {
+    "seconds_after_client": 3,
+    "servers": [
+      84731
+    ],
+    "helpers": 6
+  },
+  {
+    "seconds_after_client": 4,
+    "servers": [
+      84731
+    ],
+    "helpers": 1
+  },
+  {
+    "seconds_after_client": 5,
+    "servers": [],
+    "helpers": 0
+  },
+  {
+    "seconds_after_client": 6,
+    "servers": [],
+    "helpers": 0
+  },
+  {
+    "seconds_after_client": 7,
+    "servers": [],
+    "helpers": 0
+  },
+  {
+    "seconds_after_client": 8,
+    "servers": [],
+    "helpers": 0
+  },
+  {
+    "seconds_after_client": 9,
+    "servers": [],
+    "helpers": 0
+  },
+  {
+    "seconds_after_client": 10,
+    "servers": [],
+    "helpers": 0
+  }
+]

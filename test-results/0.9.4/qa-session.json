@@ -1,0 +1,51 @@
+{
+  "results": [
+    {
+      "test": "qa_matrix.py",
+      "exit": 1
+    },
+    {
+      "test": "high_rate_audio.py",
+      "exit": 0
+    },
+    {
+      "test": "sustained_audio.py",
+      "exit": 0
+    },
+    {
+      "test": "runtime_lifecycle.py",
+      "exit": 0
+    },
+    {
+      "test": "device_matrix.py",
+      "exit": 0
+    }
+  ],
+  "cleanup": [
+    {
+      "arch": "x86",
+      "option": "-k",
+      "exit": 1,
+      "stderr": ""
+    },
+    {
+      "arch": "x86",
+      "option": "-w",
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "arch": "x64",
+      "option": "-k",
+      "exit": 1,
+      "stderr": ""
+    },
+    {
+      "arch": "x64",
+      "option": "-w",
+      "exit": 0,
+      "stderr": ""
+    }
+  ],
+  "remaining_runtime_pids": []
+}

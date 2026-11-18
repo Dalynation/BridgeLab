@@ -10,6 +10,7 @@
 #include "editor.hpp"
 #include <fstream>
 #include <algorithm>
+#include <cmath>
 using namespace Steinberg;
 using namespace Steinberg::Vst;
 static const FUID uid=bridgeClassID(0);
@@ -43,7 +44,11 @@ public:
  if(setup.sampleRate<44100||setup.sampleRate>192000||setup.symbolicSampleSize!=kSample32||setup.maxSamplesPerBlock<1||setup.maxSamplesPerBlock>8192)return kResultFalse;
  // Cover an entire host callback plus worker scheduling headroom. Small
  // buffers retain scheduling safety; larger callbacks need more headroom.
- delay=std::max(8,2*((setup.maxSamplesPerBlock+quantum-1)/quantum)+2);
+ // Keep the scheduling allowance in time: a fixed sample count loses
+ // headroom at higher sample rates. This does not depend on a host version.
+ double allowance=2048.0/48000.0;
+ int schedulingQuanta=int(std::ceil(setup.sampleRate*allowance/quantum));
+ delay=std::max(std::max(8,schedulingQuanta),2*((setup.maxSamplesPerBlock+quantum-1)/quantum)+2);
  trace(("setup rate="+std::to_string(setup.sampleRate)+" maxBlock="+std::to_string(setup.maxSamplesPerBlock)+" mode="+std::to_string(setup.processMode)+" latency="+std::to_string(delay*quantum)).c_str());
  offline=setup.processMode==kOffline;return AudioEffect::setupProcessing(setup);
  }
@@ -56,6 +61,7 @@ public:
  if(!state)return kResultOk;
  bits=architecture();if(!bits)return kResultFalse;
  active=transport.start(path,bits,processSetup.sampleRate,offline);
+ trace((std::string("transport=")+(transport.usesSharedAudio()?"shared":"pipe")+" pid="+std::to_string(getpid())+" scheduler="+(transport.usesRealtimeScheduler()?"1":"0")).c_str());
  if(active){std::vector<uint8_t> ignored;if(!savedState.empty()&&!transport.control(SetState,savedState,ignored,program)){transport.stop();active=false;}else if(editorWanted&&!offline)transport.control(editorMapping.empty()?OpenEditor:OpenEmbeddedEditor,editorMapping,ignored);}
  return active?kResultOk:kResultFalse;
  }
@@ -106,7 +112,7 @@ public:
  for(int i=0;i<data.numSamples;i++){
  if(position==0){playing.response={};
  if(seq>=delay){auto wanted=seq-delay;bool received=false;
- while(true){if(!hasWaiting)hasWaiting=transport.responses.pop(waiting);if(!hasWaiting)break;if(waiting.seq<wanted){hasWaiting=false;continue;}if(waiting.seq==wanted){playing=waiting;hasWaiting=false;received=true;}break;}
+ while(true){if(!hasWaiting)hasWaiting=transport.receive(waiting);if(!hasWaiting)break;if(waiting.seq<wanted){hasWaiting=false;continue;}if(waiting.seq==wanted){playing=waiting;hasWaiting=false;received=true;}break;}
  if(!received)++underruns;
  }}
  while(next<count&&events[next].sampleOffset<=i){auto& e=events[next++];if(pending.request.count<maxMidi){auto& m=pending.request.midi[pending.request.count++];m.offset=position;bool on=e.type==Event::kNoteOnEvent;m.status=(on?0x90:0x80)|(on?e.noteOn.channel:e.noteOff.channel);m.note=on?e.noteOn.pitch:e.noteOff.pitch;m.velocity=uint8_t(std::clamp(on?e.noteOn.velocity:e.noteOff.velocity,0.f,1.f)*127);}}
@@ -136,6 +142,6 @@ public:
 };
 bool InitModule(){trace("bundle entry");return true;}bool DeinitModule(){trace("bundle exit");return true;}
 BEGIN_FACTORY_DEF("BridgeLab","https://example.invalid","")
-DEF_CLASS2(INLINE_UID_FROM_FUID(uid),PClassInfo::kManyInstances,kVstAudioEffectClass,bridgeDisplayName(),0,"Instrument|Synth","0.9.3",kVstVersionString,Bridge::create)
-DEF_CLASS2(INLINE_UID_FROM_FUID(controllerUid),PClassInfo::kManyInstances,kVstComponentControllerClass,"BridgeLab Controller",0,"","0.9.3",kVstVersionString,Controller::create)
+DEF_CLASS2(INLINE_UID_FROM_FUID(uid),PClassInfo::kManyInstances,kVstAudioEffectClass,bridgeDisplayName(),0,"Instrument|Synth","0.9.4",kVstVersionString,Bridge::create)
+DEF_CLASS2(INLINE_UID_FROM_FUID(controllerUid),PClassInfo::kManyInstances,kVstComponentControllerClass,"BridgeLab Controller",0,"","0.9.4",kVstVersionString,Controller::create)
 END_FACTORY

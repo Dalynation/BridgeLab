@@ -1,0 +1,31 @@
+[
+  {
+    "plugin": "BridgeLab - SQ8L (x86)",
+    "passed": true,
+    "closed_gui_released": true,
+    "closed_frame_unmapped": true,
+    "closed_idle_callbacks_stopped": true,
+    "reopened_three_times": true,
+    "state_unchanged": true
+  },
+  {
+    "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+    "passed": true,
+    "closed_gui_released": true,
+    "closed_frame_unmapped": true,
+    "closed_idle_callbacks_stopped": true,
+    "reopened_three_times": true,
+    "state_unchanged": true
+  },
+  {
+    "test": "three simultaneous isolated runners exit on destruction",
+    "passed": true,
+    "runner_count": 3,
+    "rss_kib": [
+      7332,
+      47248,
+      15176
+    ],
+    "rss_note": "RSS includes shared pages; not unique physical RAM"
+  }
+]

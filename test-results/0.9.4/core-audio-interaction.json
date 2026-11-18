@@ -1,0 +1,128 @@
+{
+  "results": [
+    {
+      "test": "ffbb70884a6cd2af-arm64-editor",
+      "arch": "arm64",
+      "plugin": "BridgeLab - SQ8L (x86)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=480000 max_slice=558 VST_block=64 rate=48000 realtime_policy=1 latency=2048 editor_changed=1 device_output=silence",
+      "stderr": "",
+      "passed": true,
+      "underrun_quanta": [
+        "0"
+      ]
+    },
+    {
+      "test": "a4def1870e48ca34-arm64-editor",
+      "arch": "arm64",
+      "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=480000 max_slice=558 VST_block=64 rate=48000 realtime_policy=1 latency=2048 editor_changed=1 device_output=silence",
+      "stderr": "",
+      "passed": true,
+      "underrun_quanta": [
+        "0"
+      ]
+    },
+    {
+      "test": "ffbb70884a6cd2af-x86_64-editor",
+      "arch": "x86_64",
+      "plugin": "BridgeLab - SQ8L (x86)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=480000 max_slice=558 VST_block=64 rate=48000 realtime_policy=1 latency=2048 editor_changed=1 device_output=silence",
+      "stderr": "",
+      "passed": true,
+      "underrun_quanta": [
+        "0"
+      ]
+    },
+    {
+      "test": "a4def1870e48ca34-x86_64-editor",
+      "arch": "x86_64",
+      "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=480000 max_slice=558 VST_block=64 rate=48000 realtime_policy=1 latency=2048 editor_changed=1 device_output=silence",
+      "stderr": "",
+      "passed": true,
+      "underrun_quanta": [
+        "0"
+      ]
+    },
+    {
+      "test": "concurrent-0",
+      "arch": "arm64",
+      "plugin": "BridgeLab - SQ8L (x86)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=256 rate=48000 realtime_policy=1 latency=2048 editor_changed=0 device_output=silence",
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "test": "concurrent-1",
+      "arch": "arm64",
+      "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=256 rate=48000 realtime_policy=1 latency=2048 editor_changed=0 device_output=silence",
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "test": "concurrent-2",
+      "arch": "x86_64",
+      "plugin": "BridgeLab - SQ8L (x86)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=256 rate=48000 realtime_policy=1 latency=2048 editor_changed=0 device_output=silence",
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "test": "concurrent-3",
+      "arch": "x86_64",
+      "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=256 rate=48000 realtime_policy=1 latency=2048 editor_changed=0 device_output=silence",
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "test": "four concurrent Core Audio clients: underruns",
+      "passed": true,
+      "underrun_quanta": [
+        "0",
+        "0",
+        "0",
+        "0"
+      ]
+    }
+  ],
+  "cleanup": [
+    {
+      "arch": "x86",
+      "option": "-k",
+      "exit": 0
+    },
+    {
+      "arch": "x86",
+      "option": "-w",
+      "exit": 0
+    },
+    {
+      "arch": "x64",
+      "option": "-k",
+      "exit": 0
+    },
+    {
+      "arch": "x64",
+      "option": "-w",
+      "exit": 0
+    }
+  ]
+}
