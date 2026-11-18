@@ -10,7 +10,7 @@ def run(label,args,timeout=120):
  print(json.dumps(row),flush=True);return row
 for arch in ['arm64','x86_64']:
  for plugin in rows:
-  for case in ['zero-sample-note','repeated-activation','prefetch','control-pressure']:
+  for case in ['zero-sample-note','repeated-activation','prefetch','control-pressure','queue-recovery']:
    results.append(run(plugin['name']+' '+arch+' '+case,['/usr/bin/arch','-'+arch,source/'build/vst3/bridge-lifecycle-qa',plugin['wrapper'],case]))
 # Cover tight and large host blocks in actual realtime, as well as offline PCM.
 for arch in ['arm64','x86_64']:
@@ -32,6 +32,6 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
 for arch in ['arm64','x86_64']:
  results.append(run('three-instance state recall '+arch,['/usr/bin/arch','-'+arch,source/'build/vst3/bridge-multi',rows[0]['wrapper'],rows[-1]['wrapper']]))
 for row in rows:results.append(run('Steinberg validation '+row['name'],[source/'build/vst3/bin/Release/validator',row['wrapper']],timeout=240))
-report=dict(version='0.9.4',plugins=[r['name'] for r in rows],checks=results)
+report=dict(version='0.9.5',plugins=[r['name'] for r in rows],checks=results)
 (out/'results.json').write_text(json.dumps(report,indent=2)+'\n')
 raise SystemExit(0 if all(r['passed'] for r in results) else 1)

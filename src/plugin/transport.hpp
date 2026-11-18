@@ -21,6 +21,9 @@
 #include <condition_variable>
 #include <memory>
 #include <pthread.h>
+#include <mach/mach.h>
+#include <mach/mach_time.h>
+#include <mach/thread_policy.h>
 #include <cerrno>
 extern char** environ;
 struct Packet {uint64_t seq=0;WireRequest request;WireResponse response;};
@@ -36,6 +39,17 @@ class Transport {
  struct ControlJob {uint32_t command,program=0;std::vector<uint8_t> input,output;bool done=false,ok=false;};
  std::mutex controls,offlineIo;std::condition_variable completed;std::shared_ptr<ControlJob> pendingControl;
  bool offlineMode=false;std::atomic<bool> running{false};std::atomic<uint64_t> lastCompleted{0};
+ std::atomic<bool> workerReady{false},pipeScheduler{false};
+ static bool enablePipeRealtime(){
+  mach_timebase_info_data_t timebase{};if(mach_timebase_info(&timebase)!=KERN_SUCCESS)return false;
+  auto ticks=[&](uint64_t nanos){return uint32_t(nanos*timebase.denom/timebase.numer);};
+  // Only the small pipe I/O worker opts in. GUI/control-only shared workers
+  // retain QoS scheduling, and no process-wide policy is changed.
+  thread_time_constraint_policy_data_t policy{};policy.period=ticks(10000000);policy.computation=ticks(1000000);policy.constraint=ticks(10000000);policy.preemptible=TRUE;
+  auto thread=mach_thread_self();auto status=thread_policy_set(thread,THREAD_TIME_CONSTRAINT_POLICY,reinterpret_cast<thread_policy_t>(&policy),THREAD_TIME_CONSTRAINT_POLICY_COUNT);
+  if(status==KERN_SUCCESS){boolean_t isDefault=FALSE;mach_msg_type_number_t count=THREAD_TIME_CONSTRAINT_POLICY_COUNT;status=thread_policy_get(thread,THREAD_TIME_CONSTRAINT_POLICY,reinterpret_cast<thread_policy_t>(&policy),&count,&isDefault);if(isDefault)status=KERN_FAILURE;}
+  mach_port_deallocate(mach_task_self(),thread);return status==KERN_SUCCESS;
+ }
  bool createShared(){
  std::string pattern=(getenv("TMPDIR")?getenv("TMPDIR"):"/tmp/");if(pattern.empty())pattern="/tmp/";if(pattern.back()!='/')pattern+='/';pattern+="BridgeLab-audio-XXXXXX";
  std::vector<char> name(pattern.begin(),pattern.end());name.push_back(0);int fd=mkstemp(name.data());if(fd<0)return false;
@@ -44,7 +58,7 @@ class Transport {
  sharedPath=name.data();shared=new(data)SharedAudio();return true;
  }
  template<class Predicate> bool waitShared(Predicate done){
- auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(6);
+ auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(32);
  while(!done()){if(stopFlag||shared->error.load(std::memory_order_acquire)||std::chrono::steady_clock::now()>deadline)return false;std::this_thread::sleep_for(std::chrono::microseconds(100));}return true;
  }
  bool sharedControlBarrier(){
@@ -66,8 +80,8 @@ class Transport {
  if(pauseAudio&&!sharedControlBarrier())return false;
  struct Resume{Transport* owner;bool paused;~Resume(){if(paused){owner->shared->pause.store(0,std::memory_order_release);owner->waitShared([&]{return owner->shared->paused.load(std::memory_order_acquire)==0;});}}} resume{this,pauseAudio};
  WireRequest request;request.frames=0;request.command=job.command;request.program=job.program;request.payloadBytes=uint32_t(job.input.size());WireResponse response;
- if(!io(input,&request,sizeof(request),true)||(!job.input.empty()&&!io(input,job.input.data(),job.input.size(),true))||!io(output,&response,sizeof(response),false)||response.magic!=wireMagic||response.frames!=0||response.payloadBytes>maxStateBytes){failed=true;return false;}
- job.output.resize(response.payloadBytes);if(!job.output.empty()&&!io(output,job.output.data(),job.output.size(),false)){failed=true;return false;}
+ if(!io(input,&request,sizeof(request),true)||(!job.input.empty()&&!io(input,job.input.data(),job.input.size(),true))||!io(output,&response,sizeof(response),false,30000)||response.magic!=wireMagic||response.frames!=0||response.payloadBytes>maxStateBytes){failed=true;return false;}
+ job.output.resize(response.payloadBytes);if(!job.output.empty()&&!io(output,job.output.data(),job.output.size(),false,30000)){failed=true;return false;}
  return response.status==1;
  }
  bool io(int fd,void* data,size_t bytes,bool writing,int timeout=5000){
@@ -83,11 +97,12 @@ class Transport {
 public:
  bool usesSharedAudio()const{return shared!=nullptr;}
  bool usesRealtimeScheduler()const{return shared&&shared->scheduler.load(std::memory_order_acquire)==1;}
+ bool usesRealtimeIO()const{return !shared&&pipeScheduler.load(std::memory_order_acquire);}
  TimingTrace timing;
  Queue<Packet,128> requests,responses;std::atomic<bool> failed{false};uint32_t programs=1;
  ~Transport(){stop();}
  bool start(const std::string& path,int bits,double rate,bool offline,bool allowShared=true){
- stop();timing.begin();offlineMode=offline;stopFlag=false;failed=false;lastCompleted=0;requests.clear();responses.clear();
+ stop();timing.begin();offlineMode=offline;stopFlag=false;failed=false;lastCompleted=0;workerReady=false;pipeScheduler=false;requests.clear();responses.clear();
  int toChild[2],fromChild[2];if(pipe(toChild))return false;if(pipe(fromChild)){close(toChild[0]);close(toChild[1]);return false;}
  // Avoid inherited descriptors holding another instance's pipes open.
  for(int* fd:{&toChild[0],&toChild[1],&fromChild[0],&fromChild[1]}){int duplicate=fcntl(*fd,F_DUPFD_CLOEXEC,3);if(duplicate<0)return false;close(*fd);*fd=duplicate;}
@@ -100,8 +115,8 @@ public:
  std::vector<std::string> env;
  // DAWs may inject loader/runtime variables. Pass only the user runtime basics.
  for(const char* key:{"HOME","USER","LOGNAME","PATH","TMPDIR","LANG","LC_ALL"})if(const char* value=getenv(key))env.emplace_back(std::string(key)+"="+value);
- env.emplace_back(std::string("WINEPREFIX=")+bridgeHome()+(bits==32?"/prefixes/crossover-x86":"/prefixes/crossover-x64"));env.emplace_back("WINEDEBUG=-all");if(timing.enabled())env.emplace_back("BRIDGELAB_TIMING=1");env.emplace_back("MVK_CONFIG_LOG_LEVEL=0");
- if(shared){std::string helper=bridgeHome()+"/engine/libBridgeLabRealtime.dylib";if(std::filesystem::exists(helper)){env.emplace_back("DYLD_INSERT_LIBRARIES="+helper);env.emplace_back("BRIDGELAB_AUDIO_MAPPING="+sharedPath);}}
+ env.emplace_back(std::string("WINEPREFIX=")+bridgeHome()+"/prefixes/"+bridgeRuntimeProfile(bits));env.emplace_back("WINEDEBUG=-all");if(timing.enabled())env.emplace_back("BRIDGELAB_TIMING=1");env.emplace_back("MVK_CONFIG_LOG_LEVEL=0");env.emplace_back("WINE_D3D_CONFIG=renderer=gl,shader_backend=glsl");
+ if(!offline){std::string helper=bridgeHome()+"/engine/libBridgeLabRealtime.dylib";if(std::filesystem::exists(helper)){env.emplace_back("DYLD_INSERT_LIBRARIES="+helper);if(shared)env.emplace_back("BRIDGELAB_AUDIO_MAPPING="+sharedPath);else env.emplace_back("BRIDGELAB_REALTIME_PIPE=1");}}
  std::vector<char*> envp;for(auto& s:env)envp.push_back(s.data());envp.push_back(nullptr);
  posix_spawn_file_actions_t actions;posix_spawn_file_actions_init(&actions);
  posix_spawn_file_actions_adddup2(&actions,toChild[0],STDIN_FILENO);posix_spawn_file_actions_adddup2(&actions,fromChild[1],STDOUT_FILENO);
@@ -114,6 +129,8 @@ public:
  running=true;
  if(!offline)worker=std::thread([this]{
  pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE,0);
+ if(!shared)pipeScheduler.store(enablePipeRealtime(),std::memory_order_release);
+ workerReady.store(true,std::memory_order_release);completed.notify_all();
  std::array<Packet,8> batch;
  while(!stopFlag){
  std::shared_ptr<ControlJob> job;{std::unique_lock<std::mutex> lock(controls);if(shared)completed.wait(lock,[&]{return stopFlag||bool(pendingControl);});if(stopFlag)break;job=pendingControl;}
@@ -127,6 +144,7 @@ public:
  if(count&&!exchangeBatch(batch.data(),count)){failed=true;break;}
  if(!count)std::this_thread::sleep_for(std::chrono::microseconds(100));}
  running=false;completed.notify_all();});
+ if(!offline&&!shared){std::unique_lock<std::mutex> lock(controls);completed.wait_for(lock,std::chrono::seconds(1),[&]{return workerReady.load(std::memory_order_acquire)||!running;});}
  return true;
  }
  bool exchangeBatch(Packet* batch,size_t count){
@@ -150,7 +168,12 @@ public:
   if(fds[1].revents&POLLIN){
    auto n=::read(output,reinterpret_cast<char*>(&batch[received].response)+readOffset,sizeof(WireResponse)-readOffset);
    if(n>0){readOffset+=size_t(n);if(readOffset==sizeof(WireResponse)){
-    auto& packet=batch[received];if(packet.response.magic!=wireMagic||packet.response.frames!=quantum||!responses.push(packet))return false;
+    auto& packet=batch[received];if(packet.response.magic!=wireMagic||packet.response.frames!=quantum)return false;
+    // A paused host can leave this queue full. Apply backpressure on this
+    // worker instead of declaring a healthy Windows instrument dead.
+    auto blocked=std::chrono::steady_clock::now();
+    while(!stopFlag&&!responses.push(packet))std::this_thread::sleep_for(std::chrono::microseconds(100));
+    if(stopFlag)return false;deadline+=std::chrono::steady_clock::now()-blocked;
     if(timing.enabled())timing.record('R',packet.seq,started[received],TimingTrace::now()-started[received],count,packet.response.status>>1);
     {std::lock_guard<std::mutex> lock(controls);lastCompleted=packet.seq+1;}completed.notify_all();
     ++received;readOffset=0;
@@ -177,23 +200,24 @@ public:
   if(timing.enabled())timing.record('S',packet.seq,TimingTrace::now(),0,w-r+1,1);
   return !prefetch||waitShared([&]{return int32_t(shared->completed.load(std::memory_order_acquire)-(w+1))>=0;});
  }
- if(failed||!running||!requests.push(packet))return false;
+ if(failed||!running){failed=true;return false;}
+ if(!requests.push(packet))return false;
  if(timing.enabled())timing.record('S',packet.seq,TimingTrace::now(),0,requests.write.load()-requests.read.load(),0);
  if(!prefetch)return true;
  // VST3 permits prefetch callbacks to run faster than wall clock and switch
  // from realtime without setupProcessing. Keep one worker/ordered pipe, but
  // wait here (only for prefetch) so a fast host cannot overflow the queue.
  std::unique_lock<std::mutex> lock(controls);
- return completed.wait_for(lock,std::chrono::seconds(6),[&]{return lastCompleted>packet.seq||failed||!running;})&&lastCompleted>packet.seq&&!failed;
+ return completed.wait_for(lock,std::chrono::seconds(32),[&]{return lastCompleted>packet.seq||failed||!running;})&&lastCompleted>packet.seq&&!failed;
  }
  bool control(uint32_t command,const std::vector<uint8_t>& bytes,std::vector<uint8_t>& result,uint32_t hostProgram=0){
  if(!running||failed||bytes.size()>maxStateBytes)return false;
  auto job=std::make_shared<ControlJob>();job->command=command;job->program=hostProgram;job->input=bytes;
  if(offlineMode){std::lock_guard<std::mutex> lock(offlineIo);bool ok=performControl(*job);result=std::move(job->output);return ok;}
  std::unique_lock<std::mutex> lock(controls);
- if(!completed.wait_for(lock,std::chrono::seconds(6),[&]{return !pendingControl||!running;} )||!running)return false;
+ if(!completed.wait_for(lock,std::chrono::seconds(32),[&]{return !pendingControl||!running;} )||!running)return false;
  pendingControl=job;completed.notify_all();
- if(!completed.wait_for(lock,std::chrono::seconds(6),[&]{return job->done||!running;} )||!job->done)return false;
+ if(!completed.wait_for(lock,std::chrono::seconds(32),[&]{return job->done||!running;} )||!job->done)return false;
  result=std::move(job->output);return job->ok;
  }
  bool exchange(Packet& packet){auto started=timing.enabled()?TimingTrace::now():0;std::unique_lock<std::mutex> lock(offlineIo,std::defer_lock);if(offlineMode)lock.lock();if(!io(input,&packet.request,sizeof(WireRequest),true)||!io(output,&packet.response,sizeof(WireResponse),false)||packet.response.magic!=wireMagic||packet.response.frames!=quantum){failed=true;return false;}if(timing.enabled())timing.record('R',packet.seq,started,TimingTrace::now()-started);return true;}

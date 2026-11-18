@@ -1,0 +1,319 @@
+{
+  "date": "2026-11-18",
+  "status": "NOT accepted as complete original-UI compatibility",
+  "scope": "Original runner-level controls in disposable QA profiles; not every parameter or an FL/macOS compatibility matrix",
+  "fixtures": {
+    "NoiseMaker": {
+      "checks": [
+        {
+          "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+          "control": "volume-knob",
+          "kind": "drag",
+          "state_changed": true,
+          "changed_region_bytes": 778,
+          "passed": true,
+          "scope": "input, parameter state, and immediate repaint"
+        },
+        {
+          "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+          "control": "amp-attack-slider",
+          "kind": "drag",
+          "state_changed": true,
+          "changed_region_bytes": 3240,
+          "passed": true,
+          "scope": "input, parameter state, and immediate repaint"
+        },
+        {
+          "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+          "control": "oscillator-waveform-click-response",
+          "kind": "probe",
+          "state_changed": false,
+          "changed_region_bytes": 3,
+          "passed": false,
+          "scope": "unverified interaction semantics; not classified as a menu defect"
+        },
+        {
+          "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+          "control": "oscillator-sync-toggle",
+          "kind": "click",
+          "state_changed": true,
+          "changed_region_bytes": 3580,
+          "passed": true,
+          "scope": "input, parameter state, and immediate repaint"
+        },
+        {
+          "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+          "control": "chorus-I-toggle",
+          "kind": "click",
+          "state_changed": true,
+          "changed_region_bytes": 3218,
+          "passed": true,
+          "scope": "input, parameter state, and immediate repaint"
+        },
+        {
+          "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+          "control": "one-shot-toggle",
+          "kind": "click",
+          "state_changed": true,
+          "changed_region_bytes": 6453,
+          "passed": true,
+          "scope": "input, parameter state, and immediate repaint"
+        },
+        {
+          "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+          "control": "lfo-trigger-toggle",
+          "kind": "click",
+          "state_changed": true,
+          "changed_region_bytes": 3527,
+          "passed": true,
+          "scope": "input, parameter state, and immediate repaint"
+        },
+        {
+          "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+          "control": "filter-dropdown",
+          "kind": "menu",
+          "state_changed": false,
+          "changed_region_bytes": 0,
+          "passed": false,
+          "scope": "menu opening only; selection/closing not certified"
+        },
+        {
+          "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+          "control": "voices-dropdown",
+          "kind": "menu",
+          "state_changed": false,
+          "changed_region_bytes": 0,
+          "passed": false,
+          "scope": "menu opening only; selection/closing not certified"
+        },
+        {
+          "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+          "control": "lfo-destination-dropdown",
+          "kind": "menu",
+          "state_changed": false,
+          "changed_region_bytes": 0,
+          "passed": false,
+          "scope": "menu opening only; selection/closing not certified"
+        },
+        {
+          "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+          "control": "amp-destination-dropdown",
+          "kind": "menu",
+          "state_changed": false,
+          "changed_region_bytes": 0,
+          "passed": false,
+          "scope": "menu opening only; selection/closing not certified"
+        },
+        {
+          "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+          "control": "portamento-dropdown",
+          "kind": "menu",
+          "state_changed": false,
+          "changed_region_bytes": 0,
+          "passed": false,
+          "scope": "menu opening only; selection/closing not certified"
+        },
+        {
+          "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+          "control": "modulation-dropdown",
+          "kind": "menu",
+          "state_changed": false,
+          "changed_region_bytes": 0,
+          "passed": false,
+          "scope": "menu opening only; selection/closing not certified"
+        },
+        {
+          "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+          "control": "envelope-graph-point",
+          "kind": "drag",
+          "state_changed": true,
+          "changed_region_bytes": 3298,
+          "passed": true,
+          "scope": "input, parameter state, and immediate repaint"
+        },
+        {
+          "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+          "control": "volume-wheel",
+          "kind": "wheel",
+          "state_changed": false,
+          "changed_region_bytes": 0,
+          "passed": false,
+          "scope": "input, parameter state, and immediate repaint"
+        },
+        {
+          "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+          "control": "volume-double-click-reset",
+          "kind": "reset",
+          "state_changed": false,
+          "changed_region_bytes": 0,
+          "passed": false,
+          "scope": "input, parameter state, and immediate repaint"
+        },
+        {
+          "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+          "control": "preset-selector",
+          "kind": "menu",
+          "state_changed": false,
+          "changed_region_bytes": 0,
+          "passed": false,
+          "scope": "menu opening only; selection/closing not certified"
+        },
+        {
+          "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+          "control": "preset-next-button",
+          "kind": "click",
+          "state_changed": true,
+          "changed_region_bytes": 2487,
+          "passed": true,
+          "scope": "input, parameter state, and immediate repaint"
+        },
+        {
+          "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+          "control": "volume-context-menu",
+          "kind": "context",
+          "state_changed": false,
+          "changed_region_bytes": 0,
+          "passed": false,
+          "scope": "menu opening only; selection/closing not certified"
+        },
+        {
+          "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+          "control": "volume-double-click-response",
+          "kind": "double",
+          "state_changed": false,
+          "changed_region_bytes": 0,
+          "passed": false,
+          "scope": "visual response only; text entry not verified"
+        },
+        {
+          "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+          "control": "midi-learn-arm",
+          "kind": "nav",
+          "state_changed": true,
+          "changed_region_bytes": 7788,
+          "passed": true,
+          "scope": "panel visual response only"
+        },
+        {
+          "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+          "control": "parameter-lock-toggle",
+          "kind": "nav",
+          "state_changed": true,
+          "changed_region_bytes": 7632,
+          "passed": true,
+          "scope": "panel visual response only"
+        }
+      ],
+      "sha256": "2eafb26ab4c7f0c09a98fe515f84c197d325be0c34ba07b52bbf68a1140fd898"
+    },
+    "SQ8L": {
+      "checks": [
+        {
+          "plugin": "BridgeLab - SQ8L (x86)",
+          "control": "parameter-knob",
+          "kind": "drag",
+          "state_changed": true,
+          "changed_region_bytes": 579,
+          "passed": true,
+          "scope": "input, parameter state, and immediate repaint"
+        },
+        {
+          "plugin": "BridgeLab - SQ8L (x86)",
+          "control": "preset-next",
+          "kind": "click",
+          "state_changed": true,
+          "changed_region_bytes": 1138,
+          "passed": true,
+          "scope": "input, parameter state, and immediate repaint"
+        },
+        {
+          "plugin": "BridgeLab - SQ8L (x86)",
+          "control": "mono-toggle",
+          "kind": "click",
+          "state_changed": true,
+          "changed_region_bytes": 285,
+          "passed": true,
+          "scope": "input, parameter state, and immediate repaint"
+        },
+        {
+          "plugin": "BridgeLab - SQ8L (x86)",
+          "control": "sync-toggle",
+          "kind": "click",
+          "state_changed": true,
+          "changed_region_bytes": 285,
+          "passed": true,
+          "scope": "input, parameter state, and immediate repaint"
+        },
+        {
+          "plugin": "BridgeLab - SQ8L (x86)",
+          "control": "oscillator-page",
+          "kind": "nav",
+          "state_changed": false,
+          "changed_region_bytes": 16620,
+          "passed": true,
+          "scope": "panel visual response only"
+        },
+        {
+          "plugin": "BridgeLab - SQ8L (x86)",
+          "control": "lfo-page",
+          "kind": "nav",
+          "state_changed": false,
+          "changed_region_bytes": 18984,
+          "passed": true,
+          "scope": "panel visual response only"
+        },
+        {
+          "plugin": "BridgeLab - SQ8L (x86)",
+          "control": "envelope-page",
+          "kind": "nav",
+          "state_changed": false,
+          "changed_region_bytes": 18868,
+          "passed": true,
+          "scope": "panel visual response only"
+        },
+        {
+          "plugin": "BridgeLab - SQ8L (x86)",
+          "control": "matrix-page",
+          "kind": "nav",
+          "state_changed": false,
+          "changed_region_bytes": 18657,
+          "passed": true,
+          "scope": "panel visual response only"
+        },
+        {
+          "plugin": "BridgeLab - SQ8L (x86)",
+          "control": "bank-menu",
+          "kind": "menu",
+          "state_changed": true,
+          "changed_region_bytes": 0,
+          "passed": false,
+          "scope": "menu opening only; selection/closing not certified"
+        },
+        {
+          "plugin": "BridgeLab - SQ8L (x86)",
+          "control": "file-menu",
+          "kind": "menu",
+          "state_changed": false,
+          "changed_region_bytes": 0,
+          "passed": false,
+          "scope": "menu opening only; selection/closing not certified"
+        }
+      ],
+      "sha256": "0ccbf512bed01149f50b6fc5d036d0d60fc206a7d0810dd4a86f6e08a6c40b04"
+    },
+    "TAL-U-NO-LX": {
+      "status": "blocked",
+      "reason": "Vendor trial notice plus persisted expanded-keyboard layout invalidated initial coordinates. Corrected test stops when visible Cancel does not clear the notice. Earlier partial results excluded; no broad control pass claimed."
+    }
+  },
+  "unverified": [
+    "Text/value entry",
+    "Menu selection, dismissal and submenus",
+    "Preset load/save and external file dialogs",
+    "Full MIDI-learn and lock semantics",
+    "Every individual knob/toggle/parameter",
+    "Other vendor DLLs, macOS and FL versions"
+  ],
+  "keyboard_note_release": "Actual FL retest failed; next source candidate passes isolated window-level tests but is not installed or FL verified",
+  "experiments": "GetMessagePos and virtual-monitor experiments did not provide a complete menu fix and were reverted from production source; diagnostic runners remain isolated."
+}

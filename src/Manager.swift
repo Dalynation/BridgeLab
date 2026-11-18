@@ -3,7 +3,8 @@ import CryptoKit
 import Darwin
 
 final class BridgeManager {
-    static let version = "0.9.4"
+    static let version = "0.9.5"
+    static let runtimeProfile = "crossover-shared"
     let fm = FileManager.default
     let root: URL
     let resources: URL
@@ -64,10 +65,10 @@ final class BridgeManager {
     func profile(_ arch:String)throws->(URL,[String:String]) {
         var env=ProcessInfo.processInfo.environment
         for key in ["__CFBundleIdentifier","XPC_SERVICE_NAME","WINEPREFIX","WINEDEBUG"] {env.removeValue(forKey:key)}
-        env["WINEPREFIX"]=root.appendingPathComponent("prefixes/crossover-"+arch).path;env["WINEDEBUG"]="-all";env["MVK_CONFIG_LOG_LEVEL"]="0"
+        env["WINEPREFIX"]=root.appendingPathComponent("prefixes/"+Self.runtimeProfile).path;env["WINEARCH"]="win64";env["WINEDEBUG"]="-all";env["MVK_CONFIG_LOG_LEVEL"]="0";env["WINE_D3D_CONFIG"]="renderer=gl,shader_backend=glsl"
         let runtime="Wine Crossover.app/Contents/Resources/wine/bin/wine64"
         let executable=root.appendingPathComponent("engine/runtime/"+runtime)
-        let prefix=root.appendingPathComponent("prefixes/crossover-"+arch)
+        let prefix=root.appendingPathComponent("prefixes/"+Self.runtimeProfile)
         let ready=prefix.appendingPathComponent(".bridgelab-ready")
         if !fm.fileExists(atPath:ready.path){
             // A registry file can appear before Wine finishes copying its system DLLs.
@@ -79,7 +80,7 @@ final class BridgeManager {
             }
             record("Preparing fresh runtime: "+arch)
             _=try execute(executable,["wineboot.exe","--init"],env:env,timeout:180)
-            let required=["system.reg","drive_c/windows/system32/kernel32.dll"]+(arch=="x86" ? ["drive_c/windows/syswow64/kernel32.dll"]:[])
+            let required=["system.reg","drive_c/windows/system32/kernel32.dll","drive_c/windows/syswow64/kernel32.dll"]
             let deadline=Date().addingTimeInterval(30)
             while !required.allSatisfy({fm.fileExists(atPath:prefix.appendingPathComponent($0).path)}) && Date()<deadline {Thread.sleep(forTimeInterval:0.1)}
             guard required.allSatisfy({fm.fileExists(atPath:prefix.appendingPathComponent($0).path)}) else{throw failure("Windows runtime setup did not finish. Import again to retry; the incomplete setup will be preserved.")}
@@ -148,7 +149,7 @@ final class BridgeManager {
             throw failure("Could not create the BridgeLab instrument. Import again; if it still fails, send this message to support.\n"+error.localizedDescription)
         }
         let res=stage.appendingPathComponent("Contents/Resources")
-        try (uid+"\n"+controller+"\n"+display+"\n"+dll.path+"\n").write(to:res.appendingPathComponent("bridgelab.conf"),atomically:true,encoding:.utf8)
+        try (uid+"\n"+controller+"\n"+display+"\n"+dll.path+"\n"+Self.runtimeProfile+"\n").write(to:res.appendingPathComponent("bridgelab.conf"),atomically:true,encoding:.utf8)
         let plistURL=stage.appendingPathComponent("Contents/Info.plist")
         var plist=(try PropertyListSerialization.propertyList(from:Data(contentsOf:plistURL),format:nil)) as! [String:Any]
         plist["CFBundleIdentifier"]="local.bridgelab.plugin."+id;plist["CFBundleName"]=display
@@ -163,7 +164,7 @@ final class BridgeManager {
         _=try execute(URL(fileURLWithPath:"/usr/bin/codesign"),["--verify","--deep","--strict",stage.path])
         if fm.fileExists(atPath:target.path){try fm.moveItem(at:target,to:root.appendingPathComponent("backups/"+UUID().uuidString+".vst3"))}
         try fm.moveItem(at:stage,to:target)
-        let row:[String:Any]=["id":id,"name":display,"path":dll.path,"original":source.path,"architecture":arch,"sha256":digest,"processor_uid":uid,"controller_uid":controller,"wrapper":target.path,"probe":probe,"bridge_version":Self.version,"warnings":warnings]
+        let row:[String:Any]=["id":id,"name":display,"path":dll.path,"original":source.path,"architecture":arch,"sha256":digest,"processor_uid":uid,"controller_uid":controller,"wrapper":target.path,"probe":probe,"bridge_version":Self.version,"runtime_profile":Self.runtimeProfile,"warnings":warnings]
         rows.removeAll{$0["id"] as? String == id};rows.append(row);rows.sort{($0["name"] as? String ?? "") < ($1["name"] as? String ?? "")}
         try writeJSON(rows,root.appendingPathComponent("plugins.json"))
         record("Installed "+display)
@@ -186,12 +187,51 @@ final class BridgeManager {
         let result=try execute(wine,[root.appendingPathComponent("engine/bin/runner-"+arch+".exe").path,windows(url),windows(output)],env:env)
         return ["output":output.path,"result":result]
     }
+    func editorHealth(in directory:URL? = nil)->[[String:Any]] {
+        let directory=directory ?? fm.temporaryDirectory
+        guard let files=try? fm.contentsOfDirectory(at:directory,includingPropertiesForKeys:[.fileSizeKey]) else{return []}
+        return files.filter{$0.lastPathComponent.hasPrefix("BridgeLab-editor-") && $0.lastPathComponent.hasSuffix(".health.json")}.compactMap { url in
+            let mapping=URL(fileURLWithPath:String(url.path.dropLast(".health.json".count)))
+            guard let size=(try? fm.attributesOfItem(atPath:url.path)[.size]) as? NSNumber,size.intValue<=4096,
+                  let mappedSize=(try? fm.attributesOfItem(atPath:mapping.path)[.size]) as? NSNumber,mappedSize.intValue==16+2048*2048*4,
+                  let data=try? Data(contentsOf:url),let value=(try? JSONSerialization.jsonObject(with:data)) as? [String:Any],value["format_version"] as? Int==1 else{return nil}
+            var observation=value
+            let attributes=try? fm.attributesOfItem(atPath:url.path)
+            if let date=attributes?[.modificationDate] as? Date {observation["status_stale"]=Date().timeIntervalSince(date)>5}
+            return observation
+        }
+    }
+    func editorHealthMessage(_ observations:[[String:Any]])->String {
+        if observations.isEmpty{return "Editor controls are not certified by import or audio rendering. No popup observations are available from open editors yet."}
+        let modes=observations.reduce(0){$0 | ($1["unsupported_popup_modes"] as? Int ?? 0)}
+        var messages:[String]=[]
+        if modes&1 != 0 {messages.append("An open plugin uses GPU popup rendering that BridgeLab cannot yet forward.")}
+        if modes&2 != 0 {messages.append("An open plugin exceeds the supported popup size or window limits; some popup content is not forwarded.")}
+        if observations.contains(where:{$0["capture_failure"] as? Int == 1}){messages.append("An open plugin's popup could not be copied. Some menus may be missing.")}
+        if observations.contains(where:{($0["input_rejected"] as? Int ?? 0) > 0}) {messages.append("Some input could not reach an open plugin editor.")}
+        if observations.contains(where:{$0["frame_stalled"] as? Int == 1 || $0["status_stale"] as? Bool == true}) {messages.append("An open editor has stopped updating its display or status. Reopen it before continuing.")}
+        for observation in observations where observation["audio_blocks_observed"] != nil || observation["quiet_while_notes"] != nil || observation["nonfinite_audio_samples"] != nil || observation["above_full_scale_recent"] != nil || observation["audio_observation_stale"] != nil {
+            let name=(observation["instrument_name"] as? String).flatMap{$0.isEmpty ? nil:$0} ?? "Open instrument"
+            let stale=observation["audio_observation_stale"] as? Int == 1
+            if stale {messages.append(name+": no recent audio blocks. Check host playback and channel mute/routing before treating it as a plugin failure.")}
+            else if observation["quiet_while_notes"] as? Int == 1 {messages.append(name+": output is very quiet while notes are held. This can be intentional. Check volume, filter cutoff/type, envelope and oscillator mix, then channel routing. BridgeLab preserves these settings.")}
+            else if let level=observation["audio_rms"] as? Double,level>0.00177827941 {messages.append(name+": audio is being produced. If you cannot hear it, check the DAW channel/mixer routing and output device.")}
+            else if observation["note_ons_observed"] as? Int == 0 {messages.append(name+": no note-on events received yet. Select this channel and play a note; check MIDI input and mute/routing if it stays silent.")}
+            if (observation["nonfinite_audio_samples"] as? Int ?? 0)>0 {messages.append(name+": the plugin produced invalid audio samples; those samples were silenced. This is separate from a quiet patch.")}
+            if !stale && (observation["above_full_scale_recent"] as? Int ?? 0)>0 {messages.append(name+": some output exceeded digital full scale. Check gain if you hear unwanted distortion; the host may provide additional headroom.")}
+        }
+        if messages.isEmpty {
+            if observations.contains(where:{($0["popup_windows_detected"] as? Int ?? 0)>0}) {messages.append("Original popup forwarding has been observed. Menu selections and individual controls still require testing.")}
+            else {messages.append("Editor input delivery and display frames are being monitored. Individual controls have not been automatically certified.")}
+        }
+        return messages.joined(separator:"\n")
+    }
     func run(_ args:[String])throws->[String:Any] {
         switch args.first {
         case "import":guard args.count==2 else{throw failure("Choose a DLL.")};return try importSelection(URL(fileURLWithPath:args[1]))
         case "inspect":return try inspect(URL(fileURLWithPath:args[1]))
         case "render":return try render(URL(fileURLWithPath:args[1]),to:URL(fileURLWithPath:args[2]))
-        default:try installEngine();return ["version":Self.version,"installation":root.path,"plugins":plugins(),"message":"Import Windows VST2 instrument DLLs. Each import gets its own FL Studio entry. Apple Silicon requires Rosetta for the Windows runtime. Minimum target: macOS 11; compatibility is verified per plugin and host."]
+        default:try installEngine();let health=editorHealth();return ["editor_health":health,"version":Self.version,"installation":root.path,"plugins":plugins(),"message":"Import Windows VST2 instrument DLLs. Each import gets its own FL Studio entry. Apple Silicon requires Rosetta for the Windows runtime. Minimum target: macOS 11; compatibility is verified per plugin and host.\n\n"+editorHealthMessage(health)]
         }
     }
 }

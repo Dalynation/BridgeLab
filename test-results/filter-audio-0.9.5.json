@@ -1,0 +1,314 @@
+{
+  "scope": "Exact current FL patch, original Windows NoiseMaker 5.0.6 DLL, disposable test profile at 44100 Hz",
+  "saved_settings": {
+    "filter": "HP 12dB",
+    "filtertype": 0.3636363744735718,
+    "cutoff": 1.0,
+    "volume": 0.4120000302791595
+  },
+  "comparison": [
+    {
+      "case": "exact user state",
+      "sample_rate": 44100,
+      "rms": 0.0009096693728150077,
+      "peak": 0.010830465704202652,
+      "noise_floor": {
+        "rms": 1.323987163883163e-07,
+        "peak": 1.3239906593298656e-07
+      },
+      "released": {
+        "rms": 1.3239878693921696e-07,
+        "peak": 1.3239906593298656e-07
+      },
+      "tail": {
+        "rms": 1.3239906593298656e-07,
+        "peak": 1.3239906593298656e-07
+      }
+    },
+    {
+      "case": "same state, LP 24dB",
+      "sample_rate": 44100,
+      "rms": 0.16135347080078333,
+      "peak": 0.26751434803009033,
+      "noise_floor": {
+        "rms": 1.323987163883163e-07,
+        "peak": 1.3239906593298656e-07
+      },
+      "released": {
+        "rms": 3.235230246771135e-07,
+        "peak": 2.2621143216383643e-06
+      },
+      "tail": {
+        "rms": 1.324071376984648e-07,
+        "peak": 1.324071376984648e-07
+      }
+    },
+    {
+      "case": "same state, HP 12dB with lower cutoff",
+      "sample_rate": 44100,
+      "rms": 0.061592107923054404,
+      "peak": 0.32962101697921753,
+      "noise_floor": {
+        "rms": 1.323987163883163e-07,
+        "peak": 1.3239906593298656e-07
+      },
+      "released": {
+        "rms": 1.3903167096855305e-07,
+        "peak": 3.00094797012207e-07
+      },
+      "tail": {
+        "rms": 1.324071376984648e-07,
+        "peak": 1.324071376984648e-07
+      }
+    }
+  ],
+  "attenuation_db_relative_to_LP24": -44.9778947765735,
+  "all_filter_roundtrips": [
+    {
+      "filter": "LP 24dB",
+      "changed_fields": [],
+      "held_note": {
+        "rms": 0.1615107966382858,
+        "peak": 0.2675113081932068
+      },
+      "fresh_note": {
+        "rms": 0.16159559137489024,
+        "peak": 0.2675144672393799
+      },
+      "LP24_recovered_without_reload": {
+        "rms": 0.16151079732908796,
+        "peak": 0.26751142740249634
+      },
+      "passed": true
+    },
+    {
+      "filter": "LP 18dB",
+      "changed_fields": [
+        "filtertype"
+      ],
+      "held_note": {
+        "rms": 0.16233092607613905,
+        "peak": 0.26360926032066345
+      },
+      "fresh_note": {
+        "rms": 0.16234494016840684,
+        "peak": 0.26364412903785706
+      },
+      "LP24_recovered_without_reload": {
+        "rms": 0.16151079555044426,
+        "peak": 0.2675113081932068
+      },
+      "passed": true
+    },
+    {
+      "filter": "LP 12dB",
+      "changed_fields": [
+        "filtertype"
+      ],
+      "held_note": {
+        "rms": 0.16238581549039813,
+        "peak": 0.26844367384910583
+      },
+      "fresh_note": {
+        "rms": 0.16239772472637282,
+        "peak": 0.26858773827552795
+      },
+      "LP24_recovered_without_reload": {
+        "rms": 0.16151079644536953,
+        "peak": 0.2675112783908844
+      },
+      "passed": true
+    },
+    {
+      "filter": "LP 6dB",
+      "changed_fields": [
+        "filtertype"
+      ],
+      "held_note": {
+        "rms": 0.1624453046875202,
+        "peak": 0.2738703191280365
+      },
+      "fresh_note": {
+        "rms": 0.1624550469065496,
+        "peak": 0.27405932545661926
+      },
+      "LP24_recovered_without_reload": {
+        "rms": 0.16151079617570152,
+        "peak": 0.2675112783908844
+      },
+      "passed": true
+    },
+    {
+      "filter": "HP 12dB",
+      "changed_fields": [
+        "filtertype"
+      ],
+      "held_note": {
+        "rms": 0.0009151896196113092,
+        "peak": 0.010829065926373005
+      },
+      "fresh_note": {
+        "rms": 0.000910122361581293,
+        "peak": 0.010830486193299294
+      },
+      "LP24_recovered_without_reload": {
+        "rms": 0.161510796880476,
+        "peak": 0.2675113379955292
+      },
+      "passed": true
+    },
+    {
+      "filter": "BP 12dB",
+      "changed_fields": [
+        "filtertype"
+      ],
+      "held_note": {
+        "rms": 0.00541302852755438,
+        "peak": 0.06192433089017868
+      },
+      "fresh_note": {
+        "rms": 0.005383162528052049,
+        "peak": 0.06192971393465996
+      },
+      "LP24_recovered_without_reload": {
+        "rms": 0.16151079570762328,
+        "peak": 0.2675113379955292
+      },
+      "passed": true
+    },
+    {
+      "filter": "Notch",
+      "changed_fields": [
+        "filtertype"
+      ],
+      "held_note": {
+        "rms": 0.17177123833687796,
+        "peak": 0.29559916257858276
+      },
+      "fresh_note": {
+        "rms": 0.1717962863008777,
+        "peak": 0.2955574095249176
+      },
+      "LP24_recovered_without_reload": {
+        "rms": 0.16151079785068587,
+        "peak": 0.2675113081932068
+      },
+      "passed": true
+    },
+    {
+      "filter": "LP SV 24dB",
+      "changed_fields": [
+        "filtertype"
+      ],
+      "held_note": {
+        "rms": 0.17136844279341873,
+        "peak": 0.2821636497974396
+      },
+      "fresh_note": {
+        "rms": 0.17139720936813593,
+        "peak": 0.28219130635261536
+      },
+      "LP24_recovered_without_reload": {
+        "rms": 0.1615107963209132,
+        "peak": 0.26751139760017395
+      },
+      "passed": true
+    },
+    {
+      "filter": "HP SV 24dB",
+      "changed_fields": [
+        "filtertype"
+      ],
+      "held_note": {
+        "rms": 0.0003918762411330945,
+        "peak": 0.004361454397439957
+      },
+      "fresh_note": {
+        "rms": 0.00038969122217558566,
+        "peak": 0.004361515864729881
+      },
+      "LP24_recovered_without_reload": {
+        "rms": 0.16151079527322112,
+        "peak": 0.2675112783908844
+      },
+      "passed": true
+    },
+    {
+      "filter": "BP SV 24dB",
+      "changed_fields": [
+        "filtertype"
+      ],
+      "held_note": {
+        "rms": 0.001184298129900416,
+        "peak": 0.01334487646818161
+      },
+      "fresh_note": {
+        "rms": 0.0011777540944227938,
+        "peak": 0.013345095328986645
+      },
+      "LP24_recovered_without_reload": {
+        "rms": 0.16151079305468855,
+        "peak": 0.2675113081932068
+      },
+      "passed": true
+    },
+    {
+      "filter": "LP Zero 24dB",
+      "changed_fields": [
+        "filtertype"
+      ],
+      "held_note": {
+        "rms": 0.25811546422721504,
+        "peak": 0.5032059550285339
+      },
+      "fresh_note": {
+        "rms": 0.25802427181371695,
+        "peak": 0.5070798993110657
+      },
+      "LP24_recovered_without_reload": {
+        "rms": 0.16151079708367827,
+        "peak": 0.2675112783908844
+      },
+      "passed": true
+    },
+    {
+      "filter": "HP Zero 24dB",
+      "changed_fields": [
+        "filtertype"
+      ],
+      "held_note": {
+        "rms": 0.515875996366776,
+        "peak": 1.0075067281723022
+      },
+      "fresh_note": {
+        "rms": 0.5157599341165989,
+        "peak": 1.006062388420105
+      },
+      "LP24_recovered_without_reload": {
+        "rms": 0.16151080105370183,
+        "peak": 0.2675113379955292
+      },
+      "passed": true
+    }
+  ],
+  "summary": {
+    "sample_rate": 44100,
+    "reference_LP24": {
+      "rms": 0.16159559104180365,
+      "peak": 0.26751434803009033
+    },
+    "released_note": {
+      "rms": 1.3993599808287436e-06,
+      "peak": 1.3015823242312763e-05
+    },
+    "released_tail": {
+      "rms": 1.324071376984648e-07,
+      "peak": 1.324071376984648e-07
+    },
+    "all_filter_selections": 12,
+    "passed": true
+  },
+  "settled_release_limit_rms": 1e-06,
+  "retained_initial_test_failure": "An initial immediate-release threshold of 1e-6 failed on a residual tail around 1.4e-6. The later settled tail matched the measured idle floor around 1.3e-7. No release-fix claim is based on that initial threshold failure.",
+  "conclusion": "The saved HP filter with maximum cutoff strongly attenuates the note. All 12 menu choices affect only filtertype, receive held/fresh notes and recover audibly via LP24 without a reload. This does not certify Mac typing-keyboard focus/key-up behavior in FL."
+}

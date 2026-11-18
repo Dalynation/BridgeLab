@@ -3,6 +3,7 @@
 #include "pluginterfaces/gui/iplugview.h"
 #include <dlfcn.h>
 #include <iostream>
+#include <unistd.h>
 using namespace Steinberg;using namespace Steinberg::Vst;
 int main(int argc,char** argv){
  @autoreleasepool {
@@ -13,7 +14,8 @@ int main(int argc,char** argv){
   using Factory=IPlugView*(*)(EditController*);
   auto make=(Factory)dlsym(library,"BridgeLabMakeEditor");if(!make)return 1;
   NSString* temporary=NSTemporaryDirectory();
-  auto count=[&](){NSUInteger n=0;for(NSString* name in [[NSFileManager defaultManager]contentsOfDirectoryAtPath:temporary error:nil])if([name hasPrefix:@"BridgeLab-editor-"])++n;return n;};
+  NSString* ownPrefix=[NSString stringWithFormat:@"BridgeLab-editor-%d-",getpid()];
+  auto count=[&](){NSUInteger n=0;for(NSString* name in [[NSFileManager defaultManager]contentsOfDirectoryAtPath:temporary error:nil])if([name hasPrefix:ownPrefix])++n;return n;};
   NSUInteger before=count();
   try{
    for(int iteration=0;iteration<200;++iteration){

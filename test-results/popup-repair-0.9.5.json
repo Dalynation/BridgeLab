@@ -1,0 +1,371 @@
+{
+  "candidate": "0.9.5 unreleased",
+  "status": "shared popup/input monitoring repair passed automated checks; user confirmed filter dropdown works in actual FL; keyboard release acceptance pending",
+  "design": "Production discovery uses HWND ownership/thread, virtual input/monitor coordinates, original window pixels and rendering mode; no vendor or control-name branches. Test fixtures use vendor-specific coordinates.",
+  "popup_roundtrips": [
+    {
+      "menu": "filter",
+      "passed": true,
+      "original_menu_visible": true,
+      "automatic_health_report": true,
+      "audio_peak_while_open": 0.274726003408432,
+      "selection_changed_state": true,
+      "selection_closed_menu": true,
+      "escape_closed_without_change": true,
+      "outside_click_closed": true,
+      "health": [
+        1,
+        3,
+        6,
+        6,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "menu": "voices",
+      "passed": true,
+      "original_menu_visible": true,
+      "automatic_health_report": true,
+      "audio_peak_while_open": 0.2747260332107544,
+      "selection_changed_state": true,
+      "selection_closed_menu": true,
+      "escape_closed_without_change": true,
+      "outside_click_closed": true,
+      "health": [
+        1,
+        6,
+        12,
+        12,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "menu": "lfo-destination",
+      "passed": true,
+      "original_menu_visible": true,
+      "automatic_health_report": true,
+      "audio_peak_while_open": 0.27472609281539917,
+      "selection_changed_state": true,
+      "selection_closed_menu": true,
+      "escape_closed_without_change": true,
+      "outside_click_closed": true,
+      "health": [
+        1,
+        9,
+        18,
+        18,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "menu": "amp-destination",
+      "passed": true,
+      "original_menu_visible": true,
+      "automatic_health_report": true,
+      "audio_peak_while_open": 0.274726003408432,
+      "selection_changed_state": true,
+      "selection_closed_menu": true,
+      "escape_closed_without_change": true,
+      "outside_click_closed": true,
+      "health": [
+        1,
+        12,
+        24,
+        24,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "menu": "portamento",
+      "passed": true,
+      "original_menu_visible": true,
+      "automatic_health_report": true,
+      "audio_peak_while_open": 0.2747260332107544,
+      "selection_changed_state": true,
+      "selection_closed_menu": true,
+      "escape_closed_without_change": true,
+      "outside_click_closed": true,
+      "health": [
+        1,
+        15,
+        30,
+        30,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "menu": "modulation",
+      "passed": true,
+      "original_menu_visible": true,
+      "automatic_health_report": true,
+      "audio_peak_while_open": 0.2747260630130768,
+      "selection_changed_state": true,
+      "selection_closed_menu": true,
+      "escape_closed_without_change": true,
+      "outside_click_closed": true,
+      "health": [
+        1,
+        18,
+        36,
+        36,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "modern_artwork_audio_recall": [
+    {
+      "plugin": "BridgeLab - TAL-J8X-64 (x64)",
+      "first_frame_seconds": 13.240059208000002,
+      "before": {
+        "rms": 0.07708119832377879,
+        "peak": 0.20757174491882324
+      },
+      "original_artwork_preserved": true,
+      "after": {
+        "rms": 0.0006050387250246071,
+        "peak": 0.0030337434727698565
+      },
+      "mouse_changes_state": true,
+      "graphics_open": [
+        1,
+        1,
+        2831024,
+        15
+      ],
+      "graphics_closed": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "normalization_byte_delta": 8,
+      "recalled_audio": {
+        "rms": 0.0004942265640783502,
+        "peak": 0.001452688709832728
+      },
+      "normalized_edited_state_recreated_exactly": true,
+      "passed": true
+    },
+    {
+      "plugin": "BridgeLab - TAL-Pha-64 (x64)",
+      "first_frame_seconds": 9.075205417000003,
+      "before": {
+        "rms": 0.07268644038189037,
+        "peak": 0.2967090904712677
+      },
+      "original_artwork_preserved": true,
+      "after": {
+        "rms": 0.0005290057567503935,
+        "peak": 0.0014412025921046734
+      },
+      "mouse_changes_state": true,
+      "graphics_open": [
+        1,
+        1,
+        2524088,
+        15
+      ],
+      "graphics_closed": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "normalization_byte_delta": -74,
+      "recalled_audio": {
+        "rms": 0.0005338609068378258,
+        "peak": 0.001360050868242979
+      },
+      "normalized_edited_state_recreated_exactly": true,
+      "passed": true
+    },
+    {
+      "plugin": "BridgeLab - TAL-U-NO-LX-V2-64 (x64)",
+      "first_frame_seconds": 9.324208958,
+      "before": {
+        "rms": 0.036047490912241034,
+        "peak": 0.07911347597837448
+      },
+      "original_artwork_preserved": true,
+      "after": {
+        "rms": 1.4769911552433597e-07,
+        "peak": 0.00023477524518966675
+      },
+      "mouse_changes_state": true,
+      "graphics_open": [
+        1,
+        1,
+        2280060,
+        28
+      ],
+      "graphics_closed": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "normalization_byte_delta": 8,
+      "recalled_audio": {
+        "rms": 0.0,
+        "peak": 0
+      },
+      "normalized_edited_state_recreated_exactly": true,
+      "passed": true
+    }
+  ],
+  "audio_editor_concurrency": [
+    {
+      "test": "ffbb70884a6cd2af-arm64-editor",
+      "arch": "arm64",
+      "plugin": "BridgeLab - SQ8L (x86)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=480000 max_slice=558 VST_block=64 rate=48000 realtime_policy=1 latency=2048 editor_ack_seconds=0.000705958 editor_state_wait_seconds=0 editor_ready_seconds=1.22501 editor_changed=1 overload_initial_peak=0 device_output=silence",
+      "stderr": "",
+      "passed": true,
+      "underrun_quanta": [
+        "0"
+      ]
+    },
+    {
+      "test": "a4def1870e48ca34-arm64-editor",
+      "arch": "arm64",
+      "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=480000 max_slice=558 VST_block=64 rate=48000 realtime_policy=1 latency=2048 editor_ack_seconds=0.001286 editor_state_wait_seconds=0 editor_ready_seconds=1.25027 editor_changed=1 overload_initial_peak=0 device_output=silence",
+      "stderr": "",
+      "passed": true,
+      "underrun_quanta": [
+        "0"
+      ]
+    },
+    {
+      "test": "ffbb70884a6cd2af-x86_64-editor",
+      "arch": "x86_64",
+      "plugin": "BridgeLab - SQ8L (x86)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=480000 max_slice=558 VST_block=64 rate=48000 realtime_policy=1 latency=2048 editor_ack_seconds=0.000788791 editor_state_wait_seconds=0 editor_ready_seconds=1.46748 editor_changed=1 overload_initial_peak=0 device_output=silence",
+      "stderr": "",
+      "passed": true,
+      "underrun_quanta": [
+        "0"
+      ]
+    },
+    {
+      "test": "a4def1870e48ca34-x86_64-editor",
+      "arch": "x86_64",
+      "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=480000 max_slice=558 VST_block=64 rate=48000 realtime_policy=1 latency=2048 editor_ack_seconds=0.00133379 editor_state_wait_seconds=0 editor_ready_seconds=1.19088 editor_changed=1 overload_initial_peak=0 device_output=silence",
+      "stderr": "",
+      "passed": true,
+      "underrun_quanta": [
+        "0"
+      ]
+    },
+    {
+      "test": "concurrent-0",
+      "arch": "arm64",
+      "plugin": "BridgeLab - SQ8L (x86)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=256 rate=48000 realtime_policy=1 latency=2048 editor_ack_seconds=0 editor_state_wait_seconds=0 editor_ready_seconds=0 editor_changed=0 overload_initial_peak=0 device_output=silence",
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "test": "concurrent-1",
+      "arch": "arm64",
+      "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=256 rate=48000 realtime_policy=1 latency=2048 editor_ack_seconds=0 editor_state_wait_seconds=0 editor_ready_seconds=0 editor_changed=0 overload_initial_peak=0 device_output=silence",
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "test": "concurrent-2",
+      "arch": "x86_64",
+      "plugin": "BridgeLab - SQ8L (x86)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=256 rate=48000 realtime_policy=1 latency=2048 editor_ack_seconds=0 editor_state_wait_seconds=0 editor_ready_seconds=0 editor_changed=0 overload_initial_peak=0 device_output=silence",
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "test": "concurrent-3",
+      "arch": "x86_64",
+      "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=256 rate=48000 realtime_policy=1 latency=2048 editor_ack_seconds=0 editor_state_wait_seconds=0 editor_ready_seconds=0 editor_changed=0 overload_initial_peak=0 device_output=silence",
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "test": "four concurrent Core Audio clients: underruns",
+      "passed": true,
+      "underrun_quanta": [
+        "0",
+        "0",
+        "0",
+        "0"
+      ]
+    }
+  ],
+  "popup_contracts": [
+    {
+      "architecture": "i686",
+      "passed": true,
+      "stdout": "PASS: popup thread isolation, coordinate forwarding, size-limit detection and destroyed-window cleanup\n",
+      "stderr": "wineserver: using server-side synchronization.\n"
+    },
+    {
+      "architecture": "x86_64",
+      "passed": true,
+      "stdout": "PASS: popup thread isolation, coordinate forwarding, size-limit detection and destroyed-window cleanup\n",
+      "stderr": "wineserver: using server-side synchronization.\n"
+    }
+  ],
+  "general_monitoring": [
+    "input queued/delivered/coalesced/rejected",
+    "frame publication and observed stall",
+    "popup capture and input forwarding",
+    "unsupported GPU or size/window limits",
+    "backing popup offscreen status"
+  ],
+  "limits": [
+    "Input delivered does not prove the intended action",
+    "Published frame buffers do not prove artwork changed correctly",
+    "Nested menus, arbitrary dialogs, text editing and every individual control remain unverified",
+    "Separate GPU-rendered popup forwarding remains unsupported and is reported",
+    "Actual FL keyboard note release remains pending after earlier failed candidate",
+    "No universal DLL, Mac, or FL guarantee"
+  ],
+  "installation": "Installed to Desktop app and shared engine after backup; six engine hashes match packaged candidate; FL restarted and saved QA project reloaded",
+  "actual_fl_observation": "NoiseMaker opened; local doctor reads live generic health with frame publication, no input rejection or capture error; dropdown and keyboard behavior await user confirmation",
+  "actual_fl_dropdown": "PASS: user confirms FILTER dropdown opens, selects another item, and closes/reopens",
+  "actual_fl_keyboard_release": "Not yet testable: user hears no sound; checking saved SQ8L-solo/NoiseMaker-muted state before classifying audio or note release"
+}

@@ -4,13 +4,13 @@ import subprocess,os,struct,mmap,select,time,tempfile,json,zlib
 HOME=Path(os.environ.get('BRIDGELAB_HOME',str(Path.home()/'Library/Application Support/BridgeLab')))
 MAP_BYTES=16+2048*2048*4
 class Session:
- def __init__(self,row):
+ def __init__(self,row,sample_rate=48000):
   arch=row['architecture'];runtime='Wine Crossover.app/Contents/Resources/wine/bin/wine64'
-  env={**os.environ,'WINEPREFIX':str(HOME/'prefixes'/('crossover-'+arch)),'WINEDEBUG':'-all','MVK_CONFIG_LOG_LEVEL':'0'}
+  env={**os.environ,'WINEPREFIX':str(HOME/'prefixes'/row.get('runtime_profile','crossover-'+arch)),'WINEDEBUG':'-all','MVK_CONFIG_LOG_LEVEL':'0','WINE_D3D_CONFIG':'renderer=gl,shader_backend=glsl'}
   runtime=os.environ.get('BRIDGELAB_TEST_RUNTIME_'+arch.upper(),str(HOME/'engine/runtime'/runtime))
   env['WINEPREFIX']=os.environ.get('BRIDGELAB_TEST_PREFIX_'+arch.upper(),env['WINEPREFIX'])
   runner=os.environ.get('BRIDGELAB_TEST_RUNNER_'+arch.upper(),str(HOME/'engine/bin'/('runner-'+arch+'.exe')))
-  self.p=subprocess.Popen([runtime,runner,'Z:'+row['path'],'--serve','48000','realtime'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,env=env)
+  self.p=subprocess.Popen([runtime,runner,'Z:'+row['path'],'--serve',str(sample_rate),'realtime'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,env=env)
   try:assert struct.unpack('<3I',self.read(12,90))[0]==0x424c3032
   except Exception:
    self.p.kill();self.p.wait();raise

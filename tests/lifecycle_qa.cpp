@@ -17,7 +17,7 @@ int main(int argc,char** argv){try{
  auto module=VST3::Hosting::Module::create(argv[1],error);if(!module)throw std::runtime_error(error);
  auto factory=module->getFactory();auto component=factory.createInstance<IComponent>(factory.classInfos()[0].ID());HostApplication host;
  if(!component||component->initialize(&host)!=kResultOk)throw std::runtime_error("initialize");
- FUnknownPtr<IAudioProcessor> processor(component);ProcessSetup setup{};setup.processMode=scenario=="prefetch"?kPrefetch:scenario=="control-pressure"?kRealtime:kOffline;setup.symbolicSampleSize=kSample32;setup.maxSamplesPerBlock=256;setup.sampleRate=48000;
+ FUnknownPtr<IAudioProcessor> processor(component);ProcessSetup setup{};setup.processMode=scenario=="prefetch"?kPrefetch:(scenario=="control-pressure"||scenario=="queue-recovery"||scenario=="held-key-recovery")?kRealtime:kOffline;setup.symbolicSampleSize=kSample32;setup.maxSamplesPerBlock=256;setup.sampleRate=48000;
  if(processor->setupProcessing(setup)!=kResultOk||component->setActive(true)!=kResultOk)throw std::runtime_error("activate");
  component->activateBus(kAudio,kOutput,0,true);component->activateBus(kEvent,kInput,0,true);processor->setProcessing(true);
  float left[256]{},right[256]{};float* channels[]{left,right};AudioBusBuffers bus{};bus.numChannels=2;bus.channelBuffers32=channels;EventList events;ProcessData data{};data.processMode=setup.processMode;data.symbolicSampleSize=kSample32;data.numOutputs=1;data.outputs=&bus;data.inputEvents=&events;data.numSamples=256;
@@ -27,6 +27,14 @@ int main(int argc,char** argv){try{
  if(scenario=="zero-sample-note"){note();data.numSamples=0;data.numOutputs=0;processor->process(data);events.clear();data.numSamples=256;data.numOutputs=1;peak=render(128);}
  else if(scenario=="repeated-activation"){note();if(render(16)<.001)throw std::runtime_error("initial note silent");if(component->setActive(true)!=kResultOk)throw std::runtime_error("repeated activation");peak=render(16);}
  else if(scenario=="prefetch"){note();render(512);peak=render(64);}
+ else if(scenario=="queue-recovery"||scenario=="held-key-recovery"){
+  // Deliberately exhaust the bounded queue, as a stalled/catching-up host can.
+  // Once the worker catches up, a new key must sound without reloading the synth.
+  if(scenario=="held-key-recovery")note();render(2048);std::this_thread::sleep_for(std::chrono::milliseconds(1500));if(scenario=="queue-recovery")note();auto start=std::chrono::steady_clock::now();int audible=0;
+  long long maxLateUs=0;
+  for(int b=0;b<256;b++){maxLateUs=std::max(maxLateUs,(long long)std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now()-start).count()-b*256*1000000LL/48000);float value=render(1);if(b>32&&value>.0001)++audible;std::this_thread::sleep_until(start+std::chrono::microseconds((b+1)*256*1000000LL/48000));}
+  std::cout<<"recovered_audible_blocks="<<audible<<"/223 max_timer_lateness_us="<<maxLateUs<<" ";peak=audible==223?.1f:0.f;
+ }
  else if(scenario=="control-pressure"){
   note();auto start=std::chrono::steady_clock::now();std::atomic<bool> done{false};std::atomic<int> captures{0};
   std::thread controls([&]{while(!done){MemoryStream state;if(component->getState(&state)!=kResultOk)break;++captures;}});

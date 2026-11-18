@@ -28,10 +28,7 @@ try:
  quanta=re.findall(r'underrun quanta=(\d+)',log.read_text()[offset:]);results.extend(group);results.append(dict(test='four concurrent Core Audio clients: underruns',passed=quanta==['0']*4,underrun_quanta=quanta))
  for r in results[4:]:print(json.dumps(r),flush=True)
 finally:
- server=home/'engine/runtime/Wine Crossover.app/Contents/Resources/wine/bin/wineserver'
- for arch in ['x86','x64']:
-  env=dict(os.environ,WINEPREFIX=str(home/'prefixes'/('crossover-'+arch)),WINEDEBUG='-all')
-  for option in ['-k','-w']:
-   p=subprocess.run([str(server),option],env=env,capture_output=True,text=True,timeout=15);cleanup.append(dict(arch=arch,option=option,exit=p.returncode))
+ from qa_runtime import stop_profiles
+ cleanup=stop_profiles(home)
  (out/'results.json').write_text(json.dumps(dict(results=results,cleanup=cleanup),indent=2)+'\n')
 raise SystemExit(0 if len(results)==9 and all(r['passed'] for r in results) else 1)

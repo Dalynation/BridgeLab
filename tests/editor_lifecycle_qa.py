@@ -9,11 +9,14 @@ for row in rows:
  fd,path=tempfile.mkstemp(prefix='BridgeLab-lifecycle-',suffix='.frame');os.ftruncate(fd,e.MAP_BYTES);mapping=mmap.mmap(fd,e.MAP_BYTES);os.close(fd)
  try:
   _,before=s.request(3)
+  initial_resources=struct.unpack('<4I',s.request(12)[1]);assert initial_resources[:3]==(0,0,0),'audio-only instance allocated an editor window or frame'
   assert s.request(6,('Z:'+path).encode())[0][2]==1
   s.pump(30)
   opened=struct.unpack('<4I',s.request(11)[1]);assert opened[0:2]==(1,1)
+  opened_resources=struct.unpack('<4I',s.request(12)[1]);assert opened_resources[:3]==(1,1,e.MAP_BYTES)
   assert s.request(2)[0][2]==1
   closed=struct.unpack('<4I',s.request(11)[1]);assert closed[0:2]==(0,0)
+  closed_resources=struct.unpack('<4I',s.request(12)[1]);assert closed_resources[:3]==(0,0,0),'closing retained an editor host window or frame'
   s.pump(30)
   idle=struct.unpack('<4I',s.request(11)[1]);assert idle[2]==closed[2],'closed editor still receives idle callbacks'
   _,after=s.request(3);assert after==before,'close changed sound state'
@@ -23,7 +26,7 @@ for row in rows:
    assert s.request(2)[0][2]==1
   assert s.request(6,('Z:'+path).encode())[0][2]==1;s.pump(30)
   _,restored=s.request(3);assert restored==before,'reopening changed sound state'
-  result=dict(plugin=row['name'],passed=True,closed_gui_released=True,closed_frame_unmapped=True,closed_idle_callbacks_stopped=True,reopened_three_times=True,state_unchanged=True)
+  result=dict(plugin=row['name'],passed=True,audio_only_has_no_editor_resources=True,closed_host_window_destroyed=True,closed_gui_released=True,closed_frame_unmapped=True,closed_idle_callbacks_stopped=True,reopened_three_times=True,state_unchanged=True)
  finally:
   s.close();mapping.close();os.unlink(path)
  results.append(result)
