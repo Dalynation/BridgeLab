@@ -18,6 +18,9 @@ using namespace Steinberg;using namespace Steinberg::Vst;
 @property(nonatomic,assign) void* mapping;
 @property(nonatomic,assign) uint32_t sequence;
 @property(nonatomic,assign) BOOL connected;
+@property(nonatomic,weak) NSResponder* keyboardHost;
+@property(nonatomic,strong) NSMutableIndexSet* editorKeys;
+@property(nonatomic,assign) BOOL routingHostKey;
 -(void)start;
 -(void)stop;
 @end
@@ -32,7 +35,7 @@ using namespace Steinberg;using namespace Steinberg::Vst;
  return self.controller->sendMessage(message)==kResultOk;
 }
 -(void)start {
- NSString* prefix=[NSTemporaryDirectory() stringByAppendingPathComponent:@"BridgeLab-editor-XXXXXX"];
+ NSString* prefix=[NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"BridgeLab-editor-%d-XXXXXX",getpid()]];
  const char* representation=prefix.fileSystemRepresentation;
  if(!representation)return;
  std::vector<char> path(representation,representation+strlen(representation)+1);
@@ -71,7 +74,11 @@ using namespace Steinberg;using namespace Steinberg::Vst;
  EditorInputEvent input{message,(int32_t)(p.x*self.bitmap.pixelsWide/self.bounds.size.width),(int32_t)(p.y*self.bitmap.pixelsHigh/self.bounds.size.height),value};
  [self send:"BridgeLab.EditorInput" bytes:&input length:sizeof(input)];[self refresh];
 }
--(void)mouseDown:(NSEvent*)event{[self.window makeFirstResponder:self];[self input:event message:event.clickCount==2?0x203:0x201 value:1];}
+-(void)mouseDown:(NSEvent*)event{
+ // Preserve the recipient of a typing-piano press begun before this click.
+ NSResponder* previous=self.window.firstResponder;
+ if(previous&&previous!=self)self.keyboardHost=previous;
+ [self.window makeFirstResponder:self];[self input:event message:event.clickCount==2?0x203:0x201 value:1];}
 -(void)mouseUp:(NSEvent*)event{[self input:event message:0x202 value:0];}
 -(void)mouseDragged:(NSEvent*)event{[self input:event message:0x200 value:1];}
 -(void)mouseMoved:(NSEvent*)event{[self input:event message:0x200 value:0];}
@@ -83,14 +90,28 @@ using namespace Steinberg;using namespace Steinberg::Vst;
  switch(event.keyCode){case 123:return 0x25;case 124:return 0x27;case 125:return 0x28;case 126:return 0x26;case 36:return 13;case 48:return 9;case 51:return 8;case 53:return 27;case 117:return 0x2e;default:break;}
  NSString* s=event.charactersIgnoringModifiers.uppercaseString;return s.length?[s characterAtIndex:0]:0;
 }
--(void)keyDown:(NSEvent*)event{uint32_t key=[self virtualKey:event];[self input:event message:0x100 value:key];for(NSUInteger i=0;i<event.characters.length;i++)[self input:event message:0x102 value:[event.characters characterAtIndex:i]];}
--(void)keyUp:(NSEvent*)event{[self input:event message:0x101 value:[self virtualKey:event]];}
+-(void)keyDown:(NSEvent*)event{if(!self.editorKeys)self.editorKeys=[NSMutableIndexSet indexSet];[self.editorKeys addIndex:event.keyCode];uint32_t key=[self virtualKey:event];[self input:event message:0x100 value:key];for(NSUInteger i=0;i<event.characters.length;i++)[self input:event message:0x102 value:[event.characters characterAtIndex:i]];}
+-(void)keyUp:(NSEvent*)event{
+ if(self.routingHostKey){[super keyUp:event];return;}
+ if([self.editorKeys containsIndex:event.keyCode]){
+  [self.editorKeys removeIndex:event.keyCode];[self input:event message:0x101 value:[self virtualKey:event]];
+ }else if(self.keyboardHost&&self.keyboardHost!=self){
+  // Hosts can handle their piano keys in NSWindow.sendEvent, before responder
+  // dispatch. Calling the previous responder directly skips that host path.
+  NSWindow* window=self.window;NSResponder* host=self.keyboardHost;
+  NSResponder* current=window.firstResponder;
+  self.routingHostKey=YES;
+  @try{if([window makeFirstResponder:host])[window sendEvent:event];else [super keyUp:event];}
+  @finally{if(window.firstResponder==host)[window makeFirstResponder:current];self.routingHostKey=NO;}
+ }
+ else{[super keyUp:event];}
+}
 -(void)stop {
  [self.timer invalidate];self.timer=nil;
  if(self.controller)[self send:"BridgeLab.CloseEditor" bytes:nullptr length:0];
  self.controller=nullptr;self.resizeEditor=nil;
  if(self.mapping){munmap(self.mapping,editorMapBytes);self.mapping=nullptr;}
- if(self.mappingPath){unlink(self.mappingPath.fileSystemRepresentation);self.mappingPath=nil;}
+ if(self.mappingPath){unlink(self.mappingPath.fileSystemRepresentation);unlink([self.mappingPath stringByAppendingString:@".health.json"].fileSystemRepresentation);self.mappingPath=nil;}
 }
 @end
 class BridgeView final:public CPluginView {

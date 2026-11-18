@@ -23,6 +23,7 @@
 #include <dlfcn.h>
 #endif
 #include "plugin_state.hpp"
+#include "audio_health.hpp"
 #include "editor_gpu.hpp"
 #include "windows_editor.hpp"
 static std::string pluginDirectory;
@@ -80,9 +81,10 @@ int main(int argc,char** argv){
  _setmode(_fileno(stdin),_O_BINARY);_setmode(_fileno(stdout),_O_BINARY);
 #endif
  uint32_t hello[3]={wireMagic,uint32_t(e->programs),uint32_t(e->outputs)};
+ AudioHealth audioHealth(rate);
  std::atomic<uint32_t> program{0};std::atomic<bool> needsPrime{true};
 #ifdef _WIN32
- EditorHost editor(e);
+ EditorHost editor(e,&audioHealth);
 #endif
  SharedAudio* shared=nullptr;
 #ifdef _WIN32
@@ -117,6 +119,7 @@ int main(int argc,char** argv){
  for(auto& c:out)std::fill(c.begin(),c.end(),0);
  e->replacing(e,ip.data(),op.data(),quantum);
  if(measure){auto micros=std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now()-renderStart).count();response.status=1|(uint32_t(std::min<int64_t>(micros,0x7fffffff))<<1);}
+ audioHealth.observe(request,out[0].data(),out[std::min(1,e->outputs-1)].data());
  for(int i=0;i<quantum;i++){response.left[i]=std::isfinite(out[0][i])?out[0][i]:0;response.right[i]=std::isfinite(out[std::min(1,e->outputs-1)][i])?out[std::min(1,e->outputs-1)][i]:0;}
  } // Release the plugin mutex before pipe I/O can block.
  return response;

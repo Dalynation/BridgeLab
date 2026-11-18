@@ -12,11 +12,16 @@
 #include <memory>
 #include "plugin_state.hpp"
 #include "editor_input_hooks.hpp"
+#include "editor_popups.hpp"
+#include "audio_health.hpp"
 struct EditorHost {
+ EditorPopups popups;std::string healthPath;DWORD lastHealthWrite=0,lastFramePublished=0;uint32_t framesPublished=0,inputDelivered=0;std::atomic<uint32_t> inputQueued{0},inputCoalesced{0},inputRejected{0};
+ std::string effectName;
+ AudioHealth* audioHealth=nullptr;uint32_t lastAudioBlocks=0;DWORD lastAudioActivity=0;
  Effect* effect;std::recursive_mutex mutex;HWND window=nullptr;bool opened=false,standalone=false,embedded=false;
  HANDLE frameFile=INVALID_HANDLE_VALUE,frameMapping=nullptr;uint8_t* frameMemory=nullptr;DWORD lastFrame=0;uint32_t idleCalls=0;HWND dragTarget=nullptr;std::atomic<bool> quit{false};std::atomic<int> note{0};std::string statePath;
  const DWORD messageThread=GetCurrentThreadId();
- explicit EditorHost(Effect* e):effect(e){MSG pending{};PeekMessageW(&pending,nullptr,0,0,PM_NOREMOVE);}
+ explicit EditorHost(Effect* e,AudioHealth* health=nullptr):audioHealth(health),effect(e){char name[128]{};effect->dispatch(effect,45,0,0,name,0);name[127]=0;effectName=name;MSG pending{};PeekMessageW(&pending,nullptr,0,0,PM_NOREMOVE);}
  std::mutex requestMutex;std::mutex jobMutex;std::condition_variable jobDone;
  struct Control {uint32_t command;std::vector<uint8_t> input,output;bool ok=false,done=false;uint32_t program=0;bool syncProgram=false;};
  struct Job {Control* control=nullptr;std::unique_ptr<Control> owned;};
@@ -50,44 +55,60 @@ struct EditorHost {
  return DefWindowProcA(hwnd,msg,wp,lp);
  }
 
- void unmapFrame(){if(frameMemory)UnmapViewOfFile(frameMemory);if(frameMapping)CloseHandle(frameMapping);if(frameFile!=INVALID_HANDLE_VALUE)CloseHandle(frameFile);frameMemory=nullptr;frameMapping=nullptr;frameFile=INVALID_HANDLE_VALUE;}
+ void unmapFrame(){if(!healthPath.empty()){DeleteFileA(healthPath.c_str());DeleteFileA((healthPath+".tmp").c_str());healthPath.clear();lastHealthWrite=0;}if(frameMemory)UnmapViewOfFile(frameMemory);if(frameMapping)CloseHandle(frameMapping);if(frameFile!=INVALID_HANDLE_VALUE)CloseHandle(frameFile);frameMemory=nullptr;frameMapping=nullptr;frameFile=INVALID_HANDLE_VALUE;}
  bool embed(const std::vector<uint8_t>& path){
  EditorGPU::enabled=!std::getenv("BRIDGELAB_GPU_BRIDGE")||std::string(std::getenv("BRIDGELAB_GPU_BRIDGE"))!="0";EditorGPU::reset();
  embedded=true;
  if(!window&&!create("BridgeLab - Original Windows Plugin Editor"))return false;
  SetWindowLongPtrW(window,GWL_EXSTYLE,(GetWindowLongPtrW(window,GWL_EXSTYLE)&~WS_EX_APPWINDOW)|WS_EX_TOOLWINDOW|WS_EX_NOACTIVATE);
  unmapFrame();if(path.empty()||path.size()>32768||std::find(path.begin(),path.end(),0)!=path.end())return false;
- std::string name(path.begin(),path.end());frameFile=CreateFileA(name.c_str(),GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,nullptr,OPEN_EXISTING,0,nullptr);
+ std::string name(path.begin(),path.end());healthPath=name+".health.json";frameFile=CreateFileA(name.c_str(),GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,nullptr,OPEN_EXISTING,0,nullptr);
  if(frameFile==INVALID_HANDLE_VALUE)return false;
  LARGE_INTEGER size{};if(!GetFileSizeEx(frameFile,&size)||size.QuadPart!=editorMapBytes){unmapFrame();return false;}
  frameMapping=CreateFileMappingA(frameFile,nullptr,PAGE_READWRITE,0,0,nullptr);if(frameMapping)frameMemory=(uint8_t*)MapViewOfFile(frameMapping,FILE_MAP_ALL_ACCESS,0,0,editorMapBytes);
  if(!frameMemory){unmapFrame();return false;}
  HMODULE plugin=nullptr;GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,(LPCSTR)effect->dispatch,&plugin);if(plugin)log((std::string("input imports patched ")+std::to_string(EditorInputHooks::patch(plugin))).c_str());else log("plugin module lookup FAILED");EditorInputHooks::root=window;EditorInputHooks::enabled=true;embedded=true;open();lastFrame=0;return opened;
  }
+ uint32_t unsupportedPopups()const{return (EditorGPU::liveChains.load()&&!popups.windows.empty()?1u:0u)|(popups.unsupported?2u:0u);}
+ static std::string jsonName(const std::string& name){std::string result;for(unsigned char c:name){if(c=='"'||c=='\\'){result+='\\';result+=char(c);}else if(c<32)result+=' ';else if(c>=128){const char* hex="0123456789abcdef";result+="\\u00";result+=hex[c>>4];result+=hex[c&15];}else result+=char(c);}return result;}
+ void reportHealth(bool force=false){
+  if(healthPath.empty()||(!force&&GetTickCount()-lastHealthWrite<1000))return;
+  lastHealthWrite=GetTickCount();
+  std::string temporary=healthPath+".tmp";std::ofstream out(temporary,std::ios::trunc);
+  out<<"{\"instrument_name\":\""<<jsonName(effectName)<<"\",\"format_version\":1,\"popup_windows_detected\":"<<popups.discovered<<",\"original_popup_pixels_forwarded\":"<<uint32_t(popups.copied!=0)<<",\"popup_input_forwarded\":"<<uint32_t(popups.routed!=0)<<",\"capture_failure\":"<<uint32_t(popups.captureFailures!=0)<<",\"visible_popup_windows\":"<<popups.windows.size()<<",\"unsupported_popup_modes\":"<<unsupportedPopups()<<",\"input_queued\":"<<inputQueued.load()<<",\"input_delivered\":"<<inputDelivered<<",\"input_coalesced\":"<<inputCoalesced.load()<<",\"input_rejected\":"<<inputRejected.load()<<",\"frames_published\":"<<framesPublished<<",\"frame_stalled\":"<<uint32_t(lastFramePublished&&GetTickCount()-lastFramePublished>2000)<<",\"popup_backing_offscreen\":"<<uint32_t(popups.backingOffscreen());
+  if(audioHealth){auto a=audioHealth->snapshot();if(a[AudioHealth::Blocks]!=lastAudioBlocks){lastAudioBlocks=a[AudioHealth::Blocks];lastAudioActivity=GetTickCount();}out<<",\"audio_blocks_observed\":"<<a[AudioHealth::Blocks]<<",\"note_ons_observed\":"<<a[AudioHealth::NoteOns]<<",\"held_note_keys\":"<<a[AudioHealth::HeldKeys]<<",\"audio_rms\":"<<std::sqrt(AudioHealth::number(a[AudioHealth::MeanSquare]))<<",\"audio_peak\":"<<AudioHealth::number(a[AudioHealth::Peak])<<",\"quiet_while_notes\":"<<a[AudioHealth::Quiet]<<",\"nonfinite_audio_samples\":"<<a[AudioHealth::Invalid]<<",\"above_full_scale_recent\":"<<a[AudioHealth::AboveRecent]<<",\"audio_observation_stale\":"<<uint32_t(lastAudioActivity&&GetTickCount()-lastAudioActivity>2000);}
+  out<<"}";out.close();
+  if(out)MoveFileExA(temporary.c_str(),healthPath.c_str(),MOVEFILE_REPLACE_EXISTING);
+ }
  void frame(){
  if(!embedded||!frameMemory||!opened||GetTickCount()-lastFrame<66)return;lastFrame=GetTickCount();
  RECT rect{};GetClientRect(window,&rect);int w=rect.right,h=rect.bottom;if(w<1||h<1||w>int(editorMaxWidth)||h>int(editorMaxHeight))return;
- if(EditorGPU::enabled&&EditorGPU::liveChains.load()){EditorGPU::publish(frameMemory,w,h);return;}
+ popups.refresh(window,!EditorGPU::liveChains.load());
+ if(EditorGPU::enabled&&EditorGPU::liveChains.load()){if(EditorGPU::publish(frameMemory,w,h)){++framesPublished;lastFramePublished=GetTickCount();}reportHealth();return;}
  HDC screen=GetDC(window),dc=CreateCompatibleDC(screen);BITMAPINFO info{};info.bmiHeader.biSize=sizeof(BITMAPINFOHEADER);info.bmiHeader.biWidth=w;info.bmiHeader.biHeight=-h;info.bmiHeader.biPlanes=1;info.bmiHeader.biBitCount=32;info.bmiHeader.biCompression=BI_RGB;void* pixels=nullptr;
  HBITMAP bitmap=CreateDIBSection(dc,&info,DIB_RGB_COLORS,&pixels,nullptr,0);
  if(bitmap){HGDIOBJ old=SelectObject(dc,bitmap);PatBlt(dc,0,0,w,h,BLACKNESS);
  BitBlt(dc,0,0,w,h,screen,0,0,SRCCOPY);
- GdiFlush();auto* header=(uint32_t*)frameMemory;InterlockedIncrement((volatile LONG*)&header[1]);MemoryBarrier();header[0]=editorFrameMagic;header[2]=w;header[3]=h;std::memcpy(frameMemory+16,pixels,size_t(w)*h*4);MemoryBarrier();InterlockedIncrement((volatile LONG*)&header[1]);SelectObject(dc,old);DeleteObject(bitmap);}
- DeleteDC(dc);ReleaseDC(window,screen);
+ popups.compose(dc);
+ GdiFlush();auto* header=(uint32_t*)frameMemory;InterlockedIncrement((volatile LONG*)&header[1]);MemoryBarrier();header[0]=editorFrameMagic;header[2]=w;header[3]=h;std::memcpy(frameMemory+16,pixels,size_t(w)*h*4);MemoryBarrier();InterlockedIncrement((volatile LONG*)&header[1]);++framesPublished;lastFramePublished=GetTickCount();SelectObject(dc,old);DeleteObject(bitmap);}
+ DeleteDC(dc);ReleaseDC(window,screen);reportHealth();
  }
  bool input(const std::vector<uint8_t>& bytes){
  if(!opened||bytes.size()!=sizeof(EditorInputEvent))return false;EditorInputEvent e{};std::memcpy(&e,bytes.data(),sizeof(e));
  switch(e.message){case WM_MOUSEMOVE:case WM_LBUTTONDOWN:case WM_LBUTTONUP:case WM_LBUTTONDBLCLK:case WM_RBUTTONDOWN:case WM_RBUTTONUP:case WM_MOUSEWHEEL:case WM_KEYDOWN:case WM_KEYUP:case WM_CHAR:break;default:return false;}
  HWND target=nullptr;
- if(e.message==WM_KEYDOWN||e.message==WM_KEYUP||e.message==WM_CHAR){target=embedded?EditorInputHooks::focused:GetFocus();if(!target||(!IsChild(window,target)&&target!=window))target=GetWindow(window,GW_CHILD);if(!target)target=window;SendMessageA(target,e.message,e.value,1);return true;}
- POINT point{e.x,e.y};ClientToScreen(window,&point);EditorInputHooks::cursor=point;EditorInputHooks::buttons=e.value&3;target=(embedded&&EditorInputHooks::captured)?EditorInputHooks::captured:dragTarget;
+ if(e.message==WM_KEYDOWN||e.message==WM_KEYUP||e.message==WM_CHAR){if(embedded&&!EditorGPU::liveChains.load())popups.refresh(window);target=embedded?EditorInputHooks::focused:GetFocus();if(embedded&&!EditorGPU::liveChains.load()&&!popups.windows.empty())target=popups.windows.front().window;if(!target||(GetWindowThreadProcessId(target,nullptr)!=messageThread))target=GetWindow(window,GW_CHILD);if(!target)target=window;SendMessageA(target,e.message,e.value,1);++inputDelivered;return true;}
+ POINT point{e.x,e.y};ClientToScreen(window,&point);HWND popup=nullptr;
+ if(embedded&&!EditorGPU::liveChains.load()){popups.refresh(window);popup=popups.target(POINT{e.x,e.y},point);}
+ EditorInputHooks::cursor=point;EditorInputHooks::buttons=e.value&3;target=popup?EditorInputHooks::windowFromPoint(point):((embedded&&EditorInputHooks::captured)?EditorInputHooks::captured:dragTarget);
+ if(target&&(!IsWindow(target)||GetWindowThreadProcessId(target,nullptr)!=messageThread)){target=nullptr;dragTarget=nullptr;EditorInputHooks::captured=nullptr;}
  if(!target){target=window;for(int depth=0;depth<32;++depth){POINT local=point;ScreenToClient(target,&local);HWND child=ChildWindowFromPointEx(target,local,CWP_SKIPINVISIBLE|CWP_SKIPDISABLED);if(!child||child==target)break;target=child;}}
  POINT local=point;ScreenToClient(target,&local);
 
  if(e.message==WM_LBUTTONDOWN||e.message==WM_RBUTTONDOWN){dragTarget=target;SendMessageA(GetWindow(window,GW_CHILD),WM_ACTIVATE,WA_ACTIVE,0);SendMessageA(target,WM_SETCURSOR,(WPARAM)target,MAKELPARAM(HTCLIENT,e.message));if(embedded)EditorInputHooks::focused=target;else{SendMessageA(target,WM_MOUSEACTIVATE,(WPARAM)window,MAKELPARAM(HTCLIENT,e.message));SetFocus(target);}}
  LPARAM coordinates=MAKELPARAM(local.x,local.y);WPARAM flags=e.value;
  if(e.message==WM_MOUSEWHEEL){coordinates=MAKELPARAM(point.x,point.y);flags=MAKEWPARAM(0,(short)e.value);}
- SendMessageA(target,e.message,flags,coordinates);
+ SendMessageA(target,e.message,flags,coordinates);++inputDelivered;
  if(e.message==WM_LBUTTONUP||e.message==WM_RBUTTONUP)dragTarget=nullptr;return true;
  }
  void execute(Control* c){std::unique_lock<std::recursive_mutex> guard(mutex,std::defer_lock);
@@ -104,10 +125,16 @@ switch(c->command){
   // the host window kept every closed editor's UI resources alive.
   if(s->opened)s->effect->dispatch(s->effect,15,0,0,nullptr,0);
   EditorGPU::enabled=false;EditorGPU::reset();s->opened=false;s->embedded=false;s->unmapFrame();if(window)DestroyWindow(window);window=nullptr;
-  EditorInputHooks::enabled=false;EditorInputHooks::captured=nullptr;EditorInputHooks::focused=nullptr;EditorInputHooks::root=nullptr;EditorInputHooks::active=nullptr;
+  popups.clear();EditorInputHooks::enabled=false;EditorInputHooks::captured=nullptr;EditorInputHooks::focused=nullptr;EditorInputHooks::root=nullptr;EditorInputHooks::active=nullptr;
   c->ok=true;break;
  case EditorStatus:{RECT r{};GetWindowRect(window,&r);int32_t status[4]={r.left,r.top,int32_t(IsWindowVisible(window)),int32_t(GetForegroundWindow()==window)};c->output.resize(sizeof(status));std::memcpy(c->output.data(),status,sizeof(status));c->ok=true;break;}
  case EditorLifecycle:{uint32_t status[4]={uint32_t(opened),uint32_t(frameMemory!=nullptr),idleCalls,uint32_t(GetWindow(window,GW_CHILD)!=nullptr)};c->output.resize(sizeof(status));std::memcpy(c->output.data(),status,sizeof(status));c->ok=true;break;}
+ case AudioHealthStatus:{if(audioHealth){auto values=audioHealth->snapshot();c->output.resize(values.size()*4);std::memcpy(c->output.data(),values.data(),c->output.size());c->ok=true;}break;}
+ case EditorHealth:{
+  popups.refresh(window,!EditorGPU::liveChains.load());reportHealth(true);std::vector<uint32_t> status{1,popups.discovered,popups.copied,popups.routed,popups.captureFailures,uint32_t(popups.windows.size()),uint32_t((EditorGPU::liveChains.load()&&!popups.windows.empty()?1:0)|(popups.unsupported?2:0)),0};
+  for(auto& popup:popups.windows){auto r=popup.destination;status.insert(status.end(),{uint32_t(r.left),uint32_t(r.top),uint32_t(r.right),uint32_t(r.bottom)});}
+  c->output.resize(status.size()*4);std::memcpy(c->output.data(),status.data(),c->output.size());c->ok=true;break;
+ }
  case EditorGraphics:{auto status=EditorGPU::status();c->output.resize(sizeof(uint32_t)*status.size());std::memcpy(c->output.data(),status.data(),c->output.size());c->ok=true;break;}
  case EditorResources:{uint32_t status[4]={uint32_t(window!=nullptr),uint32_t(opened),frameMemory?uint32_t(editorMapBytes):0,idleCalls};c->output.resize(sizeof(status));std::memcpy(c->output.data(),status,sizeof(status));c->ok=true;break;}
  case SelectProgram:if(c->program<uint32_t(s->effect->programs)){s->effect->dispatch(s->effect,2,0,c->program,nullptr,0);c->ok=true;}break;
@@ -122,8 +149,8 @@ switch(c->command){
   if(control.command==EditorInput){if(control.input.size()!=sizeof(EditorInputEvent))return false;EditorInputEvent event{};std::memcpy(&event,control.input.data(),sizeof(event));switch(event.message){case WM_MOUSEMOVE:case WM_LBUTTONDOWN:case WM_LBUTTONUP:case WM_LBUTTONDBLCLK:case WM_RBUTTONDOWN:case WM_RBUTTONUP:case WM_MOUSEWHEEL:case WM_KEYDOWN:case WM_KEYUP:case WM_CHAR:break;default:return false;}}
   if(control.command==OpenEmbeddedEditor&&(control.input.empty()||control.input.size()>32768||std::find(control.input.begin(),control.input.end(),0)!=control.input.end()))return false;
   std::lock_guard<std::mutex> lock(jobMutex);
-  if(control.command==EditorInput&&control.input.size()==sizeof(EditorInputEvent)&&!jobs.empty()&&jobs.back().owned&&jobs.back().control->command==EditorInput){EditorInputEvent a{},b{};std::memcpy(&a,control.input.data(),sizeof(a));auto& previous=jobs.back().control->input;if(previous.size()==sizeof(b)){std::memcpy(&b,previous.data(),sizeof(b));if(a.message==WM_MOUSEMOVE&&b.message==WM_MOUSEMOVE&&a.value==b.value){previous=std::move(control.input);return true;}}}
-  if(jobs.size()>=128)return false;auto owned=std::make_unique<Control>(std::move(control));auto* pointer=owned.get();jobs.push_back({pointer,std::move(owned)});PostThreadMessageW(messageThread,controlMessage,0,0);return true;
+  if(control.command==EditorInput&&control.input.size()==sizeof(EditorInputEvent)&&!jobs.empty()&&jobs.back().owned&&jobs.back().control->command==EditorInput){EditorInputEvent a{},b{};std::memcpy(&a,control.input.data(),sizeof(a));auto& previous=jobs.back().control->input;if(previous.size()==sizeof(b)){std::memcpy(&b,previous.data(),sizeof(b));if(a.message==WM_MOUSEMOVE&&b.message==WM_MOUSEMOVE&&a.value==b.value){previous=std::move(control.input);++inputCoalesced;return true;}}}
+  if(jobs.size()>=128){if(control.command==EditorInput)++inputRejected;return false;}if(control.command==EditorInput)++inputQueued;auto owned=std::make_unique<Control>(std::move(control));auto* pointer=owned.get();jobs.push_back({pointer,std::move(owned)});PostThreadMessageW(messageThread,controlMessage,0,0);return true;
  }
  void request(Control& control){std::lock_guard<std::mutex> serialize(requestMutex);std::unique_lock<std::mutex> lock(jobMutex);jobs.push_back({&control,{}});PostThreadMessageW(messageThread,controlMessage,0,0);jobDone.wait(lock,[&]{return control.done;});}
  void dispatchJobs(){for(unsigned count=0;count<64;++count){Job job;{std::lock_guard<std::mutex> lock(jobMutex);if(jobs.empty())break;job=std::move(jobs.front());jobs.pop_front();}execute(job.control);if(!job.owned){{std::lock_guard<std::mutex> lock(jobMutex);job.control->done=true;}jobDone.notify_all();}}}

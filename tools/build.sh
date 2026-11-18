@@ -34,3 +34,10 @@ python3 tests/permission_folder.py
 if [ -x build/vst3/bridge-shutdown-transport ]; then python3 tests/shutdown_transport.py; fi
 if [ -x build/vst3/bridge-pipeline-transport ]; then python3 tests/pipeline_transport.py; fi
 if [ -x build/vst3/bridge-shared-transport ]; then python3 tests/shared_transport.py; fi
+
+swiftc -module-cache-path build/swift-cache src/Manager.swift tests/editor_health.swift -o build/editor-health-test
+build/editor-health-test build
+
+clang++ -std=c++17 -arch arm64 -arch x86_64 -mmacosx-version-min=11.0 tests/audio_health.cpp -o build/audio-health-test
+/usr/bin/arch -arm64 build/audio-health-test
+/usr/bin/arch -x86_64 build/audio-health-test

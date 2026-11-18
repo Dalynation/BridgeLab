@@ -9,6 +9,8 @@ mkdir -p build
 
 for arch in i686 x86_64; do
  "$toolchain/$arch-w64-mingw32-clang++" -std=c++17 -O2 -static tests/graphics_contract.cpp -o "build/graphics-test-$arch.exe" -luser32 -lgdi32 -lwinmm -lole32
+ "$toolchain/$arch-w64-mingw32-clang++" -std=c++17 -O2 -static tests/popup_contract.cpp -o "build/popup-test-$arch.exe" -luser32 -lgdi32
+ "$toolchain/$arch-w64-mingw32-clang++" -std=c++17 -O2 -static tests/audio_health.cpp -o "build/audio-health-test-$arch.exe"
 done
 
 "$toolchain/x86_64-w64-mingw32-clang++" -std=c++17 -O2 -static -shared tests/slow_editor_fixture.cpp -o build/slow-editor-fixture.dll -luser32 -lgdi32

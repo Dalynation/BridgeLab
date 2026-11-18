@@ -1,0 +1,417 @@
+{
+  "candidate": "0.9.5 unreleased",
+  "status": "Built, tested and installed; actual FL status-message check pending",
+  "implementation": "Vendor-independent, observational fixed-memory MIDI/audio monitor. Atomic 32-bit snapshots; no locks, allocations, file I/O or plugin calls in the audio observer. GUI side writes local health; Check runtime shows per-instrument guidance.",
+  "quiet_rule": "Below -55 dBFS for 0.75 seconds of held-note audio. Informational; not a plugin failure. Cleared by audible audio or released keys. Check with a sustained note or a pattern kept playing.",
+  "diagnoses": [
+    "very quiet output while note keys held",
+    "no note-on events received",
+    "audio produced but host routing/output may be silent",
+    "no recent audio blocks; stale quiet advice suppressed",
+    "invalid samples (existing zero-sample protection retained)",
+    "recent output above full scale; host headroom acknowledged"
+  ],
+  "invariants": [
+    "No gain, cutoff, envelope, oscillator or routing changes",
+    "No MIDI events injected by diagnostics",
+    "No audio samples modified by the observer",
+    "No vendor, plugin-name or control-coordinate branches in production"
+  ],
+  "real_patch_checks": [
+    {
+      "case": "audible reference",
+      "passed": true,
+      "observed": {
+        "blocks": 700,
+        "note_ons": 1,
+        "held_keys": 1,
+        "rms": 0.1614811397924179,
+        "peak": 0.2675081193447113,
+        "quiet": false,
+        "invalid_samples": 0,
+        "above_full_scale_recent": 0,
+        "rate": 44100
+      },
+      "state_unchanged": true,
+      "local_health_report": true,
+      "recovered": {
+        "blocks": 1150,
+        "note_ons": 2,
+        "held_keys": 1,
+        "rms": 0.16148830271550244,
+        "peak": 0.2675113081932068,
+        "quiet": false,
+        "invalid_samples": 0,
+        "above_full_scale_recent": 0,
+        "rate": 44100
+      }
+    },
+    {
+      "case": "high-pass maximum cutoff",
+      "passed": true,
+      "observed": {
+        "blocks": 700,
+        "note_ons": 1,
+        "held_keys": 1,
+        "rms": 0.0009112659698377646,
+        "peak": 0.01082907896488905,
+        "quiet": true,
+        "invalid_samples": 0,
+        "above_full_scale_recent": 0,
+        "rate": 44100
+      },
+      "state_unchanged": true,
+      "local_health_report": true,
+      "recovered": {
+        "blocks": 1150,
+        "note_ons": 2,
+        "held_keys": 1,
+        "rms": 0.16148830271550244,
+        "peak": 0.2675112783908844,
+        "quiet": false,
+        "invalid_samples": 0,
+        "above_full_scale_recent": 0,
+        "rate": 44100
+      }
+    },
+    {
+      "case": "zero volume",
+      "passed": true,
+      "observed": {
+        "blocks": 660,
+        "note_ons": 1,
+        "held_keys": 1,
+        "rms": 0.0,
+        "peak": 0.0,
+        "quiet": true,
+        "invalid_samples": 0,
+        "above_full_scale_recent": 0,
+        "rate": 44100
+      },
+      "state_unchanged": true,
+      "local_health_report": true,
+      "recovered": {
+        "blocks": 1110,
+        "note_ons": 2,
+        "held_keys": 1,
+        "rms": 0.16160929195959206,
+        "peak": 0.26749783754348755,
+        "quiet": false,
+        "invalid_samples": 0,
+        "above_full_scale_recent": 0,
+        "rate": 44100
+      }
+    },
+    {
+      "case": "low-pass minimum cutoff",
+      "passed": true,
+      "observed": {
+        "blocks": 640,
+        "note_ons": 1,
+        "held_keys": 1,
+        "rms": 1.3239903470779511e-07,
+        "peak": 1.3239903751127713e-07,
+        "quiet": true,
+        "invalid_samples": 0,
+        "above_full_scale_recent": 0,
+        "rate": 44100
+      },
+      "state_unchanged": true,
+      "local_health_report": true,
+      "recovered": {
+        "blocks": 1090,
+        "note_ons": 2,
+        "held_keys": 1,
+        "rms": 0.1615019817470601,
+        "peak": 0.2674555480480194,
+        "quiet": false,
+        "invalid_samples": 0,
+        "above_full_scale_recent": 0,
+        "rate": 44100
+      }
+    },
+    {
+      "case": "oscillators off",
+      "passed": true,
+      "observed": {
+        "blocks": 660,
+        "note_ons": 1,
+        "held_keys": 1,
+        "rms": 1.3287240244655958e-07,
+        "peak": 1.7188229151088308e-07,
+        "quiet": true,
+        "invalid_samples": 0,
+        "above_full_scale_recent": 0,
+        "rate": 44100
+      },
+      "state_unchanged": true,
+      "local_health_report": true,
+      "recovered": {
+        "blocks": 1110,
+        "note_ons": 2,
+        "held_keys": 1,
+        "rms": 0.16160929195959206,
+        "peak": 0.26749783754348755,
+        "quiet": false,
+        "invalid_samples": 0,
+        "above_full_scale_recent": 0,
+        "rate": 44100
+      }
+    },
+    {
+      "case": "envelope sustain zero",
+      "passed": true,
+      "observed": {
+        "blocks": 620,
+        "note_ons": 1,
+        "held_keys": 1,
+        "rms": 1.3239903470779511e-07,
+        "peak": 1.3239903751127713e-07,
+        "quiet": true,
+        "invalid_samples": 0,
+        "above_full_scale_recent": 0,
+        "rate": 44100
+      },
+      "state_unchanged": true,
+      "local_health_report": true,
+      "recovered": {
+        "blocks": 1070,
+        "note_ons": 2,
+        "held_keys": 1,
+        "rms": 0.16157584695083507,
+        "peak": 0.2675112783908844,
+        "quiet": false,
+        "invalid_samples": 0,
+        "above_full_scale_recent": 0,
+        "rate": 44100
+      }
+    },
+    {
+      "case": "no note input",
+      "passed": true,
+      "observed": {
+        "blocks": 620,
+        "note_ons": 0,
+        "held_keys": 0,
+        "rms": 1.3239903470779511e-07,
+        "peak": 1.3239903751127713e-07,
+        "quiet": false,
+        "invalid_samples": 0,
+        "above_full_scale_recent": 0,
+        "rate": 44100
+      },
+      "state_unchanged": true,
+      "local_health_report": true,
+      "stale_audio_distinguished": true,
+      "recovered": {
+        "blocks": 1070,
+        "note_ons": 1,
+        "held_keys": 1,
+        "rms": 0.1615758411868387,
+        "peak": 0.2675112783908844,
+        "quiet": false,
+        "invalid_samples": 0,
+        "above_full_scale_recent": 0,
+        "rate": 44100
+      }
+    },
+    {
+      "case": "high output gain",
+      "passed": true,
+      "observed": {
+        "blocks": 640,
+        "note_ons": 1,
+        "held_keys": 1,
+        "rms": 19.050092818066613,
+        "peak": 37.17057800292969,
+        "quiet": false,
+        "invalid_samples": 0,
+        "above_full_scale_recent": 44484,
+        "rate": 44100
+      },
+      "state_unchanged": true,
+      "local_health_report": true,
+      "recovered": {
+        "blocks": 1090,
+        "note_ons": 2,
+        "held_keys": 1,
+        "rms": 0.16150198751369246,
+        "peak": 0.2674556076526642,
+        "quiet": false,
+        "invalid_samples": 0,
+        "above_full_scale_recent": 0,
+        "rate": 44100
+      }
+    }
+  ],
+  "exact_pcm_comparisons": [
+    {
+      "case": "saved high-pass patch",
+      "rate": 44100,
+      "passed": true,
+      "baseline_sha256": "e56c1dc94cb4d8ce2f1d9b477cd47152a1903c654cb78ed13cc8f49eaa7ae101",
+      "observed_sha256": "e56c1dc94cb4d8ce2f1d9b477cd47152a1903c654cb78ed13cc8f49eaa7ae101"
+    },
+    {
+      "case": "low-pass patch",
+      "rate": 44100,
+      "passed": true,
+      "baseline_sha256": "9d711b87ca02b9c31597282930d3fdfaeb17cf7bc1e0e5aa48273e482034320d",
+      "observed_sha256": "9d711b87ca02b9c31597282930d3fdfaeb17cf7bc1e0e5aa48273e482034320d"
+    },
+    {
+      "case": "zero volume",
+      "rate": 44100,
+      "passed": true,
+      "baseline_sha256": "d58201a30b35a60612306667b083ca4dfaf9efa107386fff36188e42c34c3c19",
+      "observed_sha256": "d58201a30b35a60612306667b083ca4dfaf9efa107386fff36188e42c34c3c19"
+    },
+    {
+      "case": "saved high-pass patch",
+      "rate": 48000,
+      "passed": true,
+      "baseline_sha256": "b41c1157d2b7743613960ea8a5f39ec9a241979000f2c2f86d28a16c0c73a80c",
+      "observed_sha256": "b41c1157d2b7743613960ea8a5f39ec9a241979000f2c2f86d28a16c0c73a80c"
+    },
+    {
+      "case": "low-pass patch",
+      "rate": 48000,
+      "passed": true,
+      "baseline_sha256": "a8dfc552e71251ff4966d7b509afc2d0f2ab95c5520cf0cac120b924dec092f1",
+      "observed_sha256": "a8dfc552e71251ff4966d7b509afc2d0f2ab95c5520cf0cac120b924dec092f1"
+    },
+    {
+      "case": "zero volume",
+      "rate": 48000,
+      "passed": true,
+      "baseline_sha256": "d58201a30b35a60612306667b083ca4dfaf9efa107386fff36188e42c34c3c19",
+      "observed_sha256": "d58201a30b35a60612306667b083ca4dfaf9efa107386fff36188e42c34c3c19"
+    }
+  ],
+  "audio_editor_concurrency": [
+    {
+      "test": "ffbb70884a6cd2af-arm64-editor",
+      "arch": "arm64",
+      "plugin": "BridgeLab - SQ8L (x86)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=480000 max_slice=558 VST_block=64 rate=48000 realtime_policy=1 latency=2048 editor_ack_seconds=0.00106779 editor_state_wait_seconds=0 editor_ready_seconds=0.99519 editor_changed=1 overload_initial_peak=0 device_output=silence",
+      "stderr": "",
+      "passed": true,
+      "underrun_quanta": [
+        "0"
+      ]
+    },
+    {
+      "test": "a4def1870e48ca34-arm64-editor",
+      "arch": "arm64",
+      "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=480000 max_slice=558 VST_block=64 rate=48000 realtime_policy=1 latency=2048 editor_ack_seconds=0.00084275 editor_state_wait_seconds=0 editor_ready_seconds=1.27787 editor_changed=1 overload_initial_peak=0 device_output=silence",
+      "stderr": "",
+      "passed": true,
+      "underrun_quanta": [
+        "0"
+      ]
+    },
+    {
+      "test": "ffbb70884a6cd2af-x86_64-editor",
+      "arch": "x86_64",
+      "plugin": "BridgeLab - SQ8L (x86)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=480000 max_slice=558 VST_block=64 rate=48000 realtime_policy=1 latency=2048 editor_ack_seconds=0.00146638 editor_state_wait_seconds=0 editor_ready_seconds=0.75188 editor_changed=1 overload_initial_peak=0 device_output=silence",
+      "stderr": "",
+      "passed": true,
+      "underrun_quanta": [
+        "0"
+      ]
+    },
+    {
+      "test": "a4def1870e48ca34-x86_64-editor",
+      "arch": "x86_64",
+      "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=480000 max_slice=558 VST_block=64 rate=48000 realtime_policy=1 latency=2048 editor_ack_seconds=0.00117987 editor_state_wait_seconds=0 editor_ready_seconds=1.46882 editor_changed=1 overload_initial_peak=0 device_output=silence",
+      "stderr": "",
+      "passed": true,
+      "underrun_quanta": [
+        "0"
+      ]
+    },
+    {
+      "test": "concurrent-0",
+      "arch": "arm64",
+      "plugin": "BridgeLab - SQ8L (x86)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=256 rate=48000 realtime_policy=1 latency=2048 editor_ack_seconds=0 editor_state_wait_seconds=0 editor_ready_seconds=0 editor_changed=0 overload_initial_peak=0 device_output=silence",
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "test": "concurrent-1",
+      "arch": "arm64",
+      "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=256 rate=48000 realtime_policy=1 latency=2048 editor_ack_seconds=0 editor_state_wait_seconds=0 editor_ready_seconds=0 editor_changed=0 overload_initial_peak=0 device_output=silence",
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "test": "concurrent-2",
+      "arch": "x86_64",
+      "plugin": "BridgeLab - SQ8L (x86)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=256 rate=48000 realtime_policy=1 latency=2048 editor_ack_seconds=0 editor_state_wait_seconds=0 editor_ready_seconds=0 editor_changed=0 overload_initial_peak=0 device_output=silence",
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "test": "concurrent-3",
+      "arch": "x86_64",
+      "plugin": "BridgeLab - TAL-NoiseMaker-64 (x64)",
+      "exit": 0,
+      "native_realtime": true,
+      "stdout": "Core Audio callback: frames=153600 max_slice=558 VST_block=256 rate=48000 realtime_policy=1 latency=2048 editor_ack_seconds=0 editor_state_wait_seconds=0 editor_ready_seconds=0 editor_changed=0 overload_initial_peak=0 device_output=silence",
+      "stderr": "",
+      "passed": true
+    },
+    {
+      "test": "four concurrent Core Audio clients: underruns",
+      "passed": true,
+      "underrun_quanta": [
+        "0",
+        "0",
+        "0",
+        "0"
+      ]
+    }
+  ],
+  "windows_architecture_contracts": [
+    {
+      "architecture": "i686",
+      "passed": true,
+      "stdout": "PASS rate=44100: quiet held notes, recovery, idle/tail distinction, channels, invalid/over-range audio, unchanged samples\nPASS rate=48000: quiet held notes, recovery, idle/tail distinction, channels, invalid/over-range audio, unchanged samples\nPASS rate=192000: quiet held notes, recovery, idle/tail distinction, channels, invalid/over-range audio, unchanged samples\n",
+      "stderr": "wineserver: using server-side synchronization.\n"
+    },
+    {
+      "architecture": "x86_64",
+      "passed": true,
+      "stdout": "PASS rate=44100: quiet held notes, recovery, idle/tail distinction, channels, invalid/over-range audio, unchanged samples\nPASS rate=48000: quiet held notes, recovery, idle/tail distinction, channels, invalid/over-range audio, unchanged samples\nPASS rate=192000: quiet held notes, recovery, idle/tail distinction, channels, invalid/over-range audio, unchanged samples\n",
+      "stderr": "wineserver: using server-side synchronization.\n"
+    }
+  ],
+  "native_contracts": "arm64 and Rosetta passed at 44.1, 48 and 192 kHz",
+  "limits": [
+    "Cannot infer the intended timbre or automatically repair every DLL",
+    "Quiet/decaying patches and floating-point headroom may be intentional",
+    "Live diagnostic observations currently require an open original editor",
+    "Mac typing-keyboard focus/note-release acceptance remains unverified",
+    "Public release remains 0.9.4"
+  ]
+}

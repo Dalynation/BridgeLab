@@ -72,8 +72,9 @@ artwork/edited-state cases passed. The corrected build also passed **44/44** exa
 editor/concurrent-client checks and **9/9** fresh standalone import/render checks.
 Its signed app and engine were installed after backing up the previous versions,
 preserving the existing imports, wrappers, runtime profile and saved projects.
-The saved two-plugin FL checkpoint loaded with the correction. Actual FL live
-repaint confirmation and separate per-instrument playback/export remain pending.
+The saved two-plugin FL checkpoint loaded with the correction. The user subsequently confirmed **the knob moves immediately and the sound
+changes in the corrected FL session**, without reopening. Separate per-instrument
+solo exports remain pending.
 
 ## Original interface
 
@@ -211,3 +212,46 @@ Brandon's macOS 15.1 / FL 26.1 combination still requires its own confirmation.
 Windows VST3, effects/audio-input buses, wider MIDI, host tempo/automation,
 complex popups/file dialogs, external media workflows and protected-plugin
 compatibility remain gaps; see [COMPATIBILITY.md](COMPATIBILITY.md).
+
+## Typing-piano release after a knob click
+
+The user reported a held Mac typing-keyboard note remaining on after clicking
+NoiseMaker's Volume knob. An isolated native host reproduced the editor
+swallowing the host's key release after the click changed first responder.
+The candidate now remembers the previous host responder and returns releases
+for keys whose presses did not begin in the editor. Editor-owned key events
+still go to Windows. Host-release, editor-key ownership and live repaint tests
+pass on arm64 and Rosetta. Actual FL confirmation with the corrected UI loaded
+is pending; this is not yet an end-to-end resolution claim.
+
+### Actual FL keyboard retest failed
+
+After installing the candidate UI and restarting FL, the user repeated the
+typing-keyboard / Volume sequence and the note still remained on. The isolated
+responder-level test therefore does not establish a fix for FL window-level
+keyboard routing. Keyboard acceptance remains failed. The user also reported
+NoiseMaker dropdowns not opening; exact control and popup handling are under
+investigation. Neither behavior is classified as a vendor plugin quirk.
+
+The isolated NoiseMaker test also reproduces the FILTER LP 24dB arrow opening
+no visible menu in the embedded frame. Popup composition/input remains under
+investigation. A broader keyboard test now checks host NSWindow.sendEvent
+interception: the previous candidate fails it; a new source correction passes
+it on arm64 and Rosetta. That second correction is not installed or verified
+in FL. Neither newly reported issue is resolved.
+
+## Expanded original-control audit
+
+See [QA-CONTROLS-0.9.5.md](QA-CONTROLS-0.9.5.md). The broader audit confirms
+working control classes but leaves menu/popup and keyboard acceptance failed.
+U-NO-LX partial control results were excluded due to trial-notice/layout
+interference. No complete-interface compatibility or regression-free release
+is claimed. Experimental popup changes were reverted from production source.
+
+## Shared automatic popup repair and generic monitoring
+
+The latest candidate and remaining manual checks are recorded in
+[QA-CONTROLS-0.9.5.md](QA-CONTROLS-0.9.5.md). Six original dropdown round trips,
+three modern editor/audio/recall checks and nine Core Audio/editor/concurrency
+checks passed after the repair. Earlier baseline failures remain documented
+above. FL menu and typing-keyboard release retests are still pending.

@@ -1,6 +1,6 @@
 {
   "version": "0.9.5",
-  "status": "unreleased candidate; legacy repaint fix tested and installed, actual FL repaint and per-instrument playback acceptance pending",
+  "status": "shared popup/input monitoring repair passed automated checks; actual FL retest pending",
   "tested_host": {
     "cpu": "Apple Silicon M1 Pro",
     "macos": "15.6.1",
@@ -159,8 +159,7 @@
     "graphical_fresh_setup_seconds": 134,
     "installed_render_non_silent": 3,
     "pending": [
-      "Actual FL confirmation of immediate knob repaint after correction",
-      "Per-instrument solo export/live playback",
+      "Per-instrument solo export confirmation",
       "Final graphical picker selection"
     ],
     "automation_limit": "Mouse API noWindowsAvailable before editor; accessibility timeout after editor close; main event-loop stack sample does not establish a product deadlock",
@@ -187,7 +186,66 @@
       "root_correction": "Pace refresh through legacy DXGI factory versions 0/1 as well as 2",
       "isolated_fixed": true,
       "corrected_build_installed": true,
-      "actual_fl_retest": "pending user confirmation"
-    }
+      "actual_fl_retest": "passed: user confirmed knob moves immediately and sound changes in the corrected build"
+    },
+    "live_playback": "User confirmed NoiseMaker knob changes sound while the pattern plays"
+  },
+  "keyboard_focus_release": {
+    "reported": "Mac typing-piano note stays on after clicking Volume while holding key",
+    "isolated_reproduction": "Host key-up swallowed after editor click takes first responder",
+    "source_fix": "Route releases for keys not pressed in editor back to previous host responder; keep editor-owned keys in Windows",
+    "checks": "arm64 and Rosetta: host release, editor-owned press/release, live repaint passed",
+    "actual_fl_retest": "FAILED: user reports note still stays on after updated library installed and FL restarted",
+    "installed": "Desktop app and shared editor updated with matching SHA256; FL restarted and QA project reloaded",
+    "scope": "Isolated responder-level check passes, but does not cover FL window-level keyboard handling; no end-to-end fix claimed",
+    "next_candidate": "Relay orphan key-up through NSWindow.sendEvent with original responder temporarily restored; expanded host-window interception test fails prior candidate and passes source correction on arm64/Rosetta; not installed or verified in FL"
+  },
+  "sq8l_solo_export": {
+    "host": "FL Studio 24.2.2.4259",
+    "solo": "User selected SQ8L solo; reloaded checkpoint screenshot shows SQ8L enabled and NoiseMaker disabled",
+    "frames": 88200,
+    "sample_rate": 44100,
+    "channels": 2,
+    "peak": 0.1141357421875,
+    "rms": 0.039409858191827414
+  },
+  "dropdown_report": {
+    "plugin": "TAL-NoiseMaker-64",
+    "report": "Dropdowns do not open",
+    "exact_control": "awaiting clarification",
+    "status": "unverified bridge popup/input gap; not attributed to plugin",
+    "isolated_reproduction": "LP 24dB selector arrow at original-editor coordinate (265,274): click produces no visible menu in embedded frame; keyboard controls still alter other artwork; disposable profile cleaned up"
+  },
+  "control_audit": {
+    "status": "incomplete; menu and keyboard acceptance failed",
+    "report": "control-audit-0.9.5.json",
+    "NoiseMaker_probes": 22,
+    "NoiseMaker_response_criterion_met": 10,
+    "SQ8L_probes": 10,
+    "SQ8L_response_criterion_met": 8,
+    "U_NO_LX": "blocked by trial notice/layout; initial partial results excluded"
+  },
+  "shared_popup_repair": {
+    "report": "popup-repair-0.9.5.json",
+    "popup_roundtrips": "6/6",
+    "modern_editor_audio_recall": "3/3",
+    "audio_editor_concurrency": "9/9",
+    "popup_contract_architectures": "2/2",
+    "manual_FL": "FILTER dropdown confirmed by user; no sound during keyboard test, channel mute/solo investigation pending",
+    "installed": "Backed up, installed, FL restarted and QA checkpoint reopened"
+  },
+  "filter_silence_investigation": {
+    "report": "filter-audio-0.9.5.json",
+    "result": "Saved HP12/max-cutoff patch attenuates output by 45 dB; all 12 filter selection/state/audio-recovery checks passed",
+    "actual_FL_keyboard_focus_release": "still unverified"
+  },
+  "audio_diagnostics": {
+    "report": "audio-diagnostics-0.9.5.json",
+    "real_patches": "8/8",
+    "bit_exact_PCM": "6/6",
+    "audio_editor_concurrency": "9/9",
+    "native_and_Windows_contracts": "passed",
+    "installed": "after backup; live FL message check pending",
+    "keyboard_focus_release": "still pending"
   }
 }

@@ -13,10 +13,36 @@ using namespace Steinberg; using namespace Steinberg::Vst;
 static unsigned draws=0;
 static IMP originalDraw=nullptr;
 static void countDraw(id self,SEL command,NSRect rect){++draws;((void(*)(id,SEL,NSRect))originalDraw)(self,command,rect);}
+@interface KeyboardHost:NSView
+@property(nonatomic) BOOL held;
+@end
+@implementation KeyboardHost
+-(BOOL)acceptsFirstResponder{return YES;}
+-(void)keyDown:(NSEvent*)event{self.held=YES;}
+-(void)keyUp:(NSEvent*)event{self.held=NO;}
+@end
+@interface KeyboardWindow:NSWindow
+@property(nonatomic) BOOL held;
+@end
+@implementation KeyboardWindow
+-(void)sendEvent:(NSEvent*)event{
+ if(event.type==NSEventTypeKeyUp)self.held=NO;
+ [super sendEvent:event];
+}
+@end
 class Frames final:public EditController {
 public:
  void* memory=MAP_FAILED;
+ unsigned keyPresses=0,keyReleases=0;
  tresult PLUGIN_API notify(IMessage* message) override {
+  if(!strcmp(message->getMessageID(),"BridgeLab.EditorInput")){
+   const void* data=nullptr;uint32 size=0;
+   if(message->getAttributes()->getBinary("payload",data,size)==kResultOk&&size==sizeof(EditorInputEvent)){
+    auto input=(const EditorInputEvent*)data;
+    if(input->message==0x100)++keyPresses;
+    if(input->message==0x101)++keyReleases;
+   }
+  }
   if(!strcmp(message->getMessageID(),"BridgeLab.EmbedEditor")){
    const void* data=nullptr;uint32 size=0;
    if(message->getAttributes()->getBinary("payload",data,size)!=kResultOk)return kResultFalse;
@@ -47,9 +73,11 @@ int main(int argc,char** argv){@autoreleasepool{
  originalDraw=method_setImplementation(method,(IMP)countDraw);
  HostApplication host;auto owner=new EditController;auto frames=new Frames;
  owner->initialize(&host);owner->connect(frames);
- NSWindow* window=[[NSWindow alloc]initWithContentRect:NSMakeRect(40,40,160,120) styleMask:NSWindowStyleMaskTitled backing:NSBackingStoreBuffered defer:NO];
+ KeyboardWindow* window=[[KeyboardWindow alloc]initWithContentRect:NSMakeRect(40,40,160,120) styleMask:NSWindowStyleMaskTitled backing:NSBackingStoreBuffered defer:NO];
  auto view=make(owner);if(view->attached((__bridge void*)window.contentView,kPlatformTypeNSView)!=kResultOk)return 1;
  NSView* canvas=window.contentView.subviews.firstObject;
+ KeyboardHost* keyboardHost=[[KeyboardHost alloc]initWithFrame:NSZeroRect];
+ [window.contentView addSubview:keyboardHost];
  // Pump the host's CFRunLoop without NSApplication.run/updateWindows. Some
  // audio hosts own their event/display loop instead of AppKit's standard loop.
  for(int i=0;i<10&&frames->memory==MAP_FAILED;++i)CFRunLoopRunInMode(kCFRunLoopDefaultMode,.03,false);
@@ -63,6 +91,26 @@ int main(int argc,char** argv){@autoreleasepool{
   std::cout<<"frame="<<sequence<<" received="<<received<<" draws="<<draws<<" previous="<<initial<<"\n";
   passed=passed&&received==sequence&&draws>initial;initial=draws;
  }
+ // A typing-piano note starts in the host, then clicking a knob changes focus.
+ // Its release must still reach the host that received the press.
+ NSEvent* down=[NSEvent keyEventWithType:NSEventTypeKeyDown location:NSZeroPoint modifierFlags:0 timestamp:0 windowNumber:window.windowNumber context:nil characters:@"a" charactersIgnoringModifiers:@"a" isARepeat:NO keyCode:0];
+ NSEvent* up=[NSEvent keyEventWithType:NSEventTypeKeyUp location:NSZeroPoint modifierFlags:0 timestamp:0 windowNumber:window.windowNumber context:nil characters:@"a" charactersIgnoringModifiers:@"a" isARepeat:NO keyCode:0];
+ [window makeFirstResponder:keyboardHost];[keyboardHost keyDown:down];
+ NSEvent* click=[NSEvent mouseEventWithType:NSEventTypeLeftMouseDown location:NSMakePoint(20,20) modifierFlags:0 timestamp:0 windowNumber:window.windowNumber context:nil eventNumber:1 clickCount:1 pressure:1];
+ [canvas mouseDown:click];[canvas keyUp:up];
+ bool releasePassed=!keyboardHost.held;passed=passed&&releasePassed;
+ std::cout<<(releasePassed?"PASS":"FAIL")<<": host key release after editor takes focus\n";
+ unsigned presses=frames->keyPresses,releases=frames->keyReleases;
+ keyboardHost.held=YES;[canvas keyDown:down];[canvas keyUp:up];
+ bool editorKeysPassed=frames->keyPresses==presses+1&&frames->keyReleases==releases+1&&keyboardHost.held;
+ passed=passed&&editorKeysPassed;
+ std::cout<<(editorKeysPassed?"PASS":"FAIL")<<": editor-owned keys stay with Windows editor\n";
+ // DAWs may handle typing-piano keys in NSWindow.sendEvent rather than in
+ // their first responder. Calling the responder directly bypasses that path.
+ [window makeFirstResponder:keyboardHost];window.held=YES;
+ [canvas mouseDown:click];[canvas keyUp:up];
+ bool windowReleasePassed=!window.held;passed=passed&&windowReleasePassed;
+ std::cout<<(windowReleasePassed?"PASS":"FAIL")<<": host window receives release after editor focus\n";
  view->removed();view->release();owner->disconnect(frames);owner->terminate();owner->release();frames->release();[window orderOut:nil];
  method_setImplementation(method,originalDraw);
  std::cout<<(passed?"PASS":"FAIL")<<": live frame repaint without host updateWindows\n";return passed?0:1;
