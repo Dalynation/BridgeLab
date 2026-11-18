@@ -21,10 +21,7 @@ try:
     (out/'results.json').write_text(json.dumps(results,indent=2)+'\n')
     if len(results)==1 and any(r['exit'] or not r['transport_matches'] for r in runs):raise RuntimeError('First Core Audio case failed')
 finally:
- server=home/'engine/runtime/Wine Crossover.app/Contents/Resources/wine/bin/wineserver'
- for arch in ['x86','x64']:
-  env=dict(os.environ,WINEPREFIX=str(home/'prefixes'/('crossover-'+arch)),WINEDEBUG='-all')
-  for option in ['-k','-w']:
-   p=subprocess.run([str(server),option],env=env,capture_output=True,text=True,timeout=15);cleanup.append(dict(arch=arch,option=option,exit=p.returncode,stderr=p.stderr))
+ from qa_runtime import stop_profiles
+ cleanup=stop_profiles(home)
  (out/'cleanup.json').write_text(json.dumps(cleanup,indent=2)+'\n')
 raise SystemExit(0 if all(r['passed'] for r in results) else 1)

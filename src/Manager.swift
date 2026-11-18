@@ -3,7 +3,8 @@ import CryptoKit
 import Darwin
 
 final class BridgeManager {
-    static let version = "0.9.4"
+    static let version = "0.9.5"
+    static let runtimeProfile = "crossover-shared"
     let fm = FileManager.default
     let root: URL
     let resources: URL
@@ -64,10 +65,10 @@ final class BridgeManager {
     func profile(_ arch:String)throws->(URL,[String:String]) {
         var env=ProcessInfo.processInfo.environment
         for key in ["__CFBundleIdentifier","XPC_SERVICE_NAME","WINEPREFIX","WINEDEBUG"] {env.removeValue(forKey:key)}
-        env["WINEPREFIX"]=root.appendingPathComponent("prefixes/crossover-"+arch).path;env["WINEDEBUG"]="-all";env["MVK_CONFIG_LOG_LEVEL"]="0"
+        env["WINEPREFIX"]=root.appendingPathComponent("prefixes/"+Self.runtimeProfile).path;env["WINEARCH"]="win64";env["WINEDEBUG"]="-all";env["MVK_CONFIG_LOG_LEVEL"]="0";env["WINE_D3D_CONFIG"]="renderer=gl,shader_backend=glsl"
         let runtime="Wine Crossover.app/Contents/Resources/wine/bin/wine64"
         let executable=root.appendingPathComponent("engine/runtime/"+runtime)
-        let prefix=root.appendingPathComponent("prefixes/crossover-"+arch)
+        let prefix=root.appendingPathComponent("prefixes/"+Self.runtimeProfile)
         let ready=prefix.appendingPathComponent(".bridgelab-ready")
         if !fm.fileExists(atPath:ready.path){
             // A registry file can appear before Wine finishes copying its system DLLs.
@@ -79,7 +80,7 @@ final class BridgeManager {
             }
             record("Preparing fresh runtime: "+arch)
             _=try execute(executable,["wineboot.exe","--init"],env:env,timeout:180)
-            let required=["system.reg","drive_c/windows/system32/kernel32.dll"]+(arch=="x86" ? ["drive_c/windows/syswow64/kernel32.dll"]:[])
+            let required=["system.reg","drive_c/windows/system32/kernel32.dll","drive_c/windows/syswow64/kernel32.dll"]
             let deadline=Date().addingTimeInterval(30)
             while !required.allSatisfy({fm.fileExists(atPath:prefix.appendingPathComponent($0).path)}) && Date()<deadline {Thread.sleep(forTimeInterval:0.1)}
             guard required.allSatisfy({fm.fileExists(atPath:prefix.appendingPathComponent($0).path)}) else{throw failure("Windows runtime setup did not finish. Import again to retry; the incomplete setup will be preserved.")}
@@ -148,7 +149,7 @@ final class BridgeManager {
             throw failure("Could not create the BridgeLab instrument. Import again; if it still fails, send this message to support.\n"+error.localizedDescription)
         }
         let res=stage.appendingPathComponent("Contents/Resources")
-        try (uid+"\n"+controller+"\n"+display+"\n"+dll.path+"\n").write(to:res.appendingPathComponent("bridgelab.conf"),atomically:true,encoding:.utf8)
+        try (uid+"\n"+controller+"\n"+display+"\n"+dll.path+"\n"+Self.runtimeProfile+"\n").write(to:res.appendingPathComponent("bridgelab.conf"),atomically:true,encoding:.utf8)
         let plistURL=stage.appendingPathComponent("Contents/Info.plist")
         var plist=(try PropertyListSerialization.propertyList(from:Data(contentsOf:plistURL),format:nil)) as! [String:Any]
         plist["CFBundleIdentifier"]="local.bridgelab.plugin."+id;plist["CFBundleName"]=display
@@ -163,7 +164,7 @@ final class BridgeManager {
         _=try execute(URL(fileURLWithPath:"/usr/bin/codesign"),["--verify","--deep","--strict",stage.path])
         if fm.fileExists(atPath:target.path){try fm.moveItem(at:target,to:root.appendingPathComponent("backups/"+UUID().uuidString+".vst3"))}
         try fm.moveItem(at:stage,to:target)
-        let row:[String:Any]=["id":id,"name":display,"path":dll.path,"original":source.path,"architecture":arch,"sha256":digest,"processor_uid":uid,"controller_uid":controller,"wrapper":target.path,"probe":probe,"bridge_version":Self.version,"warnings":warnings]
+        let row:[String:Any]=["id":id,"name":display,"path":dll.path,"original":source.path,"architecture":arch,"sha256":digest,"processor_uid":uid,"controller_uid":controller,"wrapper":target.path,"probe":probe,"bridge_version":Self.version,"runtime_profile":Self.runtimeProfile,"warnings":warnings]
         rows.removeAll{$0["id"] as? String == id};rows.append(row);rows.sort{($0["name"] as? String ?? "") < ($1["name"] as? String ?? "")}
         try writeJSON(rows,root.appendingPathComponent("plugins.json"))
         record("Installed "+display)

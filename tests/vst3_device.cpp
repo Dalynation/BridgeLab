@@ -18,7 +18,7 @@
 #include "device_editor.hpp"
 using namespace Steinberg;using namespace Steinberg::Vst;
 struct RenderState {
- IAudioProcessor* processor;int total,block,pos=0,maxSlice=0;uint64_t credit=0;float left[4096]{},right[4096]{};float* channels[2]{left,right};
+ IAudioProcessor* processor;int total,block,pos=0,maxSlice=0;bool heldBeforeStart=false;uint64_t credit=0;float left[4096]{},right[4096]{};float* channels[2]{left,right};
  AudioBusBuffers bus{};EventList events;ProcessData data{};std::vector<float> recording;std::atomic<bool> done{false};bool error=false,realtimePolicy=false,checkedPolicy=false;
  explicit RenderState(IAudioProcessor* p,int frames,int blockSize):processor(p),total(frames),block(blockSize),recording(frames*2){bus.numChannels=2;bus.channelBuffers32=channels;data.processMode=kRealtime;data.symbolicSampleSize=kSample32;data.numOutputs=1;data.outputs=&bus;data.inputEvents=&events;}
  static OSStatus callback(void* context,AudioUnitRenderActionFlags*,const AudioTimeStamp*,UInt32,UInt32 frames,AudioBufferList* output){
@@ -28,7 +28,7 @@ struct RenderState {
   s.credit+=frames;
   while(s.pos<s.total&&s.credit>=uint64_t(std::min(s.block,s.total-s.pos))){
    int n=std::min(s.block,s.total-s.pos);s.data.numSamples=n;s.events.clear();int off=s.total/2;
-   if(s.pos==0||(s.pos<=off&&s.pos+n>off)){Event e{};bool on=s.pos==0;e.type=on?Event::kNoteOnEvent:Event::kNoteOffEvent;e.busIndex=0;e.sampleOffset=on?0:off-s.pos;if(on){e.noteOn.pitch=60;e.noteOn.velocity=.8;e.noteOn.noteId=1;}else{e.noteOff.pitch=60;e.noteOff.noteId=1;}s.events.addEvent(e);}
+   if((s.pos==0&&!s.heldBeforeStart)||(s.pos<=off&&s.pos+n>off)){Event e{};bool on=s.pos==0;e.type=on?Event::kNoteOnEvent:Event::kNoteOffEvent;e.busIndex=0;e.sampleOffset=on?0:off-s.pos;if(on){e.noteOn.pitch=60;e.noteOn.velocity=.8;e.noteOn.noteId=1;}else{e.noteOff.pitch=60;e.noteOff.noteId=1;}s.events.addEvent(e);}
    if(s.processor->process(s.data)!=kResultOk){s.error=true;s.done=true;break;}
    for(int i=0;i<n;++i){s.recording[(s.pos+i)*2]=s.left[i];s.recording[(s.pos+i)*2+1]=s.right[i];if(!std::isfinite(s.left[i])||!std::isfinite(s.right[i]))s.error=true;}
    s.pos+=n;s.credit-=n;
@@ -42,8 +42,27 @@ int main(int argc,char** argv){try{
  int block=getenv("BRIDGELAB_TEST_BLOCK")?std::atoi(getenv("BRIDGELAB_TEST_BLOCK")):64;int rate=getenv("BRIDGELAB_TEST_RATE")?std::atoi(getenv("BRIDGELAB_TEST_RATE")):48000;if(block<1||block>4096||rate<44100||rate>192000)return 2;
  FUnknownPtr<IAudioProcessor> processor(component);ProcessSetup setup{};setup.processMode=kRealtime;setup.symbolicSampleSize=kSample32;setup.maxSamplesPerBlock=block;setup.sampleRate=rate;
  if(processor->setupProcessing(setup)!=kResultOk||component->setActive(true)!=kResultOk)return 1;component->activateBus(kAudio,kOutput,0,true);component->activateBus(kEvent,kInput,0,true);processor->setProcessing(true);
- int frames=getenv("BRIDGELAB_TEST_FRAMES")?std::atoi(getenv("BRIDGELAB_TEST_FRAMES")):960000;if(frames<4096||frames>48000*120)return 2;RenderState state(processor,frames,block);
- std::unique_ptr<DeviceEditor> editor;if(const char* name=getenv("BRIDGELAB_TEST_EDITOR"))editor=std::make_unique<DeviceEditor>(component,name);
+ int frames=getenv("BRIDGELAB_TEST_FRAMES")?std::atoi(getenv("BRIDGELAB_TEST_FRAMES")):960000;if(frames<4096||frames>48000*120)return 2;RenderState state(processor,frames,block);float overloadInitialPeak=0;
+ if(const char* overload=getenv("BRIDGELAB_TEST_OVERLOAD")){
+  bool held=!std::strcmp(overload,"held"),lostOn=!std::strcmp(overload,"lost-on"),lostOff=!std::strcmp(overload,"lost-off");
+  if(!held&&!lostOn&&!lostOff&&std::strcmp(overload,"new"))throw std::runtime_error("unknown overload fixture");
+  state.heldBeforeStart=held||lostOn||lostOff;state.data.numSamples=block;
+  if(held||lostOff){Event note{};note.type=Event::kNoteOnEvent;note.noteOn.pitch=60;note.noteOn.velocity=.8;note.noteOn.noteId=1;state.events.addEvent(note);}
+  if(lostOff){
+   state.data.processMode=kPrefetch;
+   for(int i=0;i<128;++i){if(processor->process(state.data)!=kResultOk)throw std::runtime_error("lost-off positive control");state.events.clear();for(int n=0;n<block;++n)overloadInitialPeak=std::max(overloadInitialPeak,std::abs(state.left[n]));}
+   state.data.processMode=kRealtime;
+   if(overloadInitialPeak<.001)throw std::runtime_error("lost-off fixture never sounded before overload");
+  }
+  // Deliberately overflow the queue before regular Core Audio callbacks begin.
+  // A held-key case must recover without another note-on masking its failure.
+  for(int i=0;i<2048;++i){
+   if(i==2047&&(lostOn||lostOff)){Event event{};event.type=lostOn?Event::kNoteOnEvent:Event::kNoteOffEvent;if(lostOn){event.noteOn.pitch=60;event.noteOn.velocity=.8;event.noteOn.noteId=1;}else{event.noteOff.pitch=60;event.noteOff.noteId=1;}state.events.addEvent(event);}
+   if(processor->process(state.data)!=kResultOk)throw std::runtime_error("overload fixture process");state.events.clear();
+  }
+  std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+ }
+ std::unique_ptr<DeviceEditor> editor;
  AudioComponentDescription description{};description.componentType=kAudioUnitType_Output;description.componentSubType=kAudioUnitSubType_DefaultOutput;description.componentManufacturer=kAudioUnitManufacturer_Apple;AudioComponent output=AudioComponentFindNext(nullptr,&description);AudioUnit unit=nullptr;
  OSStatus status=output?AudioComponentInstanceNew(output,&unit):-1;
  AudioStreamBasicDescription format{};format.mSampleRate=rate;format.mFormatID=kAudioFormatLinearPCM;format.mFormatFlags=kAudioFormatFlagsNativeFloatPacked|kAudioFormatFlagIsNonInterleaved;format.mBytesPerPacket=4;format.mFramesPerPacket=1;format.mBytesPerFrame=4;format.mChannelsPerFrame=2;format.mBitsPerChannel=32;
@@ -51,10 +70,11 @@ int main(int argc,char** argv){try{
  if(!status)status=AudioUnitSetProperty(unit,kAudioUnitProperty_StreamFormat,kAudioUnitScope_Input,0,&format,sizeof(format));
  if(!status)status=AudioUnitSetProperty(unit,kAudioUnitProperty_SetRenderCallback,kAudioUnitScope_Input,0,&callback,sizeof(callback));
  if(!status)status=AudioUnitInitialize(unit);if(!status)status=AudioOutputUnitStart(unit);
+ if(!status)if(const char* name=getenv("BRIDGELAB_TEST_EDITOR")){try{editor=std::make_unique<DeviceEditor>(component,name);}catch(const std::exception& e){std::cerr<<e.what()<<"\n";status=-1;}}
  auto started=std::chrono::steady_clock::now();auto deadline=started+std::chrono::seconds(frames/rate+15);while(!status&&!state.done&&std::chrono::steady_clock::now()<deadline){if(editor&&!editor->changed&&std::chrono::steady_clock::now()-started>std::chrono::seconds(2)){try{editor->edit();}catch(const std::exception& e){std::cerr<<e.what()<<"\n";status=-1;break;}}std::this_thread::sleep_for(std::chrono::milliseconds(10));}
  if(unit){AudioOutputUnitStop(unit);AudioUnitUninitialize(unit);AudioComponentInstanceDispose(unit);}
- bool editorChanged=editor&&editor->changed;editor.reset();processor->setProcessing(false);component->setActive(false);component->terminate();
+ double editorAckSeconds=editor?editor->ackSeconds:0,editorStateWaitSeconds=editor?editor->stateWaitSeconds:0;double editorReadySeconds=editor?editor->readySeconds:0;bool editorChanged=editor&&editor->changed;editor.reset();processor->setProcessing(false);component->setActive(false);component->terminate();
  if(status||!state.done||state.error){std::cerr<<"Core Audio render failed: "<<status<<" frames="<<state.pos<<"\n";return 1;}
  std::ofstream file(argv[2],std::ios::binary);file.write(reinterpret_cast<char*>(state.recording.data()),state.recording.size()*sizeof(float));
- std::cout<<"Core Audio callback: frames="<<state.pos<<" max_slice="<<state.maxSlice<<" VST_block="<<block<<" rate="<<rate<<" realtime_policy="<<state.realtimePolicy<<" latency="<<processor->getLatencySamples()<<" editor_changed="<<editorChanged<<" device_output=silence\n";return file&&state.realtimePolicy?0:1;
+ std::cout<<"Core Audio callback: frames="<<state.pos<<" max_slice="<<state.maxSlice<<" VST_block="<<block<<" rate="<<rate<<" realtime_policy="<<state.realtimePolicy<<" latency="<<processor->getLatencySamples()<<" editor_ack_seconds="<<editorAckSeconds<<" editor_state_wait_seconds="<<editorStateWaitSeconds<<" editor_ready_seconds="<<editorReadySeconds<<" editor_changed="<<editorChanged<<" overload_initial_peak="<<overloadInitialPeak<<" device_output=silence\n";return file&&state.realtimePolicy?0:1;
 }catch(const std::exception& e){std::cerr<<e.what()<<"\n";return 1;}}

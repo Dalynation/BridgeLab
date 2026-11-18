@@ -18,10 +18,12 @@
 #include <windows.h>
 #include <fcntl.h>
 #include <io.h>
+#include <ole2.h>
 #else
 #include <dlfcn.h>
 #endif
 #include "plugin_state.hpp"
+#include "editor_gpu.hpp"
 #include "windows_editor.hpp"
 static std::string pluginDirectory;
 struct HostTime {double samplePos=0,sampleRate=48000,nanoSeconds=0,ppqPos=0,tempo=120,barStartPos=0,cycleStartPos=0,cycleEndPos=0;int32_t numerator=4,denominator=4,smpteOffset=0,smpteRate=0,clock=0,flags=(1<<10)|(1<<13);};
@@ -44,10 +46,12 @@ int main(int argc,char** argv){
  if(serve){processLevel=std::string(argv[4])=="offline"?4:2;rate=std::atoi(argv[3]);if(rate<44100||rate>192000)return 2;}
  try{
 #ifdef _WIN32
+ struct OleScope{HRESULT result=OleInitialize(nullptr);~OleScope(){if(SUCCEEDED(result))OleUninitialize();}} ole;
  SetErrorMode(SEM_FAILCRITICALERRORS|SEM_NOGPFAULTERRORBOX);
  char fullPath[MAX_PATH]{};char* filePart=nullptr;
  if(GetFullPathNameA(argv[1],MAX_PATH,fullPath,&filePart)&&filePart){std::string directory(fullPath,filePart-fullPath);SetCurrentDirectoryA(directory.c_str());pluginDirectory=directory;}
  auto lib=LoadLibraryA(argv[1]);
+ if(lib&&(!std::getenv("BRIDGELAB_GPU_BRIDGE")||std::string(std::getenv("BRIDGELAB_GPU_BRIDGE"))!="0"))EditorGPU::patch(lib);
  auto entry=lib?reinterpret_cast<Effect*(BCALL *)(Callback)>(GetProcAddress(lib,"VSTPluginMain")):nullptr;
  if(!entry && lib)entry=reinterpret_cast<Effect*(BCALL *)(Callback)>(GetProcAddress(lib,"main"));
 #else
@@ -68,15 +72,17 @@ int main(int argc,char** argv){
  call(10,0,nullptr,rate);call(11,block);call(2,0);call(12,1);call(71);
  std::vector<std::vector<float>> in(e->inputs,std::vector<float>(block)),out(e->outputs,std::vector<float>(block));
  std::vector<float*> ip,op;for(auto& c:in)ip.push_back(c.data());for(auto& c:out)op.push_back(c.data());
+ // VST2 wrappers can defer DSP preparation until their first process call.
+ // Give that call an empty MIDI block so the first real key is not discarded.
+ auto primeAudio=[&]{for(auto& c:out)std::fill(c.begin(),c.end(),0);e->replacing(e,ip.data(),op.data(),quantum);};
  if(serve){
 #ifdef _WIN32
  _setmode(_fileno(stdin),_O_BINARY);_setmode(_fileno(stdout),_O_BINARY);
 #endif
  uint32_t hello[3]={wireMagic,uint32_t(e->programs),uint32_t(e->outputs)};
- std::atomic<uint32_t> program{0};
+ std::atomic<uint32_t> program{0};std::atomic<bool> needsPrime{true};
 #ifdef _WIN32
  EditorHost editor(e);
- if(!editor.create("BridgeLab - Original Windows Plugin Editor"))throw std::runtime_error("Cannot create editor host");
 #endif
  SharedAudio* shared=nullptr;
 #ifdef _WIN32
@@ -98,11 +104,12 @@ int main(int argc,char** argv){
  WireResponse response;
  {
 #ifdef _WIN32
- if(request.program!=program&&request.program<uint32_t(e->programs)){EditorHost::Control select{SelectProgram,{}, {},false};select.program=request.program;editor.request(select);if(select.ok)program=request.program;}
+ if(request.program!=program&&request.program<uint32_t(e->programs)){EditorHost::Control select{SelectProgram,{}, {},false};select.program=request.program;editor.request(select);if(select.ok){program=request.program;needsPrime=true;}}
  std::lock_guard<std::recursive_mutex> pluginLock(editor.mutex);
 #else
- if(request.program!=program && request.program<uint32_t(e->programs)){program=request.program;call(2,program);}
+ if(request.program!=program && request.program<uint32_t(e->programs)){program=request.program;call(2,program);needsPrime=true;}
 #endif
+ if(needsPrime.exchange(false,std::memory_order_acq_rel))primeAudio();
  struct ManyEvents {int32_t count;intptr_t reserved;Midi* items[maxMidi];} events{};
  Midi messages[maxMidi];events.count=request.count;
  for(uint32_t i=0;i<request.count;i++){messages[i].delta=std::min(request.midi[i].offset,uint32_t(quantum-1));messages[i].data[0]=request.midi[i].status;messages[i].data[1]=request.midi[i].note;messages[i].data[2]=request.midi[i].velocity;events.items[i]=&messages[i];}
@@ -116,7 +123,10 @@ int main(int argc,char** argv){
  };
  auto serveLoop=[&]{
 #ifdef _WIN32
- if(processLevel==2&&!shared)SetThreadPriority(GetCurrentThread(),THREAD_PRIORITY_TIME_CRITICAL);
+ if(processLevel==2&&!shared){
+  SetThreadPriority(GetCurrentThread(),THREAD_PRIORITY_TIME_CRITICAL);
+  using SetDescription=HRESULT(WINAPI*)(HANDLE,PCWSTR);auto nameThread=(SetDescription)GetProcAddress(GetModuleHandleA("kernel32.dll"),"SetThreadDescription");if(nameThread)nameThread(GetCurrentThread(),L"BridgeLab DSP");
+ }
 #endif
  try {
  WireRequest request;
@@ -128,7 +138,9 @@ int main(int argc,char** argv){
 #ifdef _WIN32
  EditorHost::Control control{request.command,std::move(payload),{},false};
  control.program=request.program;control.syncProgram=request.command==GetStateWithProgram&&request.program!=program&&request.program<uint32_t(e->programs);
- editor.request(control);
+ const bool asynchronousUI=request.command==OpenEditor||request.command==OpenEmbeddedEditor||request.command==CloseEditor||request.command==EditorInput;
+ if(asynchronousUI)control.ok=editor.post(EditorHost::Control{control.command,std::move(control.input),{},false});else editor.request(control);
+ if(control.ok&&(request.command==SetState||request.command==SelectProgram||control.syncProgram))needsPrime=true;
  if((request.command==SetState||request.command==GetStateWithProgram||request.command==SelectProgram)&&control.ok)program=request.program;
  response.status=control.ok;response.payloadBytes=uint32_t(control.output.size());
 #else
@@ -158,11 +170,12 @@ int main(int argc,char** argv){
   SetThreadPriority(GetCurrentThread(),THREAD_PRIORITY_TIME_CRITICAL);timeBeginPeriod(1);
   using SetDescription=HRESULT(WINAPI*)(HANDLE,PCWSTR);auto nameThread=(SetDescription)GetProcAddress(GetModuleHandleA("kernel32.dll"),"SetThreadDescription");if(nameThread)nameThread(GetCurrentThread(),L"BridgeLab DSP");
   shared->ready.store(1,std::memory_order_release);
+  auto burstStart=std::chrono::steady_clock::now();unsigned burstCount=0;
   try{while(!done&&!shared->stop.load(std::memory_order_acquire)){
    if(shared->pause.load(std::memory_order_acquire)){shared->paused.store(1,std::memory_order_release);Sleep(1);continue;}
    shared->paused.store(0,std::memory_order_release);
    auto r=shared->requestRead.load(std::memory_order_relaxed),w=shared->requestWrite.load(std::memory_order_acquire);
-   if(r==w){Sleep(1);continue;}
+   if(r==w){Sleep(1);burstStart=std::chrono::steady_clock::now();burstCount=0;continue;}
    auto request=shared->requests[r%sharedAudioSlots];shared->requestRead.store(r+1,std::memory_order_release);
    auto response=renderAudio(request.request);
    auto write=shared->responseWrite.load(std::memory_order_relaxed);
@@ -170,6 +183,12 @@ int main(int argc,char** argv){
    if(done||shared->stop.load(std::memory_order_acquire))break;
    auto& slot=shared->responses[write%sharedAudioSlots];slot.seq=request.seq;slot.response=response;
    shared->responseWrite.store(write+1,std::memory_order_release);shared->completed.store(r+1,std::memory_order_release);
+   // A mapped queue can remain busy without ever blocking. Bound catch-up
+   // work so an overloaded host cannot turn this realtime thread into a CPU
+   // hog and trigger macOS's failsafe demotion. Publish audio before yielding.
+   if(shared->requestWrite.load(std::memory_order_acquire)-(r+1)>1){
+    if(++burstCount>=4||std::chrono::steady_clock::now()-burstStart>=std::chrono::milliseconds(4)){Sleep(1);burstStart=std::chrono::steady_clock::now();burstCount=0;}
+   }else{burstStart=std::chrono::steady_clock::now();burstCount=0;}
   }}catch(const std::exception& error){std::cerr<<error.what()<<"\n";shared->error.store(1,std::memory_order_release);done=true;}
   timeEndPeriod(1);
  });
@@ -186,6 +205,7 @@ int main(int argc,char** argv){
  call(72);call(12,0);call(1);return 0;
  }
  std::vector<int16_t> pcm;pcm.reserve(rate*3*2);double peak=0;bool finite=true;
+ primeAudio();
  for(int pos=0;pos<rate*3;pos+=block){int n=std::min(block,rate*3-pos);
  Midi m;Events events; events.items[0]=&m;
  if(pos==0 || (pos<=rate*2 && pos+n>rate*2)){

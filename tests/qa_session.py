@@ -13,13 +13,8 @@ try:
   with (out/(script+'.log')).open('w') as log:p=subprocess.run(['/usr/bin/python3',str(root/'tests'/script)],env=os.environ,stdout=log,stderr=subprocess.STDOUT)
   results.append(dict(test=script,exit=p.returncode));print(json.dumps(results[-1]),flush=True)
 finally:
- server=home/'engine/runtime/Wine Crossover.app/Contents/Resources/wine/bin/wineserver'
- for arch in ['x86','x64']:
-  env=dict(os.environ,WINEPREFIX=str(home/'prefixes'/('crossover-'+arch)),WINEDEBUG='-all')
-  for option in ['-k','-w']:
-   try:
-    p=subprocess.run([str(server),option],env=env,capture_output=True,text=True,timeout=15);cleanup.append(dict(arch=arch,option=option,exit=p.returncode,stderr=p.stderr))
-   except subprocess.TimeoutExpired:cleanup.append(dict(arch=arch,option=option,exit=124))
+ from qa_runtime import stop_profiles
+ cleanup=stop_profiles(home)
  remaining=[]
  for line in subprocess.check_output(['ps','-axo','pid=,command='],text=True).splitlines():
   fields=line.strip().split(None,1)

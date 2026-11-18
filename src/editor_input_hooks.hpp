@@ -8,6 +8,9 @@ struct EditorInputHooks {
  inline static POINT cursor{};
  inline static uint32_t buttons=0;
  inline static HWND captured=nullptr,root=nullptr,focused=nullptr,active=nullptr;
+ // The backing window is offscreen, but its editor still needs a display for
+ // refresh/renderer initialization. Only virtualize our own window hierarchy.
+ static HMONITOR WINAPI monitorFromWindow(HWND hwnd,DWORD flags){if(enabled&&root&&flags==MONITOR_DEFAULTTONULL&&(hwnd==root||IsChild(root,hwnd)))flags=MONITOR_DEFAULTTONEAREST;return ::MonitorFromWindow(hwnd,flags);}
  static HWND WINAPI windowFromPoint(POINT p){if(!enabled||!root)return ::WindowFromPoint(p);HWND target=root;for(int i=0;i<32;i++){POINT local=p;ScreenToClient(target,&local);HWND child=ChildWindowFromPointEx(target,local,CWP_SKIPINVISIBLE|CWP_SKIPDISABLED);if(!child||child==target)break;target=child;}return target;}
  static BOOL WINAPI cursorPos(LPPOINT p){if(enabled){*p=cursor;return TRUE;}return ::GetCursorPos(p);}
  static BOOL WINAPI setCursorPos(int x,int y){if(enabled){cursor={x,y};return TRUE;}return ::SetCursorPos(x,y);}
@@ -33,7 +36,7 @@ struct EditorInputHooks {
  auto* names=imp->OriginalFirstThunk?(IMAGE_THUNK_DATA*)(base+imp->OriginalFirstThunk):nullptr;
  for(size_t i=0;addresses[i].u1.Function;++i){const char* imported=nullptr;if(names&&!IMAGE_SNAP_BY_ORDINAL(names[i].u1.Ordinal))imported=(const char*)((IMAGE_IMPORT_BY_NAME*)(base+names[i].u1.AddressOfData))->Name;uintptr_t replacement=0;
  #define BRIDGE_HOOK(api,fn) if((imported&&!std::strcmp(imported,api))||(!imported&&library&&addresses[i].u1.Function==(uintptr_t)GetProcAddress(library,api)))replacement=(uintptr_t)&fn;
- BRIDGE_HOOK("GetFocus",getFocus) BRIDGE_HOOK("SetFocus",setFocus) BRIDGE_HOOK("GetActiveWindow",getActive) BRIDGE_HOOK("SetActiveWindow",setActive) BRIDGE_HOOK("GetForegroundWindow",getForeground) BRIDGE_HOOK("SetForegroundWindow",setForeground) BRIDGE_HOOK("BringWindowToTop",bringTop) BRIDGE_HOOK("GetKeyboardState",keyboardState) BRIDGE_HOOK("WindowFromPoint",windowFromPoint) BRIDGE_HOOK("GetCursorPos",cursorPos) BRIDGE_HOOK("SetCursorPos",setCursorPos) BRIDGE_HOOK("GetKeyState",keyState) BRIDGE_HOOK("GetAsyncKeyState",asyncKeyState) BRIDGE_HOOK("SetCapture",setCapture) BRIDGE_HOOK("GetCapture",getCapture) BRIDGE_HOOK("ReleaseCapture",releaseCapture)
+ BRIDGE_HOOK("MonitorFromWindow",monitorFromWindow) BRIDGE_HOOK("GetFocus",getFocus) BRIDGE_HOOK("SetFocus",setFocus) BRIDGE_HOOK("GetActiveWindow",getActive) BRIDGE_HOOK("SetActiveWindow",setActive) BRIDGE_HOOK("GetForegroundWindow",getForeground) BRIDGE_HOOK("SetForegroundWindow",setForeground) BRIDGE_HOOK("BringWindowToTop",bringTop) BRIDGE_HOOK("GetKeyboardState",keyboardState) BRIDGE_HOOK("WindowFromPoint",windowFromPoint) BRIDGE_HOOK("GetCursorPos",cursorPos) BRIDGE_HOOK("SetCursorPos",setCursorPos) BRIDGE_HOOK("GetKeyState",keyState) BRIDGE_HOOK("GetAsyncKeyState",asyncKeyState) BRIDGE_HOOK("SetCapture",setCapture) BRIDGE_HOOK("GetCapture",getCapture) BRIDGE_HOOK("ReleaseCapture",releaseCapture)
  #undef BRIDGE_HOOK
  if(replacement){++count;DWORD old;if(VirtualProtect(&addresses[i].u1.Function,sizeof(addresses[i].u1.Function),PAGE_READWRITE,&old)){addresses[i].u1.Function=replacement;DWORD unused;VirtualProtect(&addresses[i].u1.Function,sizeof(addresses[i].u1.Function),old,&unused);}}
  }

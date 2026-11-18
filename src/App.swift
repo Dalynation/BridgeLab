@@ -74,7 +74,8 @@ final class App: NSObject, NSApplicationDelegate {
         window = NSWindow(contentRect: NSRect(x:0,y:0,width:780,height:650), styleMask:[.titled,.closable,.miniaturizable,.resizable], backing:.buffered, defer:false)
         window.isReleasedWhenClosed = false
         window.minSize = NSSize(width:780,height:650)
-        window.title = "BridgeLab 0.9.1 · Windows Plugin Bridge"
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Preview"
+        window.title = "BridgeLab \(version) · Windows Plugin Bridge"
         window.center()
         let view = window.contentView!
         let title = NSTextField(labelWithString:"Bring your Windows instruments to Mac.")

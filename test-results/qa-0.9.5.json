@@ -1,0 +1,133 @@
+{
+  "version": "0.9.5",
+  "status": "unreleased candidate; manual FL acceptance pending",
+  "tested_host": {
+    "cpu": "Apple Silicon M1 Pro",
+    "macos": "15.6.1",
+    "architectures": [
+      "arm64",
+      "x86_64 under Rosetta"
+    ]
+  },
+  "suites": [
+    {
+      "name": "Core Audio exact comparisons",
+      "passed": 44,
+      "total": 44,
+      "stage": "final",
+      "local_report_sha256": "6453d8b92098cf972df21dd964c162207341310888281b1819fbe87dee5963c6"
+    },
+    {
+      "name": "Concurrent editors and clients",
+      "passed": 9,
+      "total": 9,
+      "stage": "final",
+      "local_report_sha256": "946b62ac13a0ed89cc437cc9619f7d772fd641b87c41351e7766145126845d26"
+    },
+    {
+      "name": "Timer MIDI recovery",
+      "passed": 16,
+      "total": 16,
+      "stage": "final",
+      "local_report_sha256": "a48ecf82eb415362c26cd36e42ad2eaacab1a5db3f3271b267ab5f0ebc5fe419"
+    },
+    {
+      "name": "Pipe Core Audio MIDI recovery",
+      "passed": 12,
+      "total": 12,
+      "stage": "final",
+      "local_report_sha256": "d0b38d9b2a23ec8e9c7210341952fe3120fa0c87a7c72cd29e68bb40affda78d"
+    },
+    {
+      "name": "Deterministic dropped MIDI",
+      "passed": 8,
+      "total": 8,
+      "stage": "final",
+      "local_report_sha256": "6660c1c22af0df70100f14a0939bb747ec887231de7b7ce06c5b24ec96455d66"
+    },
+    {
+      "name": "Shared held-note repetitions",
+      "passed": 30,
+      "total": 30,
+      "stage": "final shared path; later pipe-only scheduling change",
+      "local_report_sha256": "1258d46b028836a2aaeb3a8f98e4c28b4c09c03eab1e336dfeb5a73df01be3b2"
+    },
+    {
+      "name": "Multi-instance recall and VST3 validation",
+      "passed": 4,
+      "total": 4,
+      "stage": "final",
+      "local_report_sha256": "b0478b2d3571ffcae11937bb01d1e5b7717763ab0dc974d069285e3aa88ed11e"
+    },
+    {
+      "name": "Packaged clean import and render",
+      "passed": 9,
+      "total": 9,
+      "stage": "final standalone app",
+      "local_report_sha256": "834ee5e8bc3bfc66776b641873a2dc56817596fd8db5cca5a4a39f020dcc3dc8"
+    },
+    {
+      "name": "Original knob artwork and audio",
+      "passed": 3,
+      "total": 3,
+      "stage": "graphics unchanged since this run",
+      "local_report_sha256": "f4a7260188d5dd35cfd6adc1b3a860493c76730fbdc0d7625815261bcbd6744e"
+    },
+    {
+      "name": "Original GPU editor Core Audio",
+      "passed": 6,
+      "total": 6,
+      "stage": "graphics unchanged since this run",
+      "local_report_sha256": "e6826af0f57791320cdd600416c66b89b9c09192b27663f1c21b4fc4df882112"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "Contents/MacOS/BridgeLab",
+      "sha256": "2f08aaa9dadc563205b04467433e17dce56da921cf5e15e83d3a736879b7a57d",
+      "bytes": 848240
+    },
+    {
+      "path": "Contents/Resources/Engine/bin/runner-x86.exe",
+      "sha256": "ba71c2a214e83151f7057165e2d4b8309198d3a34e8124d5c2163087938dd71c",
+      "bytes": 1553408
+    },
+    {
+      "path": "Contents/Resources/Engine/bin/runner-x64.exe",
+      "sha256": "b6de00bfa3c2b856c75c4fb11a88e7e78d1d49981ef8dc8ea4c01b64836b324f",
+      "bytes": 1545728
+    },
+    {
+      "path": "Contents/Resources/Engine/libBridgeLabUI.dylib",
+      "sha256": "12c1989923205099e7f71b340947023295934956e878429deb001c38dea277ce",
+      "bytes": 397696
+    },
+    {
+      "path": "Contents/Resources/Engine/libBridgeLabRealtime.dylib",
+      "sha256": "c8b87076c26e7c4515c5a1d2ea121825943b8d87e3a5317be9c5d794e25b2e3e",
+      "bytes": 134672
+    },
+    {
+      "path": "Contents/Resources/Engine/BridgeLabInstrument.vst3/Contents/MacOS/BridgeLabInstrument",
+      "sha256": "82d739bd3b0a07ce9d5b72aad7436b33e6bf8c95798a986e17477b9bc5721ca0",
+      "bytes": 838240
+    }
+  ],
+  "pending": [
+    "Final candidate clean graphical import and FL rescan",
+    "In-FL original knob input, multiple plugin instances, export and edited project save/reopen",
+    "Physical Intel, other macOS and FL versions, including friend macOS 15.1 / FL 26.1"
+  ],
+  "retained_observations": [
+    "Earlier timer stress PCM mismatches with host lateness retained in QA report",
+    "Candidate held-note replay/CPU demotion and pipe scheduling failures reproduced before corrections",
+    "Earlier fast loss fixture did not inject one intended fault; replaced with deterministic fixture",
+    "Sandbox-only runtime copy denied .DS_Store; complete isolated test outside sandbox passed"
+  ],
+  "limitations": [
+    "Windows x86/x64 VST2 instruments only; not arbitrary DLLs",
+    "Single-surface Direct2D adapter, not complete DirectComposition",
+    "Cold modern editor startup approximately 9\u201316 seconds",
+    "No claim of zero defects or universal compatibility"
+  ]
+}
