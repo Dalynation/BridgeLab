@@ -24,7 +24,7 @@ enum ZoneSixAccess {
 }
 
 final class BridgeManager {
-    static let version = "0.10.3"
+    static let version = "0.10.4"
     static let runtimeProfile = "crossover-shared"
     let fm = FileManager.default
     let root: URL

@@ -180,6 +180,6 @@ public:
 };
 bool InitModule(){trace("bundle entry");return true;}bool DeinitModule(){trace("bundle exit");return true;}
 BEGIN_FACTORY_DEF("BridgeLab","https://example.invalid","")
-DEF_CLASS2(INLINE_UID_FROM_FUID(uid),PClassInfo::kManyInstances,kVstAudioEffectClass,bridgeDisplayName(),0,"Instrument|Synth","0.10.3",kVstVersionString,Bridge::create)
-DEF_CLASS2(INLINE_UID_FROM_FUID(controllerUid),PClassInfo::kManyInstances,kVstComponentControllerClass,"BridgeLab Controller",0,"","0.10.3",kVstVersionString,Controller::create)
+DEF_CLASS2(INLINE_UID_FROM_FUID(uid),PClassInfo::kManyInstances,kVstAudioEffectClass,bridgeDisplayName(),0,"Instrument|Synth","0.10.4",kVstVersionString,Bridge::create)
+DEF_CLASS2(INLINE_UID_FROM_FUID(controllerUid),PClassInfo::kManyInstances,kVstComponentControllerClass,"BridgeLab Controller",0,"","0.10.4",kVstVersionString,Controller::create)
 END_FACTORY

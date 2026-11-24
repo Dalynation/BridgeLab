@@ -1,8 +1,8 @@
-# BridgeLab 0.10.3 preview
+# BridgeLab 0.10.4 preview
 
 BridgeLab imports supported Windows VST2 instrument DLLs and creates a separate Mac VST3 instrument for each DLL. The original Windows code runs through bundled Wine and draws its own interface. Multiple imported instruments retain their own identity and per-instance state.
 
-[Download and release notes](https://github.com/Dalynation/BridgeLab/releases/tag/v0.10.3-preview). Use Zone Six Studio Hub to sign in, install BridgeLab, and check for updates. This package requires the Hub and an internet connection to verify access.
+[Download and release notes](https://github.com/Dalynation/BridgeLab/releases/tag/v0.10.4-preview). Use Zone Six Studio Hub to sign in, install BridgeLab, and check for updates. This package requires the Hub and an internet connection to verify access.
 
 ## Update and test
 
@@ -13,6 +13,10 @@ BridgeLab imports supported Windows VST2 instrument DLLs and creates a separate 
 5. Check named presets, original controls, Mac typing-keyboard notes and key release. Save/reopen a small test project before relying on a new plugin.
 
 No source checkout or Python is required to use the download. Vendor DLLs and licenses are not included. Apple Silicon needs Rosetta for the Windows runtime. This preview is ad-hoc signed, not notarized; macOS may require approval.
+
+## Installation package correction
+
+0.10.3 was rejected by the Hub because its ZIP included an extra macOS metadata tree. 0.10.4 fixes that packaging error. The release command now requires a full install through the current Hub installer in a disposable home before producing the final ZIP. See [QA-0.10.4.md](QA-0.10.4.md).
 
 ## Changes
 
@@ -37,7 +41,7 @@ Managed wrappers live in `~/Library/Audio/Plug-Ins/VST3/BridgeLab-*.vst3`. Manag
 
 ## Development
 
-Build with `tools/build-runners.sh`, `tools/build-plugin.sh`, then `tools/build.sh`. Build scripts currently assume the original workspace dependency layout (LLVM-MinGW, Steinberg VST3 SDK and the bundled Wine runtime). The last command runs native attachment, MIDI/state/import/permissions, transport and diagnostic checks.
+Build with `tools/build-runners.sh`, `tools/build-plugin.sh`, then `tools/build.sh`. Build scripts currently assume the original workspace dependency layout (LLVM-MinGW, Steinberg VST3 SDK and the bundled Wine runtime). The last command runs native attachment, MIDI/state/import/permissions, transport and diagnostic checks. Package releases with `python3 tools/package-release.py --hub-source ../StudioHub`; this requires the current Hub checkout and exercises its complete installer before producing a release ZIP and checksum.
 
 Vendor-plugin tests require a disposable `BRIDGELAB_HOME` with a `.bridgelab-qa` marker and explicitly supplied vendor files. They do not certify vendor controls simply because pixels are visible. Local runtimes, DLLs, projects, backups and generated test artifacts are excluded from this repository.
 
