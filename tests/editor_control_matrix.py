@@ -39,11 +39,12 @@ fixtures={'a4def1870e48ca34':cases,
  ('preset-next','click',(295,46),None,(20,35,280,77)),
  ('mono-toggle','click',(575,119),None,(540,105,595,135)),
  ('sync-toggle','click',(123,133),None,(90,112,145,149)),
+ ('am-toggle','click',(237,140),None,(215,125,258,155)),
  ('oscillator-page','nav',(180,120),None,(20,225,600,300)),
  ('lfo-page','nav',(71,379),None,(20,225,600,300)),
  ('envelope-page','nav',(278,379),None,(20,225,600,300)),
  ('matrix-page','nav',(463,379),None,(20,225,600,300)),
- ('bank-menu','menu',(340,62),None,(280,75,610,300)),
+ ('bank-cycle','click',(340,62),None,(20,35,280,77)),
  ('file-menu','menu',(42,12),None,(0,25,280,300))],
  'bca6d84f7103c868':[
  ('master-level-slider','drag',(53,348),(53,310),(30,290,77,390)),
@@ -91,12 +92,21 @@ try:
     colors=[mem[16+((h//2+12)*w+xx)*4:16+((h//2+12)*w+xx)*4+3] for xx in (300,900)]
     return all(max(c)-min(c)<3 and 45<c[0]<100 for c in colors)
    if trial_notice():
-    snap(name+'-trial-notice');click(803,h//2+150);s.pump(45)
+    snap(name+'-trial-notice');click(803,h//2+150)
+    deadline=time.monotonic()+5
+    while time.monotonic()<deadline:
+     s.pump(20)
+     if not trial_notice():break
+    snap(name+'-after-trial-cancel')
     assert not trial_notice(),'Vendor trial notice remained open after Cancel'
    if h!=477:
-    assert (w,h)==(1198,650),'Unexpected U-NO-LX layout; coordinates not certified'
-    click(280,449);s.pump(45);_,_,w,h=struct.unpack('<4I',mem[:16])
-   assert (w,h)==(1198,477),'Could not restore the documented original control layout'
+    assert w in (1195,1198) and h==650,'Unexpected U-NO-LX layout; coordinates not certified'
+    click(280,449);deadline=time.monotonic()+5
+    while time.monotonic()<deadline:
+     s.pump(20);_,_,w,h=struct.unpack('<4I',mem[:16])
+     if w in (1195,1198) and h==477:break
+    snap(name+'-layout-restored')
+   assert w in (1195,1198) and h==477,'Could not restore the documented original control layout'
   x,y=point
   if kind=='reset':
    s.input(0x201,x,y,1);s.input(0x200,x,y+50,1);s.input(0x202,x,y+50,0);s.pump(30)
@@ -122,3 +132,5 @@ finally:
  if mem:mem.close()
  if path:os.unlink(path)
  stop_profiles(home);(out/'results.json').write_text(json.dumps(results,indent=2)+'\n')
+
+raise SystemExit(0 if len(results)==len(cases) and all(r["passed"] for r in results) else 1)

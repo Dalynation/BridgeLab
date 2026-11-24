@@ -25,6 +25,6 @@ shutil.copy2(root/'build/vst3/libBridgeLabUI.dylib',payload/'libBridgeLabUI.dyli
 subprocess.run(['/usr/bin/codesign','--force','--sign','-',str(payload/'libBridgeLabUI.dylib')],check=True)
 shutil.copy2(root/'build/vst3/libBridgeLabRealtime.dylib',payload/'libBridgeLabRealtime.dylib')
 subprocess.run(['/usr/bin/codesign','--force','--sign','-',str(payload/'libBridgeLabRealtime.dylib')],check=True)
-(payload/'version.txt').write_text('0.9.5\n')
+(payload/'version.txt').write_text('0.10.3\n')
 shutil.copy2(root/'THIRD_PARTY_VST3_LICENSE.txt',payload/'THIRD_PARTY_VST3_LICENSE.txt')
 print('Bundled portable engine; no prefixes or development paths included')

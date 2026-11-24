@@ -2,7 +2,7 @@
 from pathlib import Path
 import subprocess,os,struct,mmap,select,time,tempfile,json,zlib
 HOME=Path(os.environ.get('BRIDGELAB_HOME',str(Path.home()/'Library/Application Support/BridgeLab')))
-MAP_BYTES=16+2048*2048*4
+MAP_BYTES=16+2048*2048*4+4
 class Session:
  def __init__(self,row,sample_rate=48000):
   arch=row['architecture'];runtime='Wine Crossover.app/Contents/Resources/wine/bin/wine64'

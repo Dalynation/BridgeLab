@@ -9,6 +9,10 @@ import os,json,sys,importlib.util,struct,time,mmap,tempfile,zlib,math
 source=Path(__file__).resolve().parents[1];home=Path(os.environ['BRIDGELAB_HOME']).resolve();out=Path(os.environ['BRIDGELAB_QA_OUTPUT'])/'original-artwork';out.mkdir(parents=True,exist_ok=True);assert (home/'.bridgelab-qa').is_file(), 'Use a disposable QA home';sys.path.insert(0,str(source/'tests'));from qa_runtime import stop_profiles
 spec=importlib.util.spec_from_file_location('editor',source/'tests/installed_editor.py');e=importlib.util.module_from_spec(spec);spec.loader.exec_module(e)
 fixtures={'aa3d048dfa16e71d':((770,523),(1060,500),80),'9f901d6b8802bc8a':((684,479),(907,355),80),'bca6d84f7103c868':((803,388),(52,351),30)}
+selected=os.environ.get('BRIDGELAB_ARTWORK_PLUGIN')
+if selected:
+ assert selected in fixtures,'Unknown artwork fixture'
+ fixtures={selected:fixtures[selected]}
 def audio(s,note=False,blocks=100):
  total=0;n=0;peak=0
  for i in range(blocks):

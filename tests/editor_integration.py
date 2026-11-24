@@ -25,7 +25,7 @@ def audio(session,program=0):
  return result
 
 import mmap,time
-frame=Path('work/embedded-frame.bin').resolve();frame.write_bytes(bytes(16+2048*2048*4));m=mmap.mmap(os.open(frame,os.O_RDWR),0)
+frame=Path('work/embedded-frame.bin').resolve();frame.write_bytes(bytes(16+2048*2048*4+4));m=mmap.mmap(os.open(frame,os.O_RDWR),0)
 s=Session(root/'outputs/SQ8L/SQ8L.dll','x86')
 try:
  h,_,_=s.request(6,('Z:'+str(frame)).encode());print('embed status',h,flush=True);assert h[2]==1

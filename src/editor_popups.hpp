@@ -11,6 +11,22 @@ struct EditorPopups {
  struct Popup {HWND window;RECT source,destination;};
  HWND root=nullptr;bool relocateWindows=true;POINT anchor{};std::vector<Popup> windows;
  uint32_t discovered=0,copied=0,routed=0,captureFailures=0,unsupported=0;
+ static HMENU menu(HWND window){MENUBARINFO info{};info.cbSize=sizeof(info);return GetMenuBarInfo(window,OBJID_CLIENT,0,&info)?info.hMenu:nullptr;}
+ bool besideParent(HWND child,int width,int& x,int& y)const{
+  HMENU childMenu=menu(child);if(!childMenu)return false;
+  auto locate=[&](const std::vector<Popup>& candidates){
+   for(const auto& parent:candidates){
+    HMENU parentMenu=IsWindow(parent.window)?menu(parent.window):nullptr;if(!parentMenu)continue;
+    for(int i=0,count=std::min(4096,GetMenuItemCount(parentMenu));i<count;++i)if(GetSubMenu(parentMenu,i)==childMenu){
+     RECT item{},bounds{};if(!GetMenuItemRect(nullptr,parentMenu,i,&item))continue;GetClientRect(root,&bounds);
+     x=parent.destination.right;if(x+width>bounds.right)x=parent.destination.left-width;
+     y=parent.destination.top+item.top-parent.source.top;return true;
+    }
+   }
+   return false;
+  };
+  return locate(previous)||locate(windows);
+ }
  static BOOL CALLBACK enumerate(HWND window,LPARAM context){
   auto* self=(EditorPopups*)context;
   if(window==self->root||!IsWindowVisible(window)||IsChild(self->root,window))return TRUE;
@@ -25,7 +41,9 @@ struct EditorPopups {
   for(auto& old:self->previous)if(old.window==window){destination=old.destination;existing=true;break;}
   if(!existing){
    ++self->discovered;int x=self->anchor.x,y=self->anchor.y;
+   bool submenu=self->besideParent(window,w,x,y);
    for(auto& old:self->windows){
+    if(submenu)break;
     int dx=source.left-old.source.left,dy=source.top-old.source.top;
     if(std::abs(dx)<bounds.right&&std::abs(dy)<bounds.bottom){x=old.destination.left+dx;y=old.destination.top+dy;break;}
    }
@@ -36,7 +54,7 @@ struct EditorPopups {
   POINT rootOrigin{};ClientToScreen(self->root,&rootOrigin);
   const int screenX=rootOrigin.x+destination.left,screenY=rootOrigin.y+destination.top;
   if(self->relocateWindows&&(source.left!=screenX||source.top!=screenY)){
-   SetWindowPos(window,HWND_BOTTOM,screenX,screenY,0,0,SWP_NOSIZE|SWP_NOACTIVATE);
+   SetWindowPos(window,nullptr,screenX,screenY,0,0,SWP_NOSIZE|SWP_NOACTIVATE|SWP_NOZORDER);
    POINT moved{};ClientToScreen(window,&moved);source={moved.x,moved.y,moved.x+w,moved.y+h};
   }
   self->windows.push_back({window,source,destination});return TRUE;
@@ -44,6 +62,15 @@ struct EditorPopups {
  std::vector<Popup> previous;
  void refresh(HWND owner,bool relocate=true){root=owner;relocateWindows=relocate;previous=std::move(windows);windows.clear();unsupported=0;if(root)EnumThreadWindows(GetWindowThreadProcessId(root,nullptr),enumerate,(LPARAM)this);previous.clear();}
  void clear(){windows.clear();previous.clear();root=nullptr;}
+ HWND keyboardTarget(HWND focused)const{
+  if(windows.empty())return IsWindow(focused)?focused:nullptr;
+  HWND popup=windows.front().window;
+  if(IsWindow(focused)&&(focused==popup||IsChild(popup,focused)))return focused;
+  // Common dialogs set focus inside user32/comdlg32 rather than through the
+  // plugin's patched imports. Preserve their real filename/text-field focus.
+  HWND actual=GetFocus();
+  return actual&&(actual==popup||IsChild(popup,actual))?actual:popup;
+ }
  HWND target(POINT local,POINT& screen){
   for(auto& popup:windows)if(PtInRect(&popup.destination,local)){
    screen={popup.source.left+local.x-popup.destination.left,popup.source.top+local.y-popup.destination.top};++routed;return popup.window;

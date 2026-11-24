@@ -13,6 +13,13 @@ int main(){
  while(!ready)Sleep(1);
  EditorPopups bridge;bridge.anchor={40,50};bridge.refresh(root);bool passed=bridge.windows.size()==1&&bridge.windows[0].window==popup;
  POINT mapped{};HWND target=bridge.target(POINT{50,60},mapped);POINT expected{10,10};ClientToScreen(popup,&expected);passed=passed&&target==popup&&mapped.x==expected.x&&mapped.y==expected.y&&bridge.backingOffscreen();
+ HWND list=CreateWindowW(L"LISTBOX",L"",WS_CHILD|WS_VISIBLE,0,0,50,50,popup,nullptr,cls.hInstance,nullptr);
+ HWND stale=CreateWindowW(L"EDIT",L"",WS_CHILD|WS_VISIBLE,0,0,30,20,root,nullptr,cls.hInstance,nullptr);
+ SendMessageW(list,LB_ADDSTRING,0,(LPARAM)L"one");SendMessageW(list,LB_ADDSTRING,0,(LPARAM)L"two");SendMessageW(list,LB_SETCURSEL,0,0);
+ HWND keyTarget=bridge.keyboardTarget(list);SendMessageW(keyTarget,WM_KEYDOWN,VK_DOWN,1);
+ HWND fallback=bridge.keyboardTarget(stale);
+ bool childKeys=keyTarget==list&&SendMessageW(list,LB_GETCURSEL,0,0)==1&&(fallback==popup||IsChild(popup,fallback));
+ passed=passed&&childKeys;std::cout<<(childKeys?"PASS":"FAIL")<<": popup child list receives navigation; stale root focus stays outside popup\n";
  POINT outside{};passed=passed&&bridge.target(POINT{0,0},outside)==nullptr;
  SetWindowPos(popup,nullptr,-8000,-8000,1000,1000,SWP_NOACTIVATE|SWP_NOZORDER);bridge.refresh(root);passed=passed&&bridge.windows.empty()&&bridge.unsupported==1;
  DestroyWindow(popup);bridge.refresh(root);passed=passed&&bridge.windows.empty()&&bridge.unsupported==0;

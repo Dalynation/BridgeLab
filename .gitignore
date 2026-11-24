@@ -11,3 +11,5 @@ runtime/
 __pycache__/
 .DS_Store
 clean-start-backup*/
+
+/test-results/

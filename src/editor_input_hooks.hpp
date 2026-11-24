@@ -19,9 +19,15 @@ struct EditorInputHooks {
  static SHORT WINAPI keyState(int key){if(enabled&&(key==VK_LBUTTON||key==VK_RBUTTON))return (buttons&(key==VK_LBUTTON?1:2))?SHORT(0x8000):0;return ::GetKeyState(key);}
  static BOOL WINAPI keyboardState(PBYTE keys){BOOL ok=::GetKeyboardState(keys);if(enabled){keys[VK_LBUTTON]=(buttons&1)?0x80:0;keys[VK_RBUTTON]=(buttons&2)?0x80:0;}return ok;}
  static SHORT WINAPI asyncKeyState(int key){if(enabled&&(key==VK_LBUTTON||key==VK_RBUTTON))return keyState(key);return ::GetAsyncKeyState(key);}
- static HWND WINAPI setCapture(HWND hwnd){if(!enabled)return ::SetCapture(hwnd);HWND old=captured;captured=hwnd;return old;}
+ static HWND WINAPI setCapture(HWND hwnd){
+  if(!enabled)return ::SetCapture(hwnd);
+  if(hwnd&&(!IsWindow(hwnd)||GetWindowThreadProcessId(hwnd,nullptr)!=GetCurrentThreadId()))return nullptr;
+  HWND old=captured;captured=hwnd;
+  if(old&&old!=hwnd&&IsWindow(old)&&GetWindowThreadProcessId(old,nullptr)==GetCurrentThreadId())SendMessageW(old,WM_CAPTURECHANGED,0,(LPARAM)hwnd);
+  return old;
+ }
  static HWND WINAPI getCapture(){return enabled?captured: ::GetCapture();}
- static BOOL WINAPI releaseCapture(){if(!enabled)return ::ReleaseCapture();captured=nullptr;return TRUE;}
+ static BOOL WINAPI releaseCapture(){if(!enabled)return ::ReleaseCapture();setCapture(nullptr);return TRUE;}
  static HWND WINAPI getFocus(){return enabled?focused: ::GetFocus();}
  static HWND WINAPI setFocus(HWND hwnd){if(!enabled)return ::SetFocus(hwnd);HWND old=focused;focused=hwnd;return old;}
  static HWND WINAPI getActive(){return enabled?(active?active:root): ::GetActiveWindow();}

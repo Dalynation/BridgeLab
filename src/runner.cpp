@@ -66,7 +66,18 @@ int main(int argc,char** argv){
  call(0);
  if(argc==3&&std::string(argv[2])=="--probe"){
  char name[128]{};e->dispatch(e,45,0,0,name,0);name[127]=0;
- std::cout<<"VST2 probe ok; id="<<e->id<<" programs="<<e->programs<<" inputs="<<e->inputs<<" outputs="<<e->outputs<<" flags="<<e->flags<<" editor="<<((e->flags&1)?1:0)<<" name="<<name<<"\n";call(1);return ((e->flags&256)||e->inputs==0)&&e->inputs>=0&&e->inputs<=32&&e->outputs>0&&e->outputs<=32&&e->replacing?0:4;
+ std::cout<<"VST2 probe ok; id="<<e->id<<" programs="<<e->programs<<" inputs="<<e->inputs<<" outputs="<<e->outputs<<" flags="<<e->flags<<" editor="<<((e->flags&1)?1:0)<<" name="<<name<<"\n";
+ // Probe a fresh instance only. Some VST2 instruments do not implement indexed
+ // names, so select each program here, never while a user's instance is live.
+ const char hex[]="0123456789abcdef";
+ for(int i=0;i<std::clamp(e->programs,0,16384);++i){
+  char preset[256]{};
+  if(!e->dispatch(e,29,i,0,preset,0)){call(2,i);call(5,0,preset);}
+  preset[255]=0;std::cout<<"BridgeLabProgram "<<i<<" ";
+  for(const auto* c=(const unsigned char*)preset;*c;++c)std::cout<<hex[*c>>4]<<hex[*c&15];
+  std::cout<<"\n";
+ }
+ call(1);return ((e->flags&256)||e->inputs==0)&&e->inputs>=0&&e->inputs<=32&&e->outputs>0&&e->outputs<=32&&e->replacing?0:4;
  }
 
  if(e->outputs<1||e->outputs>32||e->inputs<0||e->inputs>32||!e->replacing)throw std::runtime_error("Unsupported channel count or no processReplacing");

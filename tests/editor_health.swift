@@ -7,7 +7,7 @@ import Foundation
   defer{try? fm.removeItem(at:directory)}
   let mapping=directory.appendingPathComponent("BridgeLab-editor-test")
   fm.createFile(atPath:mapping.path,contents:nil)
-  let file=try FileHandle(forWritingTo:mapping);try file.truncate(atOffset:UInt64(16+2048*2048*4));try file.close()
+  let file=try FileHandle(forWritingTo:mapping);try file.truncate(atOffset:UInt64(16+2048*2048*4+4));try file.close()
   let status=mapping.appendingPathExtension("health.json")
   try manager.writeJSON(["format_version":1,"unsupported_popup_modes":1,"capture_failure":0],status)
   let observations=manager.editorHealth(in:directory)

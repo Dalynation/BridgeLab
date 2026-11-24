@@ -19,10 +19,16 @@ using namespace Steinberg;using namespace Steinberg::Vst;
 @property(nonatomic,assign) uint32_t sequence;
 @property(nonatomic,assign) BOOL connected;
 @property(nonatomic,weak) NSResponder* keyboardHost;
+@property(nonatomic,weak) NSWindow* keyboardWindow;
 @property(nonatomic,strong) NSMutableIndexSet* editorKeys;
+@property(nonatomic,strong) NSMutableIndexSet* responderKeys;
 @property(nonatomic,assign) BOOL routingHostKey;
+@property(nonatomic,strong) id keyboardMonitor;
+@property(nonatomic,strong) NSMutableDictionary<NSNumber*,NSEvent*>* hostPresses;
+@property(nonatomic,strong) NSMapTable<NSNumber*,NSResponder*>* hostResponders;
 -(void)start;
 -(void)stop;
+-(NSEvent*)routeKeyboard:(NSEvent*)event;
 @end
 @implementation BridgeLabCanvas
 -(BOOL)isFlipped{return YES;}
@@ -43,7 +49,15 @@ using namespace Steinberg;using namespace Steinberg::Vst;
  self.mappingPath=[NSString stringWithUTF8String:path.data()];
  if(ftruncate(fd,editorMapBytes)==0){void* mem=mmap(nullptr,editorMapBytes,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0);if(mem!=MAP_FAILED)self.mapping=mem;}close(fd);
  if(!self.mapping)return;
+ // A host can focus the editor as soon as it opens, before the keyboard
+ // monitor has seen a piano note. Preserve its owning/main window then.
+ NSWindow* hostWindow=self.window.parentWindow;
+ if(!hostWindow&&NSApp.mainWindow!=self.window)hostWindow=NSApp.mainWindow;
+ if(hostWindow){self.keyboardWindow=hostWindow;self.keyboardHost=hostWindow.firstResponder;}
+ self.hostPresses=[NSMutableDictionary dictionary];
+ self.hostResponders=[NSMapTable strongToWeakObjectsMapTable];
  __weak BridgeLabCanvas* weakSelf=self;
+ self.keyboardMonitor=[NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskKeyDown|NSEventMaskKeyUp handler:^NSEvent*(NSEvent* event){BridgeLabCanvas* pane=weakSelf;return pane?[pane routeKeyboard:event]:event;}];
  self.timer=[NSTimer scheduledTimerWithTimeInterval:1.0/15.0 repeats:YES block:^(NSTimer*){[weakSelf refresh];}];
  [[NSRunLoop mainRunLoop]addTimer:self.timer forMode:NSRunLoopCommonModes];
  [self refresh];
@@ -63,6 +77,8 @@ using namespace Steinberg;using namespace Steinberg::Vst;
  self.sequence=seq;self.bitmap=image;
  if(resize&&self.resizeEditor)self.resizeEditor(w,h);
  [self setNeedsDisplay:YES];
+ // Hosts may own their event loop and never call AppKit updateWindows.
+ [self displayIfNeeded];
 }
 -(void)drawRect:(NSRect)rect {
  [[NSColor colorWithWhite:0.12 alpha:1]setFill];NSRectFill(self.bounds);
@@ -77,7 +93,7 @@ using namespace Steinberg;using namespace Steinberg::Vst;
 -(void)mouseDown:(NSEvent*)event{
  // Preserve the recipient of a typing-piano press begun before this click.
  NSResponder* previous=self.window.firstResponder;
- if(previous&&previous!=self)self.keyboardHost=previous;
+ if(previous&&previous!=self){self.keyboardHost=previous;self.keyboardWindow=self.window;}
  [self.window makeFirstResponder:self];[self input:event message:event.clickCount==2?0x203:0x201 value:1];}
 -(void)mouseUp:(NSEvent*)event{[self input:event message:0x202 value:0];}
 -(void)mouseDragged:(NSEvent*)event{[self input:event message:0x200 value:1];}
@@ -90,9 +106,55 @@ using namespace Steinberg;using namespace Steinberg::Vst;
  switch(event.keyCode){case 123:return 0x25;case 124:return 0x27;case 125:return 0x28;case 126:return 0x26;case 36:return 13;case 48:return 9;case 51:return 8;case 53:return 27;case 117:return 0x2e;default:break;}
  NSString* s=event.charactersIgnoringModifiers.uppercaseString;return s.length?[s characterAtIndex:0]:0;
 }
--(void)keyDown:(NSEvent*)event{if(!self.editorKeys)self.editorKeys=[NSMutableIndexSet indexSet];[self.editorKeys addIndex:event.keyCode];uint32_t key=[self virtualKey:event];[self input:event message:0x100 value:key];for(NSUInteger i=0;i<event.characters.length;i++)[self input:event message:0x102 value:[event.characters characterAtIndex:i]];}
+// Remember where a typing-piano press began. A plugin may live in a different
+// NSWindow from the Channel Rack; its first responder cannot release that note.
+-(NSEvent*)routeKeyboard:(NSEvent*)event {
+ if(self.routingHostKey)return event;
+ NSNumber* key=@(event.keyCode);
+ if(event.type==NSEventTypeKeyDown){
+  if(event.window.firstResponder==self&&!event.isARepeat){[self.hostPresses removeObjectForKey:key];[self.hostResponders removeObjectForKey:key];}
+  else if(!event.isARepeat&&![event.window.firstResponder isKindOfClass:[BridgeLabCanvas class]]){self.hostPresses[key]=event;[self.hostResponders setObject:event.window.firstResponder forKey:key];self.keyboardHost=event.window.firstResponder;self.keyboardWindow=event.window;}
+  return event;
+ }
+ NSEvent* press=self.hostPresses[key];
+ if(!press)return event;
+ NSResponder* responder=[self.hostResponders objectForKey:key];
+ [self.hostPresses removeObjectForKey:key];[self.hostResponders removeObjectForKey:key];
+ NSWindow* window=press.window;
+ if(!window||(event.window==window&&(!responder||window.firstResponder==responder)))return event;
+ NSEvent* release=[NSEvent keyEventWithType:NSEventTypeKeyUp location:press.locationInWindow modifierFlags:event.modifierFlags timestamp:event.timestamp windowNumber:window.windowNumber context:nil characters:event.characters charactersIgnoringModifiers:event.charactersIgnoringModifiers isARepeat:NO keyCode:event.keyCode];
+ NSResponder* current=window.firstResponder;
+ self.routingHostKey=YES;
+ @try{if(responder)[window makeFirstResponder:responder];[window sendEvent:release];}
+ @finally{if(window.firstResponder==responder&&current)[window makeFirstResponder:current];self.routingHostKey=NO;}
+ return nil;
+}
+-(void)keyDown:(NSEvent*)event{
+ uint32_t flags=self.mapping?__atomic_load_n((uint32_t*)((uint8_t*)self.mapping+editorKeyboardOffset),__ATOMIC_ACQUIRE):editorTextInput;
+ NSNumber* eventKey=@(event.keyCode);NSEvent* heldPress=self.hostPresses[eventKey];
+ NSWindow* window=heldPress?heldPress.window:self.keyboardWindow;
+ NSResponder* host=heldPress?[self.hostResponders objectForKey:eventKey]:self.keyboardHost;
+ BOOL editorOwned=event.isARepeat&&[self.editorKeys containsIndex:event.keyCode];
+ BOOL printable=event.charactersIgnoringModifiers.length&&[event.charactersIgnoringModifiers characterAtIndex:0]>=32&&[event.charactersIgnoringModifiers characterAtIndex:0]<0xf700;
+ BOOL menuSpace=(flags&editorPopupInput)&&[event.charactersIgnoringModifiers isEqualToString:@" "];
+ if(!self.routingHostKey&&!editorOwned&&(heldPress||(!(flags&editorTextInput)&&printable&&!menuSpace))&&window&&host&&host!=self){
+  NSEvent* press=[NSEvent keyEventWithType:NSEventTypeKeyDown location:event.locationInWindow modifierFlags:event.modifierFlags timestamp:event.timestamp windowNumber:window.windowNumber context:nil characters:event.characters charactersIgnoringModifiers:event.charactersIgnoringModifiers isARepeat:event.isARepeat keyCode:event.keyCode];
+  NSNumber* key=@(event.keyCode);if(!event.isARepeat){self.hostPresses[key]=press;[self.hostResponders setObject:host forKey:key];}
+  NSResponder* current=window.firstResponder;self.routingHostKey=YES;
+  @try{[window makeFirstResponder:host];[window sendEvent:press];}
+  @finally{if(window.firstResponder==host&&current)[window makeFirstResponder:current];self.routingHostKey=NO;}
+  return;
+ }
+ if(!editorOwned&&!(flags&editorTextInput)&&printable&&!menuSpace){
+  if(!self.responderKeys)self.responderKeys=[NSMutableIndexSet indexSet];
+  [self.responderKeys addIndex:event.keyCode];[super keyDown:event];return;
+ }
+ if(!self.editorKeys)self.editorKeys=[NSMutableIndexSet indexSet];[self.editorKeys addIndex:event.keyCode];uint32_t key=[self virtualKey:event];[self input:event message:0x100 value:key];for(NSUInteger i=0;i<event.characters.length;i++)[self input:event message:0x102 value:[event.characters characterAtIndex:i]];
+}
 -(void)keyUp:(NSEvent*)event{
  if(self.routingHostKey){[super keyUp:event];return;}
+ if(self.hostPresses[@(event.keyCode)]&&![self routeKeyboard:event])return;
+ if([self.responderKeys containsIndex:event.keyCode]){[self.responderKeys removeIndex:event.keyCode];[super keyUp:event];return;}
  if([self.editorKeys containsIndex:event.keyCode]){
   [self.editorKeys removeIndex:event.keyCode];[self input:event message:0x101 value:[self virtualKey:event]];
  }else if(self.keyboardHost&&self.keyboardHost!=self){
@@ -107,6 +169,8 @@ using namespace Steinberg;using namespace Steinberg::Vst;
  else{[super keyUp:event];}
 }
 -(void)stop {
+ if(self.keyboardMonitor){[NSEvent removeMonitor:self.keyboardMonitor];self.keyboardMonitor=nil;}
+ [self.hostPresses removeAllObjects];[self.hostResponders removeAllObjects];
  [self.timer invalidate];self.timer=nil;
  if(self.controller)[self send:"BridgeLab.CloseEditor" bytes:nullptr length:0];
  self.controller=nullptr;self.resizeEditor=nil;

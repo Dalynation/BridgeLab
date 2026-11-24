@@ -11,5 +11,9 @@ struct WireResponse {uint32_t magic=wireMagic,frames=quantum,status=1,payloadByt
 static_assert(sizeof(WireMidi)==8,"wire MIDI layout");
 
 constexpr uint32_t editorFrameMagic=0x424c4631,editorMaxWidth=2048,editorMaxHeight=2048;
-constexpr size_t editorMapBytes=16+size_t(editorMaxWidth)*editorMaxHeight*4;
+// Keyboard ownership is published separately from the frame seqlock, so input
+// never waits on a synchronous runner request or the audio connection.
+constexpr size_t editorKeyboardOffset=16+size_t(editorMaxWidth)*editorMaxHeight*4;
+constexpr size_t editorMapBytes=editorKeyboardOffset+4;
+constexpr uint32_t editorTextInput=1,editorPopupInput=2;
 struct EditorInputEvent {uint32_t message;int32_t x,y;uint32_t value;};
