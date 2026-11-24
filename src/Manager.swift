@@ -2,8 +2,29 @@ import Foundation
 import CryptoKit
 import Darwin
 
+enum ZoneSixAccess {
+    static func generation() -> Data? { try? Data(contentsOf:FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/ZoneSixStudioHub/session-generation")) }
+    static func require() throws {
+        let location=FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/ZoneSixStudioHub/hub-location.plist")
+        guard let data=try? Data(contentsOf:location),let record=try? PropertyListDecoder().decode([String:String].self,from:data),let path=record["applicationPath"],let hub=Bundle(path:path),hub.bundleIdentifier=="studio.tools.hub.preview",hub.object(forInfoDictionaryKey:"ZoneSixAuthenticationVersion") as? Int == 1,let executable=hub.executableURL else { throw denied() }
+        let process=Process();process.executableURL=executable;process.arguments=["--authorize-product","bridgelab"]
+        var arm64:Int32=0;var size=MemoryLayout<Int32>.size
+        if sysctlbyname("hw.optional.arm64",&arm64,&size,nil,0)==0,arm64 != 0,hub.executableArchitectures?.contains(NSNumber(value:CPU_TYPE_ARM64)) == true {
+            process.executableURL=URL(fileURLWithPath:"/usr/bin/arch")
+            process.arguments=["-arm64",executable.path,"--authorize-product","bridgelab"]
+        }
+        process.standardOutput=FileHandle.nullDevice;process.standardError=FileHandle.nullDevice;process.standardInput=FileHandle.nullDevice
+        try process.run()
+        let timeout=DispatchWorkItem{if process.isRunning{process.terminate();DispatchQueue.global().asyncAfter(deadline:.now()+1){if process.isRunning{kill(process.processIdentifier,SIGKILL)}}}}
+        DispatchQueue.global().asyncAfter(deadline:.now()+14,execute:timeout)
+        process.waitUntilExit();timeout.cancel()
+        guard process.terminationStatus==0 else{throw denied()}
+    }
+    static func denied()->NSError {NSError(domain:"ZoneSixAccess",code:77,userInfo:[NSLocalizedDescriptionKey:"Sign in to Zone Six Studio Hub with an internet connection, then reopen BridgeLab. This tool requires an active Zone Six session."])}
+}
+
 final class BridgeManager {
-    static let version = "0.9.5"
+    static let version = "0.10.3"
     static let runtimeProfile = "crossover-shared"
     let fm = FileManager.default
     let root: URL
@@ -113,6 +134,22 @@ final class BridgeManager {
         } catch {throw pluginFolderFailure(folder,error)}
         return folder
     }
+    static func programNames(_ probe:String)throws->[String] {
+        var programNames:[String]=[]
+        for rawLine in probe.components(separatedBy:"\n") where rawLine.hasPrefix("BridgeLabProgram ") {
+            let line=rawLine.trimmingCharacters(in:.newlines)
+            let fields=line.split(separator:" ",maxSplits:2,omittingEmptySubsequences:false)
+            guard fields.count>=2,fields.count<=3,let index=Int(fields[1]),index==programNames.count,index<16384 else{throw NSError(domain:"BridgeLab",code:1,userInfo:[NSLocalizedDescriptionKey:"Invalid preset metadata from the Windows plugin probe."])}
+            let hex=fields.count==3 ? Array(fields[2]):[]
+            guard hex.count<=510,hex.count%2==0 else{throw NSError(domain:"BridgeLab",code:1,userInfo:[NSLocalizedDescriptionKey:"Invalid preset metadata from the Windows plugin probe."])}
+            var bytes:[UInt8]=[]
+            for offset in stride(from:0,to:hex.count,by:2){if let byte=UInt8(String(hex[offset...offset+1]),radix:16){bytes.append(byte)}}
+            guard bytes.count*2==hex.count else{throw NSError(domain:"BridgeLab",code:1,userInfo:[NSLocalizedDescriptionKey:"Invalid preset metadata from the Windows plugin probe."])}
+            let name=String(bytes:bytes,encoding:.utf8) ?? String(bytes:bytes,encoding:.windowsCP1252) ?? ""
+            programNames.append(name.isEmpty ? "Program \(index+1)":name)
+        }
+        return programNames
+    }
     func importPlugin(_ source:URL)throws->[String:Any] {
         let info=try inspect(source)
         let pluginsFolder=try preparePluginDirectory()
@@ -150,6 +187,13 @@ final class BridgeManager {
         }
         let res=stage.appendingPathComponent("Contents/Resources")
         try (uid+"\n"+controller+"\n"+display+"\n"+dll.path+"\n"+Self.runtimeProfile+"\n").write(to:res.appendingPathComponent("bridgelab.conf"),atomically:true,encoding:.utf8)
+        // Hex keeps vendor names separate from Wine's diagnostic output.
+        let programNames=try Self.programNames(probe)
+        if !programNames.isEmpty {
+            // One hex-encoded UTF-8 name per line; newlines in names stay data.
+            let metadata=programNames.map{Data($0.utf8).map{String(format:"%02x",$0)}.joined()}.joined(separator:"\n")+"\n"
+            try metadata.write(to:res.appendingPathComponent("programs.txt"),atomically:true,encoding:.utf8)
+        }
         let plistURL=stage.appendingPathComponent("Contents/Info.plist")
         var plist=(try PropertyListSerialization.propertyList(from:Data(contentsOf:plistURL),format:nil)) as! [String:Any]
         plist["CFBundleIdentifier"]="local.bridgelab.plugin."+id;plist["CFBundleName"]=display
@@ -193,7 +237,7 @@ final class BridgeManager {
         return files.filter{$0.lastPathComponent.hasPrefix("BridgeLab-editor-") && $0.lastPathComponent.hasSuffix(".health.json")}.compactMap { url in
             let mapping=URL(fileURLWithPath:String(url.path.dropLast(".health.json".count)))
             guard let size=(try? fm.attributesOfItem(atPath:url.path)[.size]) as? NSNumber,size.intValue<=4096,
-                  let mappedSize=(try? fm.attributesOfItem(atPath:mapping.path)[.size]) as? NSNumber,mappedSize.intValue==16+2048*2048*4,
+                  let mappedSize=(try? fm.attributesOfItem(atPath:mapping.path)[.size]) as? NSNumber,[16+2048*2048*4,16+2048*2048*4+4].contains(mappedSize.intValue),
                   let data=try? Data(contentsOf:url),let value=(try? JSONSerialization.jsonObject(with:data)) as? [String:Any],value["format_version"] as? Int==1 else{return nil}
             var observation=value
             let attributes=try? fm.attributesOfItem(atPath:url.path)
@@ -227,6 +271,7 @@ final class BridgeManager {
         return messages.joined(separator:"\n")
     }
     func run(_ args:[String])throws->[String:Any] {
+        try ZoneSixAccess.require()
         switch args.first {
         case "import":guard args.count==2 else{throw failure("Choose a DLL.")};return try importSelection(URL(fileURLWithPath:args[1]))
         case "inspect":return try inspect(URL(fileURLWithPath:args[1]))

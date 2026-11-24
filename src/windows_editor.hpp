@@ -13,6 +13,7 @@
 #include "plugin_state.hpp"
 #include "editor_input_hooks.hpp"
 #include "editor_popups.hpp"
+#include "editor_menu.hpp"
 #include "audio_health.hpp"
 struct EditorHost {
  EditorPopups popups;std::string healthPath;DWORD lastHealthWrite=0,lastFramePublished=0;uint32_t framesPublished=0,inputDelivered=0;std::atomic<uint32_t> inputQueued{0},inputCoalesced{0},inputRejected{0};
@@ -84,6 +85,7 @@ struct EditorHost {
  if(!embedded||!frameMemory||!opened||GetTickCount()-lastFrame<66)return;lastFrame=GetTickCount();
  RECT rect{};GetClientRect(window,&rect);int w=rect.right,h=rect.bottom;if(w<1||h<1||w>int(editorMaxWidth)||h>int(editorMaxHeight))return;
  popups.refresh(window,!EditorGPU::liveChains.load());
+ publishKeyboard();
  if(EditorGPU::enabled&&EditorGPU::liveChains.load()){if(EditorGPU::publish(frameMemory,w,h)){++framesPublished;lastFramePublished=GetTickCount();}reportHealth();return;}
  HDC screen=GetDC(window),dc=CreateCompatibleDC(screen);BITMAPINFO info{};info.bmiHeader.biSize=sizeof(BITMAPINFOHEADER);info.bmiHeader.biWidth=w;info.bmiHeader.biHeight=-h;info.bmiHeader.biPlanes=1;info.bmiHeader.biBitCount=32;info.bmiHeader.biCompression=BI_RGB;void* pixels=nullptr;
  HBITMAP bitmap=CreateDIBSection(dc,&info,DIB_RGB_COLORS,&pixels,nullptr,0);
@@ -93,14 +95,56 @@ struct EditorHost {
  GdiFlush();auto* header=(uint32_t*)frameMemory;InterlockedIncrement((volatile LONG*)&header[1]);MemoryBarrier();header[0]=editorFrameMagic;header[2]=w;header[3]=h;std::memcpy(frameMemory+16,pixels,size_t(w)*h*4);MemoryBarrier();InterlockedIncrement((volatile LONG*)&header[1]);++framesPublished;lastFramePublished=GetTickCount();SelectObject(dc,old);DeleteObject(bitmap);}
  DeleteDC(dc);ReleaseDC(window,screen);reportHealth();
  }
+ void publishKeyboard(){
+  if(!frameMemory)return;
+  HWND focused=EditorInputHooks::focused;
+  if(!IsWindow(focused))focused=GetFocus();
+  focused=popups.keyboardTarget(focused);
+  char name[128]{};if(focused)GetClassNameA(focused,name,sizeof(name));
+  // Standard text controls include Win32 Edit and RichEdit variants. Custom
+  // controls can advertise text selection through WM_GETDLGCODE. WANTCHARS
+  // alone also describes list search and must not steal typing-piano notes.
+  LRESULT code=focused?SendMessageA(focused,WM_GETDLGCODE,0,0):0;
+  bool text=!lstrcmpiA(name,"Edit")||!_strnicmp(name,"RichEdit",8)||(code&DLGC_HASSETSEL);
+  // List boxes want character search but must not capture the DAW piano keys.
+  if(!lstrcmpiA(name,"ListBox")||!lstrcmpiA(name,"ComboBox"))text=false;
+  uint32_t flags=(text?editorTextInput:0)|(!popups.windows.empty()?editorPopupInput:0);
+  InterlockedExchange((volatile LONG*)(frameMemory+editorKeyboardOffset),LONG(flags));
+ }
+ HWND nativeMenu()const{for(const auto& popup:popups.windows)if(EditorMenu::native(popup.window))return popup.window;return EditorMenu::active();}
  bool input(const std::vector<uint8_t>& bytes){
  if(!opened||bytes.size()!=sizeof(EditorInputEvent))return false;EditorInputEvent e{};std::memcpy(&e,bytes.data(),sizeof(e));
  switch(e.message){case WM_MOUSEMOVE:case WM_LBUTTONDOWN:case WM_LBUTTONUP:case WM_LBUTTONDBLCLK:case WM_RBUTTONDOWN:case WM_RBUTTONUP:case WM_MOUSEWHEEL:case WM_KEYDOWN:case WM_KEYUP:case WM_CHAR:break;default:return false;}
  HWND target=nullptr;
- if(e.message==WM_KEYDOWN||e.message==WM_KEYUP||e.message==WM_CHAR){if(embedded&&!EditorGPU::liveChains.load())popups.refresh(window);target=embedded?EditorInputHooks::focused:GetFocus();if(embedded&&!EditorGPU::liveChains.load()&&!popups.windows.empty())target=popups.windows.front().window;if(!target||(GetWindowThreadProcessId(target,nullptr)!=messageThread))target=GetWindow(window,GW_CHILD);if(!target)target=window;SendMessageA(target,e.message,e.value,1);++inputDelivered;return true;}
+ if(e.message==WM_KEYDOWN||e.message==WM_KEYUP||e.message==WM_CHAR){
+  if(embedded&&!EditorGPU::liveChains.load())popups.refresh(window);
+  if(HWND menu=nativeMenu()){EditorInputHooks::setCapture(menu);bool ok=EditorMenu::key(menu,e.message,e.value);if(ok)++inputDelivered;publishKeyboard();return ok;}
+  target=embedded?EditorInputHooks::focused:GetFocus();
+  if(embedded&&!EditorGPU::liveChains.load())target=popups.keyboardTarget(target);
+  if(!target||(GetWindowThreadProcessId(target,nullptr)!=messageThread))target=GetWindow(window,GW_CHILD);
+  if(!target)target=window;
+  bool handled=false;
+  if(e.message==WM_KEYDOWN&&(e.value==VK_TAB||e.value==VK_RETURN||e.value==VK_ESCAPE)&&!popups.windows.empty()){
+   HWND dialog=popups.windows.front().window;char name[32]{};GetClassNameA(dialog,name,sizeof(name));
+   if(!lstrcmpA(name,"#32770")){
+    MSG message{};message.hwnd=target;message.message=e.message;message.wParam=e.value;message.lParam=1;
+    handled=IsDialogMessageA(dialog,&message);
+    if(handled)EditorInputHooks::focused=GetFocus();
+   }
+  }
+  if(!handled)SendMessageA(target,e.message,e.value,1);
+  ++inputDelivered;publishKeyboard();return true;
+ }
  POINT point{e.x,e.y};ClientToScreen(window,&point);HWND popup=nullptr;
  if(embedded&&!EditorGPU::liveChains.load()){popups.refresh(window);popup=popups.target(POINT{e.x,e.y},point);}
- EditorInputHooks::cursor=point;EditorInputHooks::buttons=e.value&3;target=popup?EditorInputHooks::windowFromPoint(point):((embedded&&EditorInputHooks::captured)?EditorInputHooks::captured:dragTarget);
+ EditorInputHooks::cursor=point;EditorInputHooks::buttons=e.value&3;
+ if(HWND menu=nativeMenu()){
+  EditorInputHooks::setCapture(menu);
+  if(e.message==WM_LBUTTONUP||e.message==WM_RBUTTONUP)dragTarget=nullptr;
+  WPARAM flags=e.message==WM_MOUSEWHEEL?MAKEWPARAM(0,(short)e.value):e.value;
+  bool ok=EditorMenu::mouse(menu,e.message,flags,point);if(ok)++inputDelivered;publishKeyboard();return ok;
+ }
+ target=popup?EditorInputHooks::windowFromPoint(point):((embedded&&EditorInputHooks::captured)?EditorInputHooks::captured:dragTarget);
  if(target&&(!IsWindow(target)||GetWindowThreadProcessId(target,nullptr)!=messageThread)){target=nullptr;dragTarget=nullptr;EditorInputHooks::captured=nullptr;}
  if(!target){target=window;for(int depth=0;depth<32;++depth){POINT local=point;ScreenToClient(target,&local);HWND child=ChildWindowFromPointEx(target,local,CWP_SKIPINVISIBLE|CWP_SKIPDISABLED);if(!child||child==target)break;target=child;}}
  POINT local=point;ScreenToClient(target,&local);
@@ -109,7 +153,7 @@ struct EditorHost {
  LPARAM coordinates=MAKELPARAM(local.x,local.y);WPARAM flags=e.value;
  if(e.message==WM_MOUSEWHEEL){coordinates=MAKELPARAM(point.x,point.y);flags=MAKEWPARAM(0,(short)e.value);}
  SendMessageA(target,e.message,flags,coordinates);++inputDelivered;
- if(e.message==WM_LBUTTONUP||e.message==WM_RBUTTONUP)dragTarget=nullptr;return true;
+ if(e.message==WM_LBUTTONUP||e.message==WM_RBUTTONUP)dragTarget=nullptr;publishKeyboard();return true;
  }
  void execute(Control* c){std::unique_lock<std::recursive_mutex> guard(mutex,std::defer_lock);
  // UI/message callbacks must remain independent of the audio callback. Some
@@ -125,7 +169,7 @@ switch(c->command){
   // the host window kept every closed editor's UI resources alive.
   if(s->opened)s->effect->dispatch(s->effect,15,0,0,nullptr,0);
   EditorGPU::enabled=false;EditorGPU::reset();s->opened=false;s->embedded=false;s->unmapFrame();if(window)DestroyWindow(window);window=nullptr;
-  popups.clear();EditorInputHooks::enabled=false;EditorInputHooks::captured=nullptr;EditorInputHooks::focused=nullptr;EditorInputHooks::root=nullptr;EditorInputHooks::active=nullptr;
+  popups.clear();EditorMenu::reset();EditorInputHooks::enabled=false;EditorInputHooks::captured=nullptr;EditorInputHooks::focused=nullptr;EditorInputHooks::root=nullptr;EditorInputHooks::active=nullptr;
   c->ok=true;break;
  case EditorStatus:{RECT r{};GetWindowRect(window,&r);int32_t status[4]={r.left,r.top,int32_t(IsWindowVisible(window)),int32_t(GetForegroundWindow()==window)};c->output.resize(sizeof(status));std::memcpy(c->output.data(),status,sizeof(status));c->ok=true;break;}
  case EditorLifecycle:{uint32_t status[4]={uint32_t(opened),uint32_t(frameMemory!=nullptr),idleCalls,uint32_t(GetWindow(window,GW_CHILD)!=nullptr)};c->output.resize(sizeof(status));std::memcpy(c->output.data(),status,sizeof(status));c->ok=true;break;}
@@ -153,13 +197,16 @@ switch(c->command){
   if(jobs.size()>=128){if(control.command==EditorInput)++inputRejected;return false;}if(control.command==EditorInput)++inputQueued;auto owned=std::make_unique<Control>(std::move(control));auto* pointer=owned.get();jobs.push_back({pointer,std::move(owned)});PostThreadMessageW(messageThread,controlMessage,0,0);return true;
  }
  void request(Control& control){std::lock_guard<std::mutex> serialize(requestMutex);std::unique_lock<std::mutex> lock(jobMutex);jobs.push_back({&control,{}});PostThreadMessageW(messageThread,controlMessage,0,0);jobDone.wait(lock,[&]{return control.done;});}
- void dispatchJobs(){for(unsigned count=0;count<64;++count){Job job;{std::lock_guard<std::mutex> lock(jobMutex);if(jobs.empty())break;job=std::move(jobs.front());jobs.pop_front();}execute(job.control);if(!job.owned){{std::lock_guard<std::mutex> lock(jobMutex);job.control->done=true;}jobDone.notify_all();}}}
+ void dispatchJobs(){for(unsigned count=0;count<64;++count){Job job;{std::lock_guard<std::mutex> lock(jobMutex);if(jobs.empty())break;job=std::move(jobs.front());jobs.pop_front();}
+  // Let the vendor's TrackPopupMenu stack unwind before destroying its GUI.
+  if(job.control->command==CloseEditor){popups.refresh(window,!EditorGPU::liveChains.load());if(nativeMenu()&&EndMenu()){std::lock_guard<std::mutex> lock(jobMutex);jobs.push_front(std::move(job));break;}}
+  execute(job.control);if(!job.owned){{std::lock_guard<std::mutex> lock(jobMutex);job.control->done=true;}jobDone.notify_all();}}}
  bool create(const char* title){WNDCLASSA cls{};cls.lpfnWndProc=wndproc;cls.hInstance=GetModuleHandle(nullptr);cls.lpszClassName="BridgeLabEditorHost";cls.hCursor=LoadCursor(nullptr,IDC_ARROW);RegisterClassA(&cls);window=CreateWindowExA(embedded?(WS_EX_TOOLWINDOW|WS_EX_NOACTIVATE):0,cls.lpszClassName,"BridgeLab - Windows Plugin Editor",WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX,CW_USEDEFAULT,CW_USEDEFAULT,640,480,nullptr,nullptr,cls.hInstance,this);if(window){SetWindowTextA(window,title);SetTimer(window,frameTimer,66,nullptr);}return window;}
  void pump(){
  dispatchJobs();
  bool trace=opened&&idleCalls==0&&std::getenv("BRIDGELAB_EDITOR_TRACE");if(trace)log("first pump messages");
  // A continuously repainting plugin must not starve controls, idle or capture.
  MSG msg;for(int count=0;count<64&&PeekMessageA(&msg,nullptr,0,0,PM_REMOVE);++count){if(trace)log((std::string("dispatch message ")+std::to_string(msg.message)).c_str());if(msg.message==controlMessage&&!msg.hwnd)dispatchJobs();else{TranslateMessage(&msg);DispatchMessageA(&msg);}if(trace)log("dispatch complete");}if(opened){if(trace)log("first pump idle");effect->dispatch(effect,19,0,0,nullptr,0);++idleCalls;if(trace)log("first pump frame");frame();if(trace)log("first pump complete");}}
- void close(){std::lock_guard<std::recursive_mutex> guard(mutex);save();EditorGPU::enabled=false;EditorGPU::reset();unmapFrame();if(opened)effect->dispatch(effect,15,0,0,nullptr,0);opened=false;if(window)DestroyWindow(window);window=nullptr;}
+ void close(){std::lock_guard<std::recursive_mutex> guard(mutex);save();EditorGPU::enabled=false;EditorGPU::reset();EditorMenu::reset();unmapFrame();if(opened)effect->dispatch(effect,15,0,0,nullptr,0);opened=false;if(window)DestroyWindow(window);window=nullptr;}
 };
 #endif

@@ -8,7 +8,7 @@
 // Exercise the same editor messages as the Mac view while Core Audio runs.
 struct DeviceEditor {
  Steinberg::Vst::IComponent* component;Steinberg::FUnknownPtr<Steinberg::Vst::IConnectionPoint> connection;
- std::string path;void* frame=MAP_FAILED;size_t bytes=16+2048*2048*4;bool sq=false,changed=false;std::string fixture;double readySeconds=0,ackSeconds=0,stateWaitSeconds=0;std::vector<char> before;
+ std::string path;void* frame=MAP_FAILED;size_t bytes=16+2048*2048*4+4;bool sq=false,changed=false;std::string fixture;double readySeconds=0,ackSeconds=0,stateWaitSeconds=0;std::vector<char> before;
  void message(const char* id,const void* data=nullptr,uint32_t length=0){
   auto msg=Steinberg::owned(static_cast<Steinberg::Vst::IMessage*>(new Steinberg::Vst::HostMessage));msg->setMessageID(id);
   if(length)msg->getAttributes()->setBinary("payload",data,length);
